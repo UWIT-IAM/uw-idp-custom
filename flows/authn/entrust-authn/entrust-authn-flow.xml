@@ -1,0 +1,37 @@
+<flow xmlns="http://www.springframework.org/schema/webflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd"
+    parent="authn.abstract">
+    
+    <!-- Entrust token login flow. -->
+
+    <view-state id="DisplayEntrustView" view="entrust">
+        <on-render>
+            <evaluate expression="environment" result="viewScope.environment" />
+            <evaluate expression="opensamlProfileRequestContext" result="viewScope.profileRequestContext" />
+            <evaluate expression="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.authn.context.AuthenticationContext))" result="viewScope.authenticationContext" />
+            <evaluate expression="authenticationContext.getSubcontext(T(net.shibboleth.idp.ui.context.RelyingPartyUIContext))" result="viewScope.rpUIContext" />
+            <evaluate expression="T(net.shibboleth.utilities.java.support.codec.HTMLEncoder)" result="viewScope.encoder" />
+            <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" result="viewScope.request" />
+            <evaluate expression="flowRequestContext.getExternalContext().getNativeResponse()" result="viewScope.response" />
+            <evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().containsBean('shibboleth.CustomViewContext') ? flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.CustomViewContext') : null" result="viewScope.custom" />
+            <set name="viewScope.EntrustIntegration" value="flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.authn.entrust.EntrustIntegrationStrategy').apply(opensamlProfileRequestContext)" />
+            <set name="viewScope.canonicalUsername" value="CanonicalUsernameStrategy.apply(opensamlProfileRequestContext)" />
+            <evaluate  result="viewScope.tokenmessage" expression="conversationScope.tokenMessage"/>
+        </on-render>
+
+        <transition on="proceed" to="ValidateEntrustResponse" />
+        <transition on="cancel" to="ReselectFlow" />
+        <!-- <transition on-exception="edu.washington.shibboleth.authn.entrust.AuthnException" to="AuthenticationException" /> -->
+    </view-state>
+
+    <action-state id="ValidateEntrustResponse"> 
+        <evaluate expression="ValidateEntrustResponse" />
+        <evaluate expression="'proceed'" />
+        
+        <transition on="proceed" to="proceed" />
+    </action-state>
+
+    <bean-import resource="entrust-authn-beans.xml" />
+
+</flow>
+

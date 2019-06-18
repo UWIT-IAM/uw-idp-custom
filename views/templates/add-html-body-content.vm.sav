@@ -1,0 +1,32 @@
+
+<!-- simple message with 'progress bar" -->
+<div>Sign in completed. Returning to your application.</div>
+<style>
+.progress_bar {
+  height: 5px;
+  background: green;
+  width: 0%;
+  -moz-transition: all 60s ease;
+  -moz-transition-delay: 1s;
+  -webkit-transition: all 60s ease;
+  -webkit-transition-delay: 1s;
+  transition: all 60s ease;
+  transition-delay: 1s;
+}
+</style>
+<div id="progressBar" class="progress_bar"></div>
+<div id="errorMsg"></div>
+<script>
+  var progress = document.getElementById("progressBar");
+  setTimeout(
+    function(){
+      progress.style.width = "100%";
+    }
+  ,100);
+  setTimeout(
+    function(){
+      document.getElementById("errorMsg").innerHTML = "<p>It looks like your application is not responding.<p>(now what?)"
+    }
+  ,50000);
+</script>
+

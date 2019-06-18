@@ -1,0 +1,47 @@
+ <flow xmlns="http://www.springframework.org/schema/webflow"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd"
+       parent="intercept.abstract">
+
+    <!-- Rudimentary impediment to direct execution of subflow. -->
+    <input name="calledAsSubflow" type="boolean" required="true" />
+    
+    <on-start>
+       <evaluate expression="'uwGoogle=done'" result="flowScope.didit" />
+       <evaluate expression="GoogleIntercept.urlEncode(flowRequestContext.getExternalContext().getNativeRequest().getRequestURL())" result="flowScope.returl" />
+    </on-start>
+
+<!--
+    <decision-state id="BeenHereAlready">
+       <if test="flowRequestContext.getExternalContext().getNativeRequest().getQueryString().contains(flowScope.didit)" then="ShowDone" else="DoesUserHaveGoogle" />
+    </decision-state>
+-->
+    <decision-state id="DoesUserHaveGoogle">
+       <if test="GoogleIntercept.testGoogle(opensamlProfileRequestContext)" then="proceed" else="SendToActivateGoogle" />
+    </decision-state>
+
+    <view-state id="SendToActivateGoogle" view="google-redirect">
+        <on-render>
+           <evaluate expression="ManageUrlbase" result="viewScope.manageUrlbase" />
+           <evaluate expression="GoogleSubscription" result="viewScope.googleSubscription" />
+           <evaluate expression="flowScope.returl" result="viewScope.returnUrl" />
+           <evaluate expression="flowScope.didit" result="viewScope.didit" />
+           <evaluate expression="flowExecutionContext.getKey().toString()" result="viewScope.executionContext" />
+        </on-render>
+        <transition to="proceed" />
+    </view-state>
+
+<!--
+    <view-state id="ShowDone" view="google-done">
+        <on-render>
+           <evaluate expression="flowScope.returl" result="viewScope.returnUrl" />
+           <evaluate expression="flowScope.didit" result="viewScope.didit" />
+           <evaluate expression="flowExecutionContext.getKey().toString()" result="viewScope.executionContext" />
+        </on-render>
+        <transition to="proceed" />
+    </view-state>
+-->
+
+    <bean-import resource="../../../flows/intercept/google-check/google-check-beans.xml" />
+</flow>
+    

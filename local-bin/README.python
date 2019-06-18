@@ -1,0 +1,12 @@
+virtual env is py-env (python 2.7)
+
+need pg_config in PATH
+
+to recreate (rhel6)
+
+/usr/local/bin/virtualenv3.6 py-env
+. py-env/bin/activate
+export PATH=$PATH:/usr/local/pgversion/bin
+pip install -r py-requirements.txt
+
+

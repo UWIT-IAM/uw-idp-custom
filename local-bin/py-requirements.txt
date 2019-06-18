@@ -1,0 +1,4 @@
+psycopg2==2.6
+lxml==3.5.0
+jinja2
+pep8

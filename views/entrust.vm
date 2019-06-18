@@ -1,0 +1,126 @@
+##
+## Velocity Template for DisplayUsernamePasswordPage view-state
+##
+## Velocity context will contain the following properties
+## flowExecutionUrl - the form action location
+## flowRequestContext - the Spring Web Flow RequestContext
+## flowExecutionKey - the SWF execution key (this is built into the flowExecutionUrl)
+## profileRequestContext - root of context tree
+## authenticationContext - context with authentication request information
+## authenticationErrorContext - context with login error state
+## authenticationWarningContext - context with login warning state
+## ldapResponseContext - context with LDAP state (if using native LDAP)
+## rpUIContext - the context with SP UI information from the metadata
+## extendedAuthenticationFlows - collection of "extended" AuthenticationFlowDescriptor objects
+## passwordPrincipals - contents of the shibboleth.authn.Password.PrincipalOverride bean
+## encoder - HTMLEncoder class
+## request - HttpServletRequest
+## response - HttpServletResponse
+## environment - Spring Environment object for property resolution
+## custom - arbitrary object injected by deployer
+##
+#set ($rpContext = $profileRequestContext.getSubcontext('net.shibboleth.idp.profile.context.RelyingPartyContext'))
+#set ($username = $authenticationContext.getSubcontext('net.shibboleth.idp.authn.context.UsernamePasswordContext', true).getUsername())
+#set ($passwordEnabled = false)
+#if (!$passwordPrincipals or $passwordPrincipals.isEmpty() or $authenticationContext.isAcceptable($passwordPrincipals))
+  #set ($passwordEnabled = true)
+#end
+##
+<!DOCTYPE html>
+<html>
+  	<head>
+    	<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="/css/opensans.css" media="screen, handheld" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>UW NetID sign-in</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="cleartype" content="on">
+<link rel="stylesheet" type="text/css" href="/css/weblogin-global.css" media="screen, handheld" />
+  <link rel="stylesheet" type="text/css" href="/css/weblogin-enhanced.css" media="screen  and (min-width: 40.5em)" />
+  <!--[if (lt IE 9)&(!IEMobile)]>
+  <link rel="stylesheet" type="text/css" href="/css/weblogin-enhanced.css" />
+  <![endif]-->
+
+
+<script>
+function _clear_screen() {
+   docdiv = document.getElementById('main');
+   docdiv.className='visuallyhidden';
+}
+
+</script>
+  	</head>
+
+
+  	<body onLoad="document.forms[0][0].focus()">
+  <h1 class="visuallyhidden">UW NetID sign-in</h1>
+
+  <div id="container">
+    <div id="main" role="main">
+
+
+        <h2 class="visuallyhidden" aria-flowto="weblogin_warning">Login</h2>
+        <div class="form">
+          <div><img src="/img/weblogin.png" height="57" width="198" alt="" aria-hidden="true"></div>
+
+
+   <div style="background: #e7e7e7; padding: 10px; margin: 10px auto 25px;">Entrust 2FA is being replaced by Duo 2FA. To sign up for Duo, go to <a
+href="https://identity.uw.edu/2fa" target="_blank">identity.uw.edu/2fa</a>.</div>
+#if ($tokenmessage)
+    <section>
+        <p class="form-element form-error">$tokenmessage</p>
+    </section>
+#else
+    <div id="tokentext">Please enter your Entrust token number.</div>
+#end
+          <form name="entrustresp" method="POST" action="$flowExecutionUrl" autocomplete="off">
+
+            <ul class="login">
+              <li><label for="token_val">Token number:</label>
+                   <input id="token_val" placeholder="Token number" type="text" NAME="token" SIZE="20"
+                      value=""/></li>
+
+
+            <ul class="submit">
+              <li><input type="submit" id="submit_button" name="_eventId_proceed" value="Continue"
+                    onClick="javascript:_clear_screen()"></li>
+            </ul>
+
+            </form>
+
+        </div>
+
+        <h2 class="visuallyhidden">UW NetID Help</h2>
+        <div class="sidebar">
+
+                <!-- <h3 style="margin-top:0;">UW NetID Help</h3> -->
+
+            <ul class="links">
+                <li><a href="http://itconnect.uw.edu/security/uw-netids/about-uw-netids/account-recovery//">Learn about account recovery options</a></li>
+                <li><a href="http://itconnect.uw.edu/security/uw-netids/about-uw-netids/">Learn about UW NetIDs</a></li>
+                <li><a href="http://itconnect.uw.edu/security/uw-netids/weblogin/">Learn about UW NetID sign-in</A></li>
+                <li><a href="https://uwnetid.washington.edu/newid/">Obtain a UW NetID</a></li>
+                <li style="height: 30px"></li>
+                <li><a href="http://itconnect.uw.edu/help/">Need help?</a></li>
+            </ul>
+
+        </div>
+        <div id="weblogin_warning" class="warning">
+
+            <p>Sign in reduces how often you have to reauthenticate to access UW resources.</p>
+
+            <p style="color:#999;"><strong>WARNING:</strong> Protect your privacy! Prevent unauthorized use!<br/>
+                <a href="http://itconnect.uw.edu/security/uw-netids/weblogin/" title="How to log out">Completely exit your Web browser when you are finished.</a></p>
+
+            <p class="copyright"><span class="copyright-links"><a href="http://www.washington.edu/online/privacy">PRIVACY</a> | <a href="http://www.washington.edu/online/terms">TERMS</a></span></p>
+
+         </div>
+
+
+    </div> <!--end main -->
+  </div> <!-- end container -->
+
+ 	</body>
+</html>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetadataProvider id="ShibbolethMetadata" xsi:type="ChainingMetadataProvider"
+    xmlns="urn:mace:shibboleth:2.0:metadata"
+    xmlns:resource="urn:mace:shibboleth:2.0:resource"
+    xmlns:security="urn:mace:shibboleth:2.0:security"
+    xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:mace:shibboleth:2.0:metadata http://shibboleth.net/schema/idp/shibboleth-metadata.xsd
+                        urn:mace:shibboleth:2.0:resource http://shibboleth.net/schema/idp/shibboleth-resource.xsd 
+                        urn:mace:shibboleth:2.0:security http://shibboleth.net/schema/idp/shibboleth-security.xsd
+                        urn:oasis:names:tc:SAML:2.0:metadata http://docs.oasis-open.org/security/saml/v2.0/saml-schema-metadata-2.0.xsd">
+                        
+
+        <MetadataProvider id="ICMD" xsi:type="FileBackedHTTPMetadataProvider" 
+                          maxRefreshDelay="PT24H" minRefreshDelay="PT8H"
+                          metadataURL="http://md.incommon.org/InCommon/InCommon-metadata.xml"
+                          backingFile="%{idp.home}/metadata-cache/InCommon-metadata.xml">
+            <MetadataFilter xsi:type="SignatureValidation" requireSignedRoot="true"
+                            certificateFile="%{idp.home}/credentials/inc-md-cert.pem"/>
+            <MetadataFilter xsi:type="RequiredValidUntil" maxValidityInterval="P14D"/>
+            <MetadataFilter xsi:type="EntityRoleWhiteList" >
+                   <RetainedRole>md:SPSSODescriptor</RetainedRole>
+            </MetadataFilter>
+        </MetadataProvider>
+
+
+<!--
+    <MetadataProvider id="InCommonMetadata"  xsi:type="FilesystemMetadataProvider"
+         xmlns="urn:mace:shibboleth:2.0:metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:mace:shibboleth:2.0:metadata http://shibboleth.net/schema/idp/shibboleth-metadata.xsd"
+         maxRefreshDelay="PT2H" metadataFile="%{idp.home}/metadata-cache/InCommon-metadata.xml">
+            <MetadataFilter xsi:type="SignatureValidation" requireSignedRoot="true"
+                            certificateFile="%{idp.home}/credentials/inc-md-cert.pem"/>
+            <MetadataFilter xsi:type="RequiredValidUntil" maxValidityInterval="P14D"/>
+                <MetadataFilter xsi:type="EntityRoleWhiteList" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
+                    <RetainedRole>md:SPSSODescriptor</RetainedRole>
+                </MetadataFilter>
+    </MetadataProvider>
+-->
+
+    <MetadataProvider id="UWBaseMetadata"  xsi:type="FilesystemMetadataProvider"
+         maxRefreshDelay="PT4H" metadataFile="%{idp.home}/metadata/UW-base-metadata.xml"/>
+    <MetadataProvider id="UWRpMetadata"  xsi:type="FilesystemMetadataProvider"
+         maxRefreshDelay="PT15M" metadataFile="%{idp.home}/metadata/UW-rp-metadata.xml"/>
+
+          
+    
+</MetadataProvider>

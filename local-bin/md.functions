@@ -1,0 +1,58 @@
+#
+# utility functions for metadata file manipulation
+#
+
+root=/data/local/idp-3.4
+export JAVA_HOME=/usr/local/java
+
+#
+# simple cycle of archive files
+
+dir=$root/archive
+
+function cycle_archive {
+  cycle_dir=$1
+  cycle_file=$2
+  [[ -f $root/$dir/$cycle_file ]] || return 1
+  # cycle old files
+  cycle_tgt=
+  for n in 9 8 7 6 5 4 3 2 1 0
+  do
+    cycle_src=$root/archive/$cycle_file.$n
+    [[ -n $cycle_tgt && -f $cycle_src ]] && mv $cycle_src $cycle_tgt
+    cycle_tgt=$cycle_src
+  done
+  # archive file (to the [archive].0)
+  cp -dp $root/$dir/$cycle_file $cycle_tgt
+  return 0
+}
+
+
+# mail notices 
+
+not_fatal="
+
+The idp is continuing to use a previous version of the information, so this
+does not indicate a fatal error. 
+"
+
+## Reply-To: $mailto
+## Errors-To: $mailto
+host=`hostname`;
+mailto="fox@uw.edu,mbrogan@uw.edu,pass@uw.edu"
+mailfrom="The IdP at $host <somebody@$host>"
+
+function send_mail {
+  
+subject="$1"
+message="$2"
+/usr/sbin/sendmail -t  <<END
+From: $mailfrom
+To: $mailto
+Subject: $subject
+$message
+.
+
+END
+return $?
+}

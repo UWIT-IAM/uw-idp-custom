@@ -1,0 +1,30 @@
+<flow xmlns="http://www.springframework.org/schema/webflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd"
+    parent="authn.abstract">
+    
+    <!-- CRN selector login flow. -->
+
+    <view-state id="DisplayCrnView" view="crnselect">
+        <on-render>
+            <evaluate expression="environment" result="viewScope.environment" />
+            <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" result="viewScope.request" />
+            <evaluate expression="flowRequestContext.getExternalContext().getNativeResponse()" result="viewScope.response" />
+            <evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().containsBean('shibboleth.CustomViewContext') ? flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.CustomViewContext') : null" result="viewScope.custom" />
+        </on-render>
+
+        <transition on="proceed" to="ProcessCrnSelect" />
+        <transition on="cancel" to="ReselectFlow" />
+        <!-- <transition on-exception="edu.washington.shibboleth.authn.entrust.AuthnException" to="AuthenticationException" /> -->
+    </view-state>
+
+    <action-state id="ProcessCrnSelect"> 
+        <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" result="flowScope.request" />
+        <evaluate expression="flowScope.request.getParameter('crnid')" result="conversationScope.duo_crn_username" />
+        <evaluate expression="'proceed'" />
+        <transition on="proceed" to="proceed" />
+    </action-state>
+
+    <bean-import resource="crn-select-beans.xml" />
+
+</flow>
+

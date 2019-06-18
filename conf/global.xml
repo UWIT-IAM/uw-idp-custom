@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+                           
+       default-init-method="initialize"
+       default-destroy-method="destroy">
+
+    <!-- Use this file to define any custom beans needed globally. -->
+
+<!-- OIDC extension global bean definitions -->
+<import resource="global-oidc.xml" />
+
+<!-- http client for group attr resolver -->
+<bean id="uw.HttpClient"  parent="shibboleth.NonCachingHttpClient" lazy-init="true"
+        p:connectionDisregardTLSCertificate="%{idp.httpclient.connectionDisregardTLSCertificate:false}"
+        p:maxConnectionsPerRoute="20"
+        p:maxConnectionsTotal="20"
+        p:connectionTimeout="PT5S"
+        p:connectionRequestTimeout="PT5S"
+        p:socketTimeout="PT20S"
+        p:tLSSocketFactory-ref="shibboleth.SecurityEnhancedTLSSocketFactoryWithClientTLS" />
+
+<bean id="uw.GwsSecurity" class="org.opensaml.security.httpclient.HttpClientSecurityParameters" lazy-init="true">
+    <property name="tLSTrustEngine">
+        <bean parent="shibboleth.StaticPKIXTrustEngine"
+            p:checkNames="true"
+            p:verifyDepth="5"
+            p:certificates="%{idp.home}/credentials/uw-incommon-ca.crt" />
+    </property>
+    <property name="clientTLSCredential">
+        <bean class="net.shibboleth.idp.profile.spring.factory.BasicX509CredentialFactoryBean"
+            p:privateKeyResource="%{idp.home}/credentials/gws.cac-uw.key"
+            p:certificateResource="%{idp.home}/credentials/gws.cac-uw.crt" />
+    </property>
+</bean>
+<bean id="uw.PwsSecurity" class="org.opensaml.security.httpclient.HttpClientSecurityParameters" lazy-init="true">
+    <property name="tLSTrustEngine">
+        <bean parent="shibboleth.StaticPKIXTrustEngine"
+            p:checkNames="true"
+            p:verifyDepth="5"
+            p:certificates="%{idp.home}/credentials/uw-incommon-ca.crt" />
+    </property>
+    <property name="clientTLSCredential">
+        <bean class="net.shibboleth.idp.profile.spring.factory.BasicX509CredentialFactoryBean"
+            p:privateKeyResource="%{idp.home}/credentials/idp-uw.key"
+            p:certificateResource="%{idp.home}/credentials/idp-uw.crt" />
+    </property>
+</bean>
+
+
+<bean id="uw.UWHttpClient" class="edu.washington.shibboleth.tools.UWHttpClient" destroy-method="close"
+    p:certificateFile="/data/local/idp-3.4/credentials/gws.cac-uw.crt"
+    p:keyFile="/data/local/idp-3.4/credentials/gws.cac-uw.key"
+    p:caCertificateFile="/data/local/idp-3.4/credentials/uw-incommon-ca.crt"
+    p:acceptHeader="application/json"
+    p:optionsHeader="full"
+    p:connectTimeLimit="5"
+    p:responseTimeLimit="5"
+    />
+
+<!-- configuration for the group membership attribute -->
+
+<bean id="uw.GwsDataSource" class="edu.washington.shibboleth.attribute.resolver.dc.rws.HttpDataSource" destroy-method="close"
+    p:certificateFile="/data/local/idp-3.4/credentials/gws.cac-uw.crt"
+    p:keyFile="/data/local/idp-3.4/credentials/gws.cac-uw.key"
+    p:caCertificateFile="/data/local/idp-3.4/credentials/uw-incommon-ca.crt"
+    p:acceptHeader="text/xml" />
+
+<!--
+<bean id="GwsDataSourceBasicTest" class="edu.washington.shibboleth.attribute.resolver.dc.rws.HttpDataSource" destroy-method="close"
+    p:username="spud"
+    p:password="1234"
+    p:caCertificateFile="/data/local/idp-3.4/credentials/uwca.crt"
+    p:acceptHeader="text/xml" />
+-->
+
+<!-- configuration for the targeted id database -->
+
+<bean id="EptidDataConnector" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"
+    p:driverClassName="org.postgresql.Driver"
+    p:url="jdbc:postgresql://localhost/idp" p:username="shib" p:password="spud123"
+    p:maxActive="10" p:maxIdle="5" p:maxWait="2000" p:testOnBorrow="true"
+    p:defaultReadOnly="false"
+    p:validationQuery="select 1" p:validationQueryTimeout="5" />
+
+<!-- configuration for consent storage -->
+
+<!--
+<bean id="shibboleth.JPAStorageService"
+        class="org.opensaml.storage.impl.JPAStorageService"
+        p:cleanupInterval="%{idp.storage.cleanupInterval:PT10M}"
+        c:factory-ref="shibboleth.JPAStorageService.EntityManagerFactory" />
+  
+<bean id="shibboleth.JPAStorageService.EntityManagerFactory"
+        class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceUnitName" value="storageservice" />
+        <property name="packagesToScan" value="org.opensaml.storage.impl" />
+        <property name="dataSource" ref="shibboleth.JPAStorageService.DataSource" />
+        <property name="jpaVendorAdapter" ref="shibboleth.JPAStorageService.JPAVendorAdapter" />
+        <property name="jpaDialect">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+        </property>
+</bean>
+
+<bean id="shibboleth.JPAStorageService.JPAVendorAdapter"
+    class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+    <property name="database" value="MYSQL" />
+</bean>
+
+<bean id="shibboleth.JPAStorageService.DataSource"
+    class="com.zaxxer.hikari.HikariDataSource" destroy-method="close" lazy-init="true"
+    p:driverClassName="com.mysql.jdbc.Driver"
+    p:jdbcUrl="jdbc:mysql://iamdbdev01.s.uw.edu:3306/idp"
+    p:username="shibidp"
+    p:password="Spud13579" />
+-->
+
+<!-- consent storage as external postgres DB 
+<bean id="shibboleth.JPAStorageService.DataSource"
+    class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"
+    p:driverClassName="org.postgresql.Driver"
+    p:url="jdbc:postgresql://localhost/idp" p:username="shib" p:password="spud123"
+    p:maxActive="10" p:maxIdle="5" p:maxWait="2000" p:testOnBorrow="true"
+    p:defaultReadOnly="false"
+    p:validationQuery="select 1" p:validationQueryTimeout="5" />
+-->
+
+    <!--
+    Algorithm whitelists and blacklists that override or merge with library defaults. Normally you can leave
+    these empty or commented and use the system defaults, but you can override those defaults using these lists.
+    Each <value> element is an algorithm URI, or you can use <util:constant> elements in place of literal values.
+    -->
+    
+    <!--
+    <util:list id="shibboleth.SignatureWhitelist">
+    </util:list>
+
+    <util:list id="shibboleth.SignatureBlacklist">
+    </util:list>
+
+    <util:list id="shibboleth.EncryptionWhitelist">
+    </util:list>
+
+    <util:list id="shibboleth.EncryptionBlacklist">
+    </util:list>
+    -->
+
+    <!--
+    If you need to define and inject custom Java object(s) into the various views used throughout the
+    system (errors, login, logout, etc.), you can uncomment and define the bean below to be of any
+    type required. It will appear in the view scope as a variable named "custom".
+    
+    The example below defines the bean as a map, which allows you to inject multiple objects under
+    named keys to expand the feature to support multiple injected objects.
+    -->
+    
+    <util:map id="shibboleth.CustomViewContext">
+        <entry key="foo" value="bar"/>
+    </util:map>
+    
+    <util:list id="uw.want2falways">
+            <value>https://uw-it-aca.slack.com/</value>
+            <value>https://uw-it.slack.com</value>
+            <value>https://urizen.s.uw.edu/shibboleth</value>
+            <value>https://www.mathworks.com/edu-sp</value>
+            <value>https://uw-asa.slack.com/</value>
+    </util:list>
+
+    <import resource="new.uw-auto-rps.xml" />
+
+
+    <util:map id="uw.ComboBean">
+        <entry key="webget" value-ref="uw.UWHttpClient"/>
+        <entry key="view" value-ref="shibboleth.CustomViewContext"/>
+        <entry key="request" value-ref="shibboleth.HttpServletRequest"/>
+        <entry key="response" value-ref="shibboleth.HttpServletResponse"/>
+        <entry key="sealer" value-ref="shibboleth.DataSealer"/>
+        <entry key="autotoken" value-ref="uw.AutoTokenRPIds"/>
+    </util:map>
+
+    
+</beans>

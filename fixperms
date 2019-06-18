@@ -1,0 +1,14 @@
+# fix permissions for idpdev.
+# they get messed up by shib install.sh
+
+cd /data/local/idp-3.4
+
+chmod -R +r conf
+chmod -R +r credentials
+chown nobody metadata-cache
+chown nobody metadata-cache/InCommon-metadata.xml
+
+# get rid of clutter
+rm conf/attribute-resolver-full.xml
+rm conf/attribute-resolver-ldap.xml
+rm conf/attribute-filter.xml

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AttributeFilterPolicyGroup id="RandSFilterPolicy" xmlns="urn:mace:shibboleth:2.0:afp"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:mace:shibboleth:2.0:afp http://shibboleth.net/schema/idp/shibboleth-afp.xsd">
+<AttributeFilterPolicy id="releaseToRandS">
+ <PolicyRequirementRule xsi:type="EntityAttributeExactMatch"
+   attributeName="http://macedir.org/entity-category"
+   attributeValue="http://refeds.org/category/research-and-scholarship"/>
+ <AttributeRule attributeID="ePPN"> <PermitValueRule xsi:type="ANY"/> </AttributeRule>
+ <AttributeRule attributeID="email"> <PermitValueRule xsi:type="ANY"/> </AttributeRule>
+ <AttributeRule attributeID="displayName"> <PermitValueRule xsi:type="ANY"/> </AttributeRule>
+ <AttributeRule attributeID="givenName"> <PermitValueRule xsi:type="ANY"/> </AttributeRule>
+ <AttributeRule attributeID="surname"> <PermitValueRule xsi:type="ANY"/> </AttributeRule>
+</AttributeFilterPolicy>
+</AttributeFilterPolicyGroup>
+
