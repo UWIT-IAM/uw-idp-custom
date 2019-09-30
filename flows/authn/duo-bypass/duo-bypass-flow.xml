@@ -1,0 +1,28 @@
+<flow xmlns="http://www.springframework.org/schema/webflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd"
+    parent="authn.abstract">
+    
+    <!-- This is a simple login flow for Duo Bypass. -->
+
+    <action-state id="PreValidateDuoBypass">
+        <evaluate expression="'proceed'" />
+        <transition on="proceed" to="ValidateDuoBypass" />
+    </action-state>
+
+    <action-state id="ValidateDuoBypass">
+        <evaluate expression="ValidateDuoBypass" />
+        <evaluate expression="'proceed'" />
+        
+        <transition on="proceed" to="proceed" />
+    </action-state>
+
+    <action-state id="LogDuoException">
+        <on-entry>
+            <evaluate expression="T(org.slf4j.LoggerFactory).getLogger('net.shibboleth.idp.authn.duo').error('DuoWebException', flowExecutionException.getCause())" />
+        </on-entry>
+        <evaluate expression="'AuthenticationException'" />
+    </action-state>
+
+    <bean-import resource="duo-bypass-beans.xml" />
+
+</flow>

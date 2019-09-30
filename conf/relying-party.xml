@@ -12,9 +12,8 @@
        default-init-method="initialize"
        default-destroy-method="destroy">
 
-<!-- OIDC extension relying party definitions -->
-<import resource="oidc-relying-party.xml" />
-
+    <!-- OIDC extension relying party definitions -->
+    <import resource="oidc-relying-party.xml" />
 
     <!--
     Unverified RP configuration, defaults to no support for any profiles. Add <ref> elements to the list
@@ -58,7 +57,7 @@
     <bean id="uwPasswordReqPrincipal" parent="shibboleth.SAML2AuthnContextClassRef"
         c:classRef="urn:oasis:names:tc:SAML:2.0:ac:classes:Password" />
 
-    <!-- Workday identification -->
+    <!-- Workday identification 
     <bean id="uwWorkdayRegex" class="java.util.regex.Pattern" factory-method="compile"
         c:_0="^http://www\.workday\.com" />
  
@@ -69,13 +68,13 @@
     <bean id="uwWorkday.RelyingPartyCondition"
         class="net.shibboleth.idp.profile.logic.RelyingPartyIdPredicate"
         c:_0-ref="uwWorkdayRegexPredicate" />
+     -->
 
     <!-- uw.AutoTokenRPs: automatic 2fa authn
          uw.AutoAuthzRPs: post authn by-group authz check
-         uw.AutoTokenAutoAuthzRPs: auto 2fa AND post authn by-group authz check
          -->
 
-    <import resource="new.uw-auto-rps.xml" />
+    <import resource="uw-auto-rps.xml" />
 
     <!-- old ic credential -->
     <bean id="LegacySecurityConfig" parent="shibboleth.DefaultSecurityConfiguration">
@@ -212,7 +211,6 @@
         </bean>
 
         <!-- Amazon -->
-<!--
         <bean id="uw.AmazonRelyingParty" parent="RelyingParty">
             <property name="activationCondition" ref="uw.AmazonRPs" />
             <property name="profileConfigurations">
@@ -234,13 +232,10 @@
                 </list>
             </property>
         </bean>
--->
 
 
-        <!-- Needing Workday special authn -->
- 
 
-<!-- this bean uses the separate wd flow -->
+<!-- this bean uses the separate wd flow 
         <bean id="CustomRelyingParty" parent="RelyingParty">
             <property name="activationCondition" ref="uwWorkday.RelyingPartyCondition" />
             <property name="profileConfigurations">
@@ -253,6 +248,7 @@
                 </list>
             </property>
         </bean>
+-->
 
 <!-- this bean would use the standard mfa flow but workday sometimes requests an authn context. 
 

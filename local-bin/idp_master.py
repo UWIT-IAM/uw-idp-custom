@@ -158,7 +158,7 @@ class LogWatcher(threading.Thread):
 
     def run(self):
         log(log_info, 'logwatcher watching ' + self.filename)
-        file = open(self.filename, 'r')
+        file = open(self.filename, encoding='utf-8', mode='r')
         # get to the end
         fstat = os.stat(self.filename)
         fend = fstat[6]
@@ -167,7 +167,12 @@ class LogWatcher(threading.Thread):
         emptyCount = 0
         while True:
             p = file.tell()
-            line = file.readline()
+            try:
+                line = file.readline()
+            except UnicodeDecodeError:
+                log(log_info, 'caught a decode error')
+                continue
+
             if not line:
                 emptyCount += 1
                 if emptyCount > 5:

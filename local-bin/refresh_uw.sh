@@ -4,6 +4,7 @@
 
 [[ "$1" == "force" ]] || {
    [[ -f /www/refresh_uw/data/refresh ]] || exit 0
+   [[ -f /www/refresh_uw/data/norefresh ]] && exit 0
    lockfile -r 0 -l 600 /www/refresh_uw/lock || exit 1
 }
 
@@ -26,7 +27,9 @@ nameid_pre="`date +%s -r ${root}/conf/saml-nameid-exceptions.xml`"
 attrs_pre="`date +%s -r ${root}/conf/attribute-resolver-activators.xml`"
 auto_pre="`date +%s -r ${root}/conf/uw-auto-rps.xml`"
 
-python spreg_update_4.py 
+uparg=
+[[ $1 == "force" ]] && uparg="-f"
+python spreg_update_4.py $uparg -v
 
 # if rp-metadata changed, notify idp
 md_post="`date +%s -r ${root}/metadata/UW-rp-metadata.xml`"

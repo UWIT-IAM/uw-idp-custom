@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <!-- UW logging - DEV -->
+    <!-- UW logging - PROD -->
 
     <!--
     Variables for simplifying logging configuration.
@@ -44,29 +44,17 @@
     <!-- Logs our addons -->
     <logger name="edu.washington.shibboleth" level="DEBUG"/>
 
-    <logger name="org.geant" level="DEBUG"/>
-    <logger name="org.geant.idpextension.oidc.profile" level="DEBUG"/>
-    
+    <logger name="org.geant.idpextension.oidc.profile" level="INFO"/>
+
     <!-- Logs http client detail -->
-<!--
-    <logger name="org.apache.http.headers" level="DEBUG"/>
-    <logger name="org.apache.http.wire" level="INFO"/>
-    <logger name="org.apache.http.impl" level="DEBUG"/>
-    <logger name="org.apache.http.conn" level="DEBUG"/>
- -->
+    <logger name="org.apache.http.headers" level="WARN"/>
 
     <!-- Logs IdP, but not OpenSAML, messages -->
-    <logger name="net.shibboleth.idp" level="INFO"/>
-    <logger name="net.shibboleth.idp.authn" level="DEBUG"/>
-    <!-- <logger name="net.shibboleth.idp.attribute.resolver" level="TRACE"/> -->
+    <logger name="net.shibboleth.idp" level="${idp.loglevel.idp:-INFO}"/>
+    <logger name="net.shibboleth.idp.authn" level="INFO"/>
 
     <!-- Logs OpenSAML, but not IdP, messages -->
-<!--
     <logger name="org.opensaml.saml" level="${idp.loglevel.opensaml:-INFO}"/>
-    <logger name="org.opensaml.security" level="${idp.loglevel.opensaml:-INFO}"/>
-    <logger name="org.opensaml.security.httpclient" level="TRACE"/>
-    <logger name="org.opensaml.security.x509.tls" level="TRACE"/>
- -->
     
     <!-- Logs LDAP related messages -->
     <logger name="org.ldaptive" level="${idp.loglevel.ldap:-WARN}"/>
@@ -148,7 +136,7 @@
     
     <!-- Audit log to syslog. -->
     <appender name="IDP_AUDIT_2" class="ch.qos.logback.classic.net.SyslogAppender">
-        <syslogHost>uw-log-ads-02.s.uw.edu</syslogHost>
+        <syslogHost>logger3.s.uw.edu</syslogHost>
         <facility>LOCAL2</facility>
         <suffixPattern>idp-audit %msg</suffixPattern>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
@@ -159,7 +147,7 @@
     
     <!-- Audit log to another syslog. -->
     <appender name="IDP_AUDIT_3" class="ch.qos.logback.classic.net.SyslogAppender">
-        <syslogHost>logger3.s.uw.edu</syslogHost>
+        <syslogHost>uw-log-ads-02.s.uw.edu</syslogHost>
         <facility>LOCAL2</facility>
         <suffixPattern>idp-audit %msg</suffixPattern>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
@@ -222,7 +210,7 @@
     </appender>
 
     <logger name="Shibboleth-Audit" level="ALL">
-        <appender-ref ref="IDP_AUDIT"/>
+        <appender-ref ref="${idp.audit.appender:-IDP_AUDIT}"/>
     </logger>
 
     <logger name="Shibboleth-Audit-2" level="ALL">

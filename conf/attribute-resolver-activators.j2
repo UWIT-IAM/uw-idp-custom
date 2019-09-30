@@ -21,7 +21,6 @@
     <bean id="uw.GetsGwsMemberships" parent="shibboleth.Conditions.RelyingPartyId">
      <constructor-arg name="candidates">
         <list>
-               <value>urizen</value>
             {% for rp in info.gws %}
              <value>{{ rp }}</value>
             {% endfor %}

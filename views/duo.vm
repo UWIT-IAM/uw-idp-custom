@@ -91,22 +91,17 @@ function show_no_phone() {
             <p></p>
 
             <form id="duo_form" method="post">
-#if ($askRemember=='y')
-            <p>You have opted-in to 2-factor authentication. To continue, please choose an option below.
-                     <a href="https://itconnect.uw.edu/security/uw-netids/2fa/">Learn more.</a></p>
-
-              <div class="form-element-wrapper">
-                <input type="checkbox" name="rememberme" value="y"> Remember me on this device.
-              </div>
-#else
             <p>This application requires two-factor authentication. To continue, please choose an option below.
                      <a href="https://itconnect.uw.edu/security/uw-netids/2fa/">Learn more.</a></p>
-#end
 <p>
 #if ($show_duo_username)
 Using your '$duo_username' Duo identity.
 <p>
 #end
+
+              <div class="form-element-wrapper">
+                <input type="checkbox" name="rememberme" value="y" #if ($remember_checked) checked="checked" #end > Remember me on this device.
+              </div>
 
             <noscript>#springMessageText("idp.login.duoNoScript", "The Duo service requires JavaScript.")</noscript>
             <script src="$request.getContextPath()$duoScriptPath"></script>

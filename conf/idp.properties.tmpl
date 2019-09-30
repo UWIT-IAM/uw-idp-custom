@@ -1,4 +1,3 @@
-{# Ignore the following message.  This is the real idp.properties source #}
 #---------------------------------------------
 # DON'T EDIT.  Source is idp.properties.tmpl
 #              etc
@@ -9,8 +8,16 @@ idp.additionalProperties= /conf/ldap.properties, /conf/saml-nameid.properties, /
 
 # Set the entityID of the IdP and the AWS ident
 
-idp.entityID= {{issuer_name}}
-idp.uw.awsEntityId = {{aws_entity}}
+{% if cluster_type == 'prod' %}
+idp.entityID= urn:mace:incommon:washington.edu
+idp.uw.awsEntityId = UW
+{% elif cluster_type == 'eval' %}
+idp.entityID= urn:mace:incommon:washington.edu:eval
+idp.uw.awsEntityId = UWeval
+{% else %}
+idp.entityID= urn:mace:incommon:washington.edu:dev
+idp.uw.awsEntityId = UWdev
+{% endif %}
 
 # users opting into mfa (not yet activated)
 idp.uw.mfa-optin-urlbase = https://iam-ws.u.washington.edu/group_sws/v2/group/u_weblogin_optin-mfa/effective_member/
@@ -19,7 +26,7 @@ idp.uw.mfa-optin-urlbase = https://iam-ws.u.washington.edu/group_sws/v2/group/u_
 idp.uw.slack-gws-urlbase = https://iam-ws.u.washington.edu/group_sws/v3/group/u_weblogin_idpauthz_
 
 # auto 2fa group base
-idp.uw.slack-gws-urlbase = https://iam-ws.u.washington.edu/group_sws/v3/group/u_weblogin_idp2fa_
+idp.uw.2fa-gws-urlbase = https://iam-ws.u.washington.edu/group_sws/v3/group/u_weblogin_idp2fa_
 
 # tokend preauth
 idp.uw.token-preauth-urlbase = https://taws.s.uw.edu:716/token/v2/preauth/

@@ -11,6 +11,7 @@
                         urn:oasis:names:tc:SAML:2.0:metadata http://docs.oasis-open.org/security/saml/v2.0/saml-schema-metadata-2.0.xsd">
                         
 
+<!-- see dynamic below 
         <MetadataProvider id="ICMD" xsi:type="FileBackedHTTPMetadataProvider" 
                           maxRefreshDelay="PT24H" minRefreshDelay="PT8H"
                           metadataURL="http://md.incommon.org/InCommon/InCommon-metadata.xml"
@@ -22,6 +23,7 @@
                    <RetainedRole>md:SPSSODescriptor</RetainedRole>
             </MetadataFilter>
         </MetadataProvider>
+-->
 
 
 <!--
@@ -43,6 +45,19 @@
     <MetadataProvider id="UWRpMetadata"  xsi:type="FilesystemMetadataProvider"
          maxRefreshDelay="PT15M" metadataFile="%{idp.home}/metadata/UW-rp-metadata.xml"/>
 
+    <!-- InCommon Per-Entity Metadata Distribution Service -->
+    <MetadataProvider id="incommon" xsi:type="DynamicHTTPMetadataProvider"
+             maxCacheDuration="PT8H" minCacheDuration="PT10M" persistentCacheManagerDirectory="%{idp.home}/metadata-cache">
+        <!-- Verify the signature on the root element (i.e., the EntityDescriptor element) -->
+        <MetadataFilter xsi:type="SignatureValidation" requireSignedRoot="true"
+            certificateFile="%{idp.home}/credentials/inc-md-cert-mdq.pem" />
+    
+        <!-- Require a validUntil XML attribute no more than 14 days into the future -->
+        <MetadataFilter xsi:type="RequiredValidUntil" maxValidityInterval="P14D" />
+    
+        <!-- The MetadataQueryProtocol element specifies the base URL for the query protocol -->
+        <MetadataQueryProtocol>https://mdq.incommon.org/</MetadataQueryProtocol>
+    </MetadataProvider>
           
     
 </MetadataProvider>

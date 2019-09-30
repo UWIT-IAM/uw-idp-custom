@@ -56,13 +56,46 @@
     </AttributeDefinition>
 
 
- <!-- cn -->
+    <AttributeDefinition id="cnDummy" xsi:type="Simple" >
+        <InputDataConnector ref="personreg" attributeNames="uwPersonRegisteredSurname" />
+    </AttributeDefinition>
 
-    <AttributeDefinition id="cn" xsi:type="Simple" >
-        <InputDataConnector ref="personreg" attributeNames="cn" />
+    <AttributeDefinition id="cn" xsi:type="ScriptedAttribute" >
+        <InputAttributeDefinition ref="cnDummy" />
+        <InputAttributeDefinition ref="preferredFirst" />
+        <InputAttributeDefinition ref="preferredMiddle" />
+        <InputAttributeDefinition ref="preferredSurname" />
+        <InputAttributeDefinition ref="uwNetID" />
         <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:cn" />
         <AttributeEncoder xsi:type="SAML2String" name="urn:oid:2.5.4.3" friendlyName="cn" />
+
+          <Script>
+           <![CDATA[
+              logger = Java.type("org.slf4j.LoggerFactory").getLogger("net.shibboleth.idp.attribute");
+              cn.getValues().clear();
+              if (preferredFirst.getValues().size()>0) {
+                   pcn = preferredFirst.getValues().get(0);
+                   if (preferredMiddle.getValues().size()>0) pcn = pcn + " " + preferredMiddle.getValues().get(0);
+                   if (preferredSurname.getValues().size()>0) pcn = pcn + " " + preferredSurname.getValues().get(0);
+                   logger.debug("cn is preferred: {}", pcn);
+                   cn.getValues().add(pcn);
+              } else {
+                   logger.debug("cn is registered");
+                   if (cnDummy.getValues().size()>0) {
+                       cn.getValues().add(cnDummy.getValues().get(0));
+                   } else {
+                       if (uwNetID.getValues().length>0) logger.info("no cn: " + uwNetID.getValues()[0]);
+                   }
+              }
+             ]]>
+          </Script>
+
     </AttributeDefinition>
+
+
+
+
+
 
  <!-- preferred names -->
 
@@ -83,13 +116,39 @@
         <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.2.840.113994.200.49" friendlyName="preferredSurname" />
     </AttributeDefinition>
 
- <!-- surname = uwPersonRegisteredSurname -->
+ <!-- surname = preferred or uwPersonRegisteredSurname -->
 
-    <AttributeDefinition id="surname" xsi:type="Simple" >
+    <AttributeDefinition id="surnameDummy" xsi:type="Simple" >
         <InputDataConnector ref="personreg" attributeNames="uwPersonRegisteredSurname" />
+    </AttributeDefinition>
+
+    <AttributeDefinition id="surname" xsi:type="ScriptedAttribute" >
+        <InputAttributeDefinition ref="surnameDummy" />
+        <InputAttributeDefinition ref="preferredSurname" />
+        <InputAttributeDefinition ref="uwNetID" />
+        <InputAttributeDefinition ref="uwRegID" />
         <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:sn" />
         <AttributeEncoder xsi:type="SAML2String" name="urn:oid:2.5.4.4" friendlyName="surname" />
         <resolver:AttributeEncoder xsi:type="oidcext:OIDCString" name="family_name" />
+
+          <Script>
+           <![CDATA[
+              logger = Java.type("org.slf4j.LoggerFactory").getLogger("net.shibboleth.idp.attribute");
+              surname.getValues().clear();
+              if (preferredSurname.getValues().size()>0) {
+                   logger.debug("RES: surname is preferred");
+                   surname.getValues().add(preferredSurname.getValues().get(0));
+              } else {
+                   logger.debug("RES: surname, is registered");
+                   if (surnameDummy.getValues().size()>0) {
+                       surname.getValues().add(surnameDummy.getValues().get(0));
+                   } else {
+                       if (uwNetID.getValues().length>0) logger.info("no surname: " + uwNetID.getValues()[0]);
+                   }
+              }
+             ]]>
+          </Script>
+
     </AttributeDefinition>
 
  <!-- homeDepartment = uwEmployeeHomeDepartment -->
@@ -129,36 +188,45 @@
         <resolver:AttributeEncoder xsi:type="oidcext:OIDCString" name="name" />
     </AttributeDefinition>
 
- <!-- givenName = uwPersonRegisteredFirstMiddle -->
+ <!-- givenName = preferred or uwPersonRegisteredFirstMiddle -->
 
-    <AttributeDefinition id="givenName" xsi:type="Simple" >
+    <AttributeDefinition id="givenNameDummy" xsi:type="Simple" >
         <InputDataConnector ref="personreg" attributeNames="uwPersonRegisteredFirstMiddle" />
+    </AttributeDefinition>
+
+    <AttributeDefinition id="givenName" xsi:type="ScriptedAttribute" >
+        <InputAttributeDefinition ref="givenNameDummy" />
+        <InputAttributeDefinition ref="preferredFirst" />
+        <InputAttributeDefinition ref="preferredMiddle" />
+        <InputAttributeDefinition ref="uwNetID" />
         <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:givenName" />
         <AttributeEncoder xsi:type="SAML2String" name="urn:oid:2.5.4.42" friendlyName="givenName" />
         <resolver:AttributeEncoder xsi:type="oidcext:OIDCString" name="given_name" />
+
+          <Script>
+           <![CDATA[
+              logger = Java.type("org.slf4j.LoggerFactory").getLogger("net.shibboleth.idp.attribute");
+              givenName.getValues().clear();
+              if (preferredFirst.getValues().size()>0) {
+                   gn = preferredFirst.getValues().get(0);
+                   if (preferredMiddle.getValues().size()>0) gn = gn + " " + preferredMiddle.getValues().get(0);
+                   logger.debug("RES: given is preferred: {}", gn);
+                   givenName.getValues().add(gn);
+              } else {
+                   logger.debug("RES: given is registered");
+                   if (givenNameDummy.getValues().size()>0) {
+                       givenName.getValues().add(givenNameDummy.getValues().get(0));
+                   } else {
+                       if (uwNetID.getValues().length>0) logger.info("no given: " + uwNetID.getValues()[0]);
+                   }
+              }
+             ]]>
+          </Script>
     </AttributeDefinition>
 
 
- <!-- preferredFirst = uwPersonPreferredFirst -->
 
-    <AttributeDefinition id="preferredFirst" xsi:type="Simple" >
-        <InputDataConnector ref="personreg" attributeNames="uwPersonPreferredFirst" />
-        <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.2.840.113994.200.47" friendlyName="preferredFirst" />
-    </AttributeDefinition>
 
- <!-- preferredMiddle = uwPersonPreferredMiddle -->
-
-    <AttributeDefinition id="preferredMiddle" xsi:type="Simple" >
-        <InputDataConnector ref="personreg" attributeNames="uwPersonPreferredMiddle" />
-        <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.2.840.113994.200.48" friendlyName="preferredMiddle" />
-    </AttributeDefinition>
-
- <!-- preferredSurname = uwPersonPreferredSurname -->
-
-    <AttributeDefinition id="preferredSurname" xsi:type="Simple" >
-        <InputDataConnector ref="personreg" attributeNames="uwPersonPreferredSurname" />
-        <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.2.840.113994.200.49" friendlyName="preferredSurname" />
-    </AttributeDefinition>
 
  <!-- employeeNumber = uwEmployeeID -->
 
@@ -651,19 +719,19 @@
     <DataConnector id="loginNetid" xsi:type="ScriptedDataConnector">
         <Script><![CDATA[
            logger = Java.type("org.slf4j.LoggerFactory").getLogger("net.shibboleth.idp.attribute");
-           logger.info("==== scripted enter ====");
+           logger.debug("==== scripted enter ====");
     
            IdPAttribute = Java.type("net.shibboleth.idp.attribute.IdPAttribute");
            StringAttributeValue = Java.type("net.shibboleth.idp.attribute.StringAttributeValue");
            HashSet = Java.type("java.util.HashSet");
 
-           logger.info("username = " + resolutionContext.getPrincipal());
+           logger.info("Using login netid = " + resolutionContext.getPrincipal());
            attr = new IdPAttribute("uwNetID");
            set = new HashSet(1);
            set.add(new StringAttributeValue(resolutionContext.getPrincipal()));
            attr.setValues(set);
            connectorResults.add(attr);
-           logger.info("==== scripted exit ====");
+           logger.debug("==== scripted exit ====");
         ]]></Script>
     </DataConnector>
 
@@ -686,10 +754,6 @@
     </DataConnector>
 
     <!-- EDS ldap service -->
-<!--
-           ldapURL="ldap://eds.u.washington.edu:389"
-           ldapURL="ldap://seneca22.s.uw.edu:389 ldap://seneca21.s.uw.edu:389 ldap://seneca23.s.uw.edu:389"
-  -->
 
     <DataConnector id="personreg" xsi:type="LDAPDirectory" 
 {% if location == 'uwtc' %}
@@ -754,7 +818,7 @@
 
         <QueryTemplate>
             <![CDATA[
-                select tid2('${uwRegID.get(0)}', '${requestContext.attributeRecipientID}') as tid
+                select tid2('${uwRegID.get(0)}', '${resolutionContext.attributeRecipientID}') as tid
             ]]>
         </QueryTemplate>
 
@@ -768,10 +832,11 @@
         httpClientRef="uw.HttpClient"
         httpClientSecurityParametersRef="uw.GwsSecurity" 
            propagateResolutionExceptions="false"
+          activationConditionRef="uw.GetsGwsMemberships"
         >
     <URLTemplate>
         <![CDATA[
-        https://groups.uw.edu/group_sws/v3/search?member=${resolutionContext.principal}&type=effective&junk=1
+        https://groups.uw.edu/group_sws/v3/search?member=${resolutionContext.principal}&type=effective
         ]]>
     </URLTemplate>
  
@@ -786,6 +851,7 @@
         httpClientRef="uw.HttpClient"
         httpClientSecurityParametersRef="uw.GwsSecurity" 
            propagateResolutionExceptions="false"
+           activationConditionRef="uw.GetsCourseMemberships"
         >
     <URLTemplate>
         <![CDATA[

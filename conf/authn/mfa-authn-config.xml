@@ -47,13 +47,12 @@
             <bean parent="shibboleth.authn.MFA.Transition" p:nextFlow="authn/Password" />
         </entry>
         
-        <!-- If local login (authn/Password), next rule runs the Duo (uwduo) login flow as needed.
-             Errors result in informational flows. -->
+        <!-- After authn/Password, next rule runs the Duo (uwduo) login flow as needed. -->
         <entry key="authn/Password">
             <bean parent="shibboleth.authn.MFA.Transition" p:nextFlowStrategy-ref="checkSecondFactorNeeded" />
         </entry>
 
-        <!-- Following Duo, check the 'remember me' toggle.  If duo login failed, it will be rerun. -->
+        <!-- Following a Duo flow, check the 'remember me' toggle.  If duo login failed, it will be rerun. -->
         <entry key="authn/uwduo">
             <bean parent="shibboleth.authn.MFA.Transition" p:nextFlowStrategy-ref="checkRememberMe" />
         </entry>
@@ -62,6 +61,12 @@
         <entry key="authn/crn-select">
             <bean parent="shibboleth.authn.MFA.Transition" p:nextFlowStrategy-ref="checkSecondFactorNeeded" />
         </entry>
+
+        <!-- just for debug logging 
+        <entry key="authn/duo-bypass">
+            <bean parent="shibboleth.authn.MFA.Transition" p:nextFlowStrategy-ref="completeDuoBypass" />
+        </entry>
+         -->
 
         <!-- This should never happen.  (catch someone bypassing aws 2fa?) -->
         <entry key="authn/needduo">
@@ -84,9 +89,8 @@
                var AuthnContextClassRefPrincipal = Java.type("net.shibboleth.idp.saml.authn.principal.AuthnContextClassRefPrincipal");
                var Cookie = Java.type("javax.servlet.http.Cookie");
                var System = Java.type("java.lang.System");
-               logger = Java.type("org.slf4j.LoggerFactory").getLogger("net.shibboleth.idp.authn");
+               logger = Java.type("org.slf4j.LoggerFactory").getLogger("edu.washington.shibboleth");
 
-               logger.debug("checkSecondFactorNeeded");
                request = custom.get("request");
                webget = custom.get("webget");
                autotoken = custom.get("autotoken");
@@ -105,11 +109,11 @@
                requestContext = input.getSubcontext("net.shibboleth.idp.profile.context.SpringRequestContext").getRequestContext();
                conversationScope = requestContext.getConversationScope();
 
-               conversationScope.put("askRemember", null);
+               conversationScope.put("remember_checked", null);
                conversationScope.put("duo_username", null);
                conversationScope.put("show_duo_username", null);
 
-               /* Check cookies.  See if the user has an optin long-term session.
+               /* Check cookies.  See if the user has a long-term 2fa session.
                 */
 
                for ( i=0; cookies!=null && i< cookies.length; i++ ) {
@@ -120,14 +124,17 @@
                         logger.debug("rememberme cookie value=" + val);
                         vals = val.split("|");
                         if (vals[1].equals(username)) hasCookie = "t";
+                        conversationScope.put("remember_checked", "t");
                      } catch (e) {
-                        if (e instanceof Java.type("edu.internet2.middleware.shibboleth.common.util.DataExpiredException")) {
-                           logger.debug("cookie has expired");
-                           hasCookie = "e";
+                        if (e instanceof Java.type("net.shibboleth.utilities.java.support.security.DataExpiredException")) {
+                            logger.debug("cookie has expired");
+                            hasCookie = "e";
+                            conversationScope.put("remember_checked", "t");
                         } else {
-                           logger.debug("bad remember cookie: " + e.getMessage());
+                           logger.debug(e);
                         }
                      }
+           
                   }
                }
  
@@ -149,7 +156,7 @@
                    else return ""  // must have 'standard' id
                    if (id.indexOf("/")>0) id = id.substring(0,id.indexOf("/"));
                    // logger.debug("fixed dns: " + id);
-                   return "%{idp.uw.slack-gws-urlbase}" + id + "/effective_member/"
+                   return "%{idp.uw.2fa-gws-urlbase}" + id + "/effective_member/"
                }
 
                  
@@ -173,18 +180,24 @@
                 var rpCtx = input.getSubcontext("net.shibboleth.idp.profile.context.RelyingPartyContext");
                 var rpCtxId = rpCtx.getConfiguration().getId();
                 rpid = rpCtx.relyingPartyId;
-                logger.debug("context id=" + rpCtxId);
 
                 // See if 2fa is auto configured for this rp
 
                 if (need2f == null) {
-                   for (i=0; i<autotoken.size(); i++) {
-                      if (rpid.startsWith(autotoken.get(i))) {
-                         logger.debug("autotokenr rp match: " + rpid);
+                   /* dynamic list by local file */
+                   var Files = Java.type("java.nio.file.Files");
+                   var Paths = Java.type("java.nio.file.Paths");
+                   var autos = Files.readAllLines(Paths.get("/data/local/idp-3.4/conf/authn/autotoken.txt"));
+                   // logger.debug(rpid);
+                   for (i=0; i<autos.size(); i++) {
+                      // logger.debug("[[" + autos.get(i).trim() + "]]");
+                      if (rpid.startsWith(autos.get(i).trim())) {
+                         logger.debug("autotoken rp match: " + rpid);
                          need2f = "t";
                          break;
                        }
                    }
+
 
                    // If 2fa auto triggered, see if user really needs it ( config token + group exists + not a member = no 2fa needed )
                    if ( need2f == 't' ) {
@@ -202,7 +215,7 @@
                               // distinguish between 'group not found'=>need 2fa and 'member not found'=>no 2fa
                               errors = jresp.getJsonArray("errors");
                               if (errors != null && errors.size()>0) {
-                                 substat = errors[0].getJsonObject("subStatus").getString();
+                                 substat = errors[0].getString("subStatus");
                                  logger.debug("substatus = " + substat);
                                  if (substat.equals("m404")) {
                                     logger.debug("group exists. member not found");
@@ -216,6 +229,7 @@
                    }
                 }
 
+              /** will by OBE when everyone gets 2fa all the time
                 // See if user opted in to 2nd factor and has no long-term session
                 if (need2f == null && hasCookie != "t") {
                    // later
@@ -230,12 +244,25 @@
                       }
                    }
                 }
+              **/
+
+  
+                // See if user has remember-me
+                if (need2f != null && hasCookie == "t") {
+                   if (authCtx.isForceAuthn()) {
+                      logger.info("2FA: force authn.  skipping cookie test");
+                   } else {
+                      logger.info("2FA: user has cookie.  skipping");
+                      need2f = null;   
+                      nextFlow = "authn/duo-bypass";
+                   }
+                }
 
                // If 2nd factor needed, several choices
                // Complicated by CRN possibilities
                // If this is a return from crn selector duo_crn_username will be set
 
-               if (nextFlow == null && need2f != null) {
+               if (need2f != null) {
                   var Json = Java.type("javax.json.Json");
                   var SR = Java.type("java.io.StringReader");
                   var Http = Java.type("com.duosecurity.client.Http");
@@ -347,6 +374,7 @@
                            }
                         } catch (e) {
                            logger.warn("Taws CRN error for user '{}': {}", username, e);
+                           conversationScope.put("duo_username", username);
                            nextFlow = "authn/uwduo";
                         }
                      }
@@ -374,7 +402,7 @@
            <value>
            <![CDATA[
                var AuthnContextClassRefPrincipal = Java.type("net.shibboleth.idp.saml.authn.principal.AuthnContextClassRefPrincipal");
-               logger = Java.type("org.slf4j.LoggerFactory").getLogger("net.shibboleth.idp.authn");
+               logger = Java.type("org.slf4j.LoggerFactory").getLogger("edu.washington.shibboleth");
                logger.debug("checkRememberMe");
                nextFlow = null;
 
@@ -390,44 +418,29 @@
                   username = culs.apply(input);
                   logger.debug("username = " + username);
    
-                  // if rememberme checked, send cookie
+                  // set or delete cookie, depends on rememberme checked
+
                   remme = requestContext.getConversationScope().get("rememberme");
                   cname = requestContext.getConversationScope().get("duo_realuser");
                   if (!username.equals(cname)) {
-                     logger.info("using cookie name: " + cname);
+                     logger.info("using cookie for: " + cname);
                      username = cname;
                   }
 
-                  // if the user has an optin long-term session, update its timeout
-                  request = custom.get("request");
-                  cookies = request.getCookies();
-                  for ( i=0; cookies!=null && i< cookies.length; i++ ) {
-                     cookie = cookies[i];
-                     if (cookie.getName().equals("%{idp.uw.mfa-remember-cookie}" + username)) {
-                        try {
-                           vals = custom.get("sealer").unwrap(cookie.getValue()).split("|");
-                           if (vals[1].equals(username)) remme = "t";
-                        } catch (e) {
-                           logger.debug("has cookie, but not good");
-                        }
-                     }
-                  }
- 
-                  if (remme!=null && remme.equals("y")) {
-                     // set a cookie
-                     var Random = Java.type("java.util.Random");
-                     var Cookie = Java.type("javax.servlet.http.Cookie");
-                     var System = Java.type("java.lang.System");
-                     tdata = new Random().nextInt(1000000) + "|" + username;
-                     logger.debug("set remember cookie = " + tdata);
-                     cdata = custom.get("sealer").wrap(tdata, System.currentTimeMillis() + %{idp.uw.mfa-remember-seconds}*1000);
-                     cookie = new Cookie("%{idp.uw.mfa-remember-cookie}" + username, cdata);
-                     cookie.setPath("/");
-                     cookie.setSecure(true);
-                     cookie.setMaxAge(%{idp.uw.mfa-remember-seconds}*10);
-                     response = custom.get("response");
-                     response.addCookie(cookie);
-                  }
+                  var maxAge = 0;
+                  if (remme!=null && remme.equals("y")) maxAge = %{idp.uw.mfa-remember-seconds}*10;
+                  var Random = Java.type("java.util.Random");
+                  var Cookie = Java.type("javax.servlet.http.Cookie");
+                  var System = Java.type("java.lang.System");
+                  tdata = new Random().nextInt(1000000) + "|" + username;
+                  cdata = custom.get("sealer").wrap(tdata, System.currentTimeMillis() + %{idp.uw.mfa-remember-seconds}*1000);
+                  cookie = new Cookie("%{idp.uw.mfa-remember-cookie}" + username, cdata);
+                  cookie.setPath("/");
+                  cookie.setSecure(true);
+                  cookie.setHttpOnly(true);
+                  cookie.setMaxAge(maxAge);
+                  response = custom.get("response");
+                  response.addCookie(cookie);
                }
                nextFlow;
            ]]>
@@ -435,4 +448,27 @@
        </constructor-arg>
    </bean>
 
+    <!-- this just for logging debug 
+    <bean id="completeDuoBypass" parent="shibboleth.ContextFunctions.Scripted" factory-method="inlineScript"
+          p:customObject-ref="uw.ComboBean">
+       <constructor-arg>
+           <value>
+           <![CDATA[
+               logger = Java.type("org.slf4j.LoggerFactory").getLogger("edu.washington.shibboleth");
+               logger.debug("completeDuoBypass");
+               request = custom.get("request");
+               requestContext = input.getSubcontext("net.shibboleth.idp.profile.context.SpringRequestContext").getRequestContext();
+        conversationScope = requestContext.getConversationScope();
+        fp = conversationScope.get("fingerprint");
+        logger.debug("== fingerprint: " + fp);
+        fpt = conversationScope.get("fptime");
+        logger.debug("== time: " + fpt);
+
+               nextFlow = null;
+               nextFlow;
+           ]]>
+       </value>
+       </constructor-arg>
+   </bean>
+ -->
 </beans>

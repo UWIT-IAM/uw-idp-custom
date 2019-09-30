@@ -17,7 +17,7 @@ use LWP::Simple;
 # filter and metadata files
 my $rp_filter_file = "/data/local/idp-3.4/conf/rp-filter.xml";
 my $uw_metadata_file = "/data/local/idp-3.4/metadata/UW-rp-metadata.xml";
-my $ic_metadata_file = "/data/local/idp-3.4/metadata-cache/InCommon-metadata.xml";
+my $ic_metadata_file = "/data/local/idp-3.4/metadata/InCommon-metadata.xml";
 
 # get the dynamic files from idp eval
 # my $url = 'https://idp11.s.uw.edu/metadata/UW-rp-metadata.xml';

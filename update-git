@@ -8,38 +8,29 @@ fixperms
 update-git
 conf/access-control.xml
 conf/admin/metrics.xml
-conf/attribute-filter-oidc.xml
 conf/attribute-resolver-activators.j2
 conf/attribute-resolver.xml.tmpl
-conf/attribute-resolver-oidc.xml
 conf/audit.xml
-conf/core-filter.xml
-conf/core-filter.xml.oidc
-conf/credentials.xml
-conf/credentials-oidc.xml
-conf/errors.xml
-conf/global.xml
-conf/global-oidc.xml
-conf/idp.properties.tmpl
-conf/idp-oidc.properties.tmpl
-conf/intercept/google-check-intercept-config.xml
-conf/intercept/slack-check-intercept-config.xml
-conf/logback.xml
-conf/metadata-providers.xml
-conf/oidc-metadata-providers.xml
-conf/relying-party.xml
-conf/oidc-relying-party.xml
-conf/oidc-subject.properties
-conf/rs-filter.xml
-conf/saml-nameid-exceptions.j2
-conf/services.properties
-conf/services.xml
-conf/services-oidc.xml
-conf/uw-auto-rps.xml.j2
 conf/authn/general-authn.xml
 conf/authn/mfa-authn-config.xml
 conf/authn/uwduo-config.xml
 conf/authn/wdmfa-config.xml
+conf/core-filter.xml
+conf/credentials.xml
+conf/errors.xml
+conf/global.xml
+conf/idp.properties.tmpl
+conf/idp.properties.tmpl
+conf/intercept/google-check-intercept-config.xml
+conf/intercept/slack-check-intercept-config.xml
+conf/logback.xml
+conf/metadata-providers.xml
+conf/relying-party.xml
+conf/rs-filter.xml
+conf/saml-nameid-exceptions.j2
+conf/services.properties
+conf/services.xml
+conf/uw-auto-rps.xml.j2
 flows/intercept/slack-check/slack-check-beans.xml
 flows/intercept/slack-check/slack-check-flow.xml
 flows/intercept/google-check/google-check-flow.xml
@@ -48,6 +39,8 @@ flows/authn/smstoken/smstoken-flow.xml
 flows/authn/smstoken/smstoken-beans.xml
 flows/authn/crn-select/crn-select-beans.xml
 flows/authn/crn-select/crn-select-flow.xml
+flows/authn/duo-bypass/duo-bypass-flow.xml
+flows/authn/duo-bypass/duo-bypass-beans.xml
 flows/authn/wdmfa/wdmfa-flow.xml
 flows/authn/wdmfa/wdmfa-beans.xml
 flows/authn/uwduo/uwduo-flow.xml
@@ -83,6 +76,7 @@ local-bin/orphan_policy.py
 local-bin/py-requirements.txt
 local-bin/refresh_ic.sh
 local-bin/refresh_uw.sh
+local-bin/reload_clientinfo
 local-bin/reload_resolver
 local-bin/reload_filter
 local-bin/reload_metadata
@@ -90,9 +84,10 @@ local-bin/reload_relyingparty
 local-bin/restart_tomcat.sh
 local-bin/sp-contacts.pl
 local-bin/sp-contacts.sh
-local-bin/spreg_conf_2.py
-local-bin/spreg_update_2.py
-local-bin/test_dependencies.sh
+local-bin/spreg_conf.py
+local-bin/spreg_conf_4.py
+local-bin/spreg_update_4.py
+local-bin/test_deps.sh
 local-bin/verify_schema.sh
 messages/messages.properties
 messages/authn-messages.properties
@@ -111,7 +106,6 @@ do
   (( $? == 0 )) && continue 
   [[ -d ${dest}/${path} ]] || mkdir -p ${dest}/${path}
   cp $fp ${dest}/${path}/${file}
-  echo "updated: $fp"
   (( num = num + 1 ))
 done
 

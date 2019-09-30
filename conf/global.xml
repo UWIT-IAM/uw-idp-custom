@@ -24,7 +24,7 @@
         p:maxConnectionsTotal="20"
         p:connectionTimeout="PT5S"
         p:connectionRequestTimeout="PT5S"
-        p:socketTimeout="PT20S"
+        p:socketTimeout="PT5S"
         p:tLSSocketFactory-ref="shibboleth.SecurityEnhancedTLSSocketFactoryWithClientTLS" />
 
 <bean id="uw.GwsSecurity" class="org.opensaml.security.httpclient.HttpClientSecurityParameters" lazy-init="true">
@@ -56,22 +56,25 @@
 
 
 <bean id="uw.UWHttpClient" class="edu.washington.shibboleth.tools.UWHttpClient" destroy-method="close"
-    p:certificateFile="/data/local/idp-3.4/credentials/gws.cac-uw.crt"
-    p:keyFile="/data/local/idp-3.4/credentials/gws.cac-uw.key"
+    p:certificateFile="/data/local/idp-3.4/credentials/idp-uw.crt"
+    p:keyFile="/data/local/idp-3.4/credentials/idp-uw.key"
     p:caCertificateFile="/data/local/idp-3.4/credentials/uw-incommon-ca.crt"
     p:acceptHeader="application/json"
     p:optionsHeader="full"
     p:connectTimeLimit="5"
     p:responseTimeLimit="5"
+    p:maxConnections="10"
     />
 
 <!-- configuration for the group membership attribute -->
 
+<!--
 <bean id="uw.GwsDataSource" class="edu.washington.shibboleth.attribute.resolver.dc.rws.HttpDataSource" destroy-method="close"
     p:certificateFile="/data/local/idp-3.4/credentials/gws.cac-uw.crt"
     p:keyFile="/data/local/idp-3.4/credentials/gws.cac-uw.key"
     p:caCertificateFile="/data/local/idp-3.4/credentials/uw-incommon-ca.crt"
     p:acceptHeader="text/xml" />
+-->
 
 <!--
 <bean id="GwsDataSourceBasicTest" class="edu.washington.shibboleth.attribute.resolver.dc.rws.HttpDataSource" destroy-method="close"
@@ -165,16 +168,7 @@
         <entry key="foo" value="bar"/>
     </util:map>
     
-    <util:list id="uw.want2falways">
-            <value>https://uw-it-aca.slack.com/</value>
-            <value>https://uw-it.slack.com</value>
-            <value>https://urizen.s.uw.edu/shibboleth</value>
-            <value>https://www.mathworks.com/edu-sp</value>
-            <value>https://uw-asa.slack.com/</value>
-    </util:list>
-
-    <import resource="new.uw-auto-rps.xml" />
-
+    <import resource="uw-auto-rps.xml" />
 
     <util:map id="uw.ComboBean">
         <entry key="webget" value-ref="uw.UWHttpClient"/>

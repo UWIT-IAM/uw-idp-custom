@@ -260,6 +260,27 @@
                 </util:list>
             </property>
         </bean>
+
+        <bean id="authn/duo-bypass" parent="shibboleth.AuthenticationFlow"
+                p:passiveAuthenticationSupported="true"
+                p:forcedAuthenticationSupported="true" >
+            <property name="supportedPrincipals">
+                <util:list>
+                    <bean parent="shibboleth.SAML2AuthnContextClassRef"
+                        c:classRef="urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport" />
+                    <bean parent="shibboleth.SAML2AuthnContextClassRef"
+                        c:classRef="urn:oasis:names:tc:SAML:2.0:ac:classes:Password" />
+                    <bean parent="shibboleth.SAML1AuthenticationMethod"
+                        c:method="urn:oasis:names:tc:SAML:1.0:am:password" />
+                    <bean parent="shibboleth.SAML2AuthnContextClassRef"
+                        c:classRef="urn:oasis:names:tc:SAML:2.0:ac:classes:TimeSyncToken" />
+                    <bean parent="shibboleth.SAML2AuthnContextClassRef"
+                        c:classRef="https://refeds.org/profile/mfa" />
+                    <bean parent="shibboleth.SAML2AuthnContextClassRef"
+                        c:classRef="http://schemas.microsoft.com/ws/2008/06/identity/authenticationmethod/password" />
+                </util:list>
+            </property>
+        </bean>
     </util:list>
 
     <!--
@@ -284,7 +305,7 @@
                 <bean parent="shibboleth.SAML2AuthnContextClassRef"
                     c:classRef="https://refeds.org/profile/mfa" />
             </key>
-            <value>3</value>
+            <value>4</value>
         </entry>
         <entry>
             <key>

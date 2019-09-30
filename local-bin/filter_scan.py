@@ -124,10 +124,10 @@ def get_existing_entities():
 def get_gws_attributes():
     doc = etree.parse('../conf/attribute-resolver.xml')
     for ent in resolverEntities:
-        for attr in doc.getroot().findall('.//resolver:AttributeDefinition/resolver:Dependency[@ref="%s"]' % (ent['refid']), ns):
+        for attr in doc.getroot().findall('.//resolver:AttributeDefinition/resolver:InputAttributeDefinition[@ref="%s"]' % (ent['refid']), ns):
             _print('adding %s to %s' % (attr.getparent().get('id'), ent['type']))
             ent['attrids'].append(attr.getparent().get('id'))
-    for attr in doc.getroot().findall('.//resolver:AttributeDefinition/resolver:Dependency[@ref="%s"]' % (tgtidEntity['refid']), ns):
+    for attr in doc.getroot().findall('.//resolver:AttributeDefinition/resolver:InputAttributeDefinition[@ref="%s"]' % (tgtidEntity['refid']), ns):
         _print('adding %s to tgtid triggers' % (attr.getparent().get('id')))
         tgtidEntity['attrids'].append(attr.getparent().get('id'))
 
