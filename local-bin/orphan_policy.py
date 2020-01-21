@@ -108,7 +108,7 @@ def sendNotice(sub):
 # ----------
 
 
-parseMetadata('/data/local/idp-3.4/metadata-cache/InCommon-metadata.xml')
+parseMetadata('/data/local/idp-3.4/metadata/InCommon-metadata.xml')
 parseMetadata('/data/local/idp-3.4/metadata/UW-rp-metadata.xml')
 
 print '{} metadata rps'.format(len(known_rps))

@@ -310,6 +310,9 @@
                      p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent','urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified','urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress','urn:oasis:names:tc:SAML:2.0:nameid-format:transient'}}" 
                    p:postAuthenticationFlows="#{{'slack-check'}}"
                  />
+            <bean parent="OIDC.SSO" p:postAuthenticationFlows="#{{'slack-check'}}" />
+            <bean parent="OIDC.UserInfo"/>
+            <bean parent="OAUTH2.Revocation"/>
                 </list>
             </property>
         </bean>

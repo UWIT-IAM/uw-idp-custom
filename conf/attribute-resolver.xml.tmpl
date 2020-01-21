@@ -71,7 +71,7 @@
 
           <Script>
            <![CDATA[
-              logger = Java.type("org.slf4j.LoggerFactory").getLogger("net.shibboleth.idp.attribute");
+              logger = Java.type("org.slf4j.LoggerFactory").getLogger("edu.washington.shibboleth");
               cn.getValues().clear();
               if (preferredFirst.getValues().size()>0) {
                    pcn = preferredFirst.getValues().get(0);
@@ -133,7 +133,7 @@
 
           <Script>
            <![CDATA[
-              logger = Java.type("org.slf4j.LoggerFactory").getLogger("net.shibboleth.idp.attribute");
+              logger = Java.type("org.slf4j.LoggerFactory").getLogger("edu.washington.shibboleth");
               surname.getValues().clear();
               if (preferredSurname.getValues().size()>0) {
                    logger.debug("RES: surname is preferred");
@@ -205,7 +205,7 @@
 
           <Script>
            <![CDATA[
-              logger = Java.type("org.slf4j.LoggerFactory").getLogger("net.shibboleth.idp.attribute");
+              logger = Java.type("org.slf4j.LoggerFactory").getLogger("edu.washington.shibboleth");
               givenName.getValues().clear();
               if (preferredFirst.getValues().size()>0) {
                    gn = preferredFirst.getValues().get(0);
@@ -461,7 +461,7 @@
           <!-- scan groups for AWS roles -->
           <Script>
            <![CDATA[
-              logger = Java.type("org.slf4j.LoggerFactory").getLogger("net.shibboleth.idp.attribute");
+              logger = Java.type("org.slf4j.LoggerFactory").getLogger("edu.washington.shibboleth");
               awsrole.getValues().clear();
               var ngws = gws_groups.getValues().size();
               for (var i=0; i<ngws; i++) {
@@ -648,7 +648,7 @@
 
         <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:isMemberOf" />
         <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.3.6.1.4.1.5923.1.5.1.1" friendlyName="isMemberOf" />
-        <resolver:AttributeEncoder xsi:type="oidcext:OIDCString" name="edumember_is_member_of" />
+        <resolver:AttributeEncoder xsi:type="oidcext:OIDCString" asArray="true" name="edumember_is_member_of" />
 
           <Template>
            <![CDATA[
@@ -709,6 +709,16 @@
         <AttributeEncoder xsi:type="SAML2String" friendlyName="urn:oid:2.5.4.4" name="last_name" />
     </AttributeDefinition>
 
+ <!-- Netsuite idiot specials -->
+    <AttributeDefinition id="netsuite_account" xsi:type="Simple" >
+        <InputDataConnector ref="staticAttributes" attributeNames="netsuiteAccount" />
+        <AttributeEncoder xsi:type="SAML2String" name="account " friendlyName="netsuite_account" />
+    </AttributeDefinition>
+
+    <AttributeDefinition id="netsuite_site" xsi:type="Simple" >
+        <InputDataConnector ref="staticAttributes" attributeNames="netsuiteSite" />
+        <AttributeEncoder xsi:type="SAML2String" name="site " friendlyName="netsuite_site" />
+    </AttributeDefinition>
 
     <!-- ========================================== -->
     <!--      Data Connectors                       -->
@@ -718,7 +728,7 @@
     <!-- Get uwNetID from login -->
     <DataConnector id="loginNetid" xsi:type="ScriptedDataConnector">
         <Script><![CDATA[
-           logger = Java.type("org.slf4j.LoggerFactory").getLogger("net.shibboleth.idp.attribute");
+           logger = Java.type("org.slf4j.LoggerFactory").getLogger("edu.washington.shibboleth");
            logger.debug("==== scripted enter ====");
     
            IdPAttribute = Java.type("net.shibboleth.idp.attribute.IdPAttribute");
@@ -750,6 +760,12 @@
         </Attribute>
         <Attribute id="awstwelve">
             <Value>43200</Value>
+        </Attribute>
+        <Attribute id="netsuiteAccount">
+            <Value>4487126_SB1</Value>
+        </Attribute>
+        <Attribute id="netsuiteSite">
+            <Value>1</Value>
         </Attribute>
     </DataConnector>
 
@@ -831,8 +847,8 @@
 <DataConnector id="gws" xsi:type="HTTP" 
         httpClientRef="uw.HttpClient"
         httpClientSecurityParametersRef="uw.GwsSecurity" 
-           propagateResolutionExceptions="false"
-          activationConditionRef="uw.GetsGwsMemberships"
+        propagateResolutionExceptions="false"
+        activationConditionRef="uw.GetsGwsMemberships"
         >
     <URLTemplate>
         <![CDATA[
@@ -850,8 +866,8 @@
 <DataConnector id="courses" xsi:type="HTTP" 
         httpClientRef="uw.HttpClient"
         httpClientSecurityParametersRef="uw.GwsSecurity" 
-           propagateResolutionExceptions="false"
-           activationConditionRef="uw.GetsCourseMemberships"
+        propagateResolutionExceptions="false"
+        activationConditionRef="uw.GetsCourseMemberships"
         >
     <URLTemplate>
         <![CDATA[

@@ -233,6 +233,7 @@ def updateAccess(group):
         f.write('# list of SPs needing auto 2fa\n# created by spreg_update_4.py\n')
         f.write('urn:amazon:webservices\n')
         f.write('http://www.workday.com\n')
+        f.write('oidc/mosler.s.uw.edu\n')
         for l in auth_sps['mfa']:
             f.write(l + '\n')
     arc = config.archive_dir + config.autotoken_filename + '.' + time.strftime('%s')

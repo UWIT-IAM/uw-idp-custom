@@ -22,7 +22,6 @@
 #set ($rpContext = $profileRequestContext.getSubcontext('net.shibboleth.idp.profile.context.RelyingPartyContext'))
 #set ($username = $authenticationContext.getSubcontext('net.shibboleth.idp.authn.context.UsernamePasswordContext', true).getUsername())
 #set ($username2 = $authenticationContext.getSubcontext('net.shibboleth.idp.authn.context.MultiFactorAuthenticationContext', true).getUsername())
-#set ($principalName = $authenticationContext.getSubcontext('net.shibboleth.idp.authn.context.ExternalAuthenticationContext', true).getPrincipalName())
 #set ($username3 = $authenticationContext.getSubcontext('net.shibboleth.idp.authn.context.UsernamePasswordContext', true).getUsername())
 #set ($passwordEnabled = false)
 #if (!$passwordPrincipals or $passwordPrincipals.isEmpty() or $authenticationContext.isAcceptable($passwordPrincipals))
@@ -71,8 +70,7 @@ function show_no_phone() {
 }
 </script>
 
-
-  	</head>
+</head>
 
 
   	<body onLoad="document.getElementById('duo_iframe').focus()">
@@ -99,9 +97,12 @@ Using your '$duo_username' Duo identity.
 <p>
 #end
 
-              <div class="form-element-wrapper">
-                <input type="checkbox" name="rememberme" value="y" #if ($remember_checked) checked="checked" #end > Remember me on this device.
-              </div>
+            <div class="form-element-wrapper">
+<!--
+              <input type="checkbox" name="rememberme" value="y" #if ($remember_checked) checked="checked" #end ><b> Remember me on this device.</b>
+-->
+              <input type="checkbox" name="rememberme" value="y" checked="checked"><b>Remember my 2FA approval on this device.</b>
+            </div>
 
             <noscript>#springMessageText("idp.login.duoNoScript", "The Duo service requires JavaScript.")</noscript>
             <script src="$request.getContextPath()$duoScriptPath"></script>
@@ -126,12 +127,6 @@ Using your '$duo_username' Duo identity.
                 <input type="hidden" name="_eventId" value="proceed" />
             </form>
 
-<!--
-            <ul class="login">
-              <li><a href="$flowExecutionUrl&_eventId=cancel">#springMessageText("idp.login.duoCancel", "Use Entrust instead")</a></li>
-            </ul>
--->
-                        
         </div>
 
         <h2 class="visuallyhidden">UW NetID Help</h2>

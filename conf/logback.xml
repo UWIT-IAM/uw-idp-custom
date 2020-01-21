@@ -42,7 +42,7 @@
     <!-- =========================================================== -->
 
     <!-- Logs our addons -->
-    <logger name="edu.washington.shibboleth" level="DEBUG"/>
+    <logger name="edu.washington" level="DEBUG"/>
 
     <logger name="org.geant.idpextension.oidc.profile" level="INFO"/>
 

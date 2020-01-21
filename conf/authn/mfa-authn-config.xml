@@ -12,32 +12,6 @@
        default-init-method="initialize"
        default-destroy-method="destroy">
 
-    <!--
-    This is a map of transition rules that guide the behavior of the MFA flow
-    and controls how factors are sequenced, skipped, etc. The key of each entry
-    is the name of the step/flow out of which control is passing. The starting
-    rule has an empty key.
-    
-    Each entry is a bean inherited from "shibboleth.authn.MFA.Transition". Per
-    the Javadoc for net.shibboleth.idp.authn.MultiFactorAuthenticationTransition:
-            
-        p:nextFlow (String)
-            - A flow to run if the previous step signaled a "proceed" event, for simple
-                transitions.
-                
-        p:nextFlowStrategy (Function<ProfileRequestContext,String>)
-            - A function to run if the previous step signaled a "proceed" event, for dynamic
-                transitions. Returning null ends the MFA process.
-            
-        p:nextFlowStrategyMap (Map<String,Object> where Object is String or Function<ProfileRequestContext,String>)
-            - Fully dynamic way of expressing control paths. Map is keyed by a previously
-                signaled event and the value is a flow to run or a function to
-                return the flow to run. Returning null ends the MFA process.
-                
-    When no rule is provided, there's an implicit "null" that ends the MFA flow
-    with whatever event was last signaled. If the "proceed" event from a step is
-    the final event, then the MFA process attempts to complete itself successfully.
-    -->
 
     <!-- Basic Login.  1 or 2-factor -->
     <util:map id="shibboleth.authn.MFA.TransitionMap">
@@ -98,6 +72,8 @@
                nextFlow = null;
                need2f = null;
                hasCookie = "f";
+               hasOptinCookie = null;
+               needsOptinCookie = null;
                
                // Get the username
                CanonicalUsernameLookupStrategy = Java.type("net.shibboleth.idp.session.context.navigate.CanonicalUsernameLookupStrategy");
@@ -113,6 +89,29 @@
                conversationScope.put("duo_username", null);
                conversationScope.put("show_duo_username", null);
 
+               /* Load dynamic configs (mfa not on-the-fly reloadable) */
+
+               var Files = Java.type("java.nio.file.Files");
+               var Paths = Java.type("java.nio.file.Paths");
+               var ArrayList = Java.type("java.util.ArrayList");
+               var locals = Files.readAllLines(Paths.get("%{idp.uw.dynamic-mfa-file}"));
+
+               userSeq = "1";
+               autoTokenRps = new ArrayList();
+
+               for each (var local in locals) {
+                  if (local.length()==0 || local[0]=='#') continue;
+                  lv = local.replaceAll("\\s","").split("|");
+                  if (lv.length==3 && lv[0]=="user" && lv[1]==username && lv[2].length>0 ) {
+                     logger.info("Seq for " + username + " set to " + lv[2]);
+                     userSeq = lv[2];
+                  }
+                  if (lv.length==2 && lv[0]=="auto" && lv[1].length>0 ) {
+                     autoTokenRps.add(lv[1]);
+                  }
+               }
+               conversationScope.put("user_seq", userSeq);
+               
                /* Check cookies.  See if the user has a long-term 2fa session.
                 */
 
@@ -123,18 +122,22 @@
                         val = custom.get("sealer").unwrap(cookie.getValue());
                         logger.debug("rememberme cookie value=" + val);
                         vals = val.split("|");
-                        if (vals[1].equals(username)) hasCookie = "t";
-                        conversationScope.put("remember_checked", "t");
+                        if (vals[1].equals(username) && vals[2].equals(userSeq)) hasCookie = "t";
+                        // conversationScope.put("remember_checked", "t");
                      } catch (e) {
                         if (e instanceof Java.type("net.shibboleth.utilities.java.support.security.DataExpiredException")) {
                             logger.debug("cookie has expired");
                             hasCookie = "e";
-                            conversationScope.put("remember_checked", "t");
+                            // conversationScope.put("remember_checked", "t");
                         } else {
                            logger.debug(e);
                         }
                      }
-           
+                     conversationScope.put("remember_checked", "t");
+                  }
+                  if (cookie.getName().equals("%{idp.uw.mfa-optin-cookie}" + username)) {
+                     logger.debug("has optin cookie");
+                     hasOptinCookie = "t";
                   }
                }
  
@@ -153,6 +156,7 @@
                    // else use the id's dns part
                    if (id.indexOf("http://")==0) id = id.substring(7);
                    else if (id.indexOf("https://")==0) id = id.substring(8);
+                   else if (id.indexOf("oidc/")==0) id = id.substring(5);
                    else return ""  // must have 'standard' id
                    if (id.indexOf("/")>0) id = id.substring(0,id.indexOf("/"));
                    // logger.debug("fixed dns: " + id);
@@ -160,6 +164,7 @@
                }
 
                  
+               logger.debug(input.toString());
                authCtx = input.getSubcontext("net.shibboleth.idp.authn.context.AuthenticationContext");
                rpCtx = authCtx.getSubcontext("net.shibboleth.idp.authn.context.RequestedPrincipalContext");
                      
@@ -175,7 +180,7 @@
                            break;
                      }
                   }
-                }
+                } else logger.debug("No RequestedPrincipalContext!");
          
                 var rpCtx = input.getSubcontext("net.shibboleth.idp.profile.context.RelyingPartyContext");
                 var rpCtxId = rpCtx.getConfiguration().getId();
@@ -184,15 +189,9 @@
                 // See if 2fa is auto configured for this rp
 
                 if (need2f == null) {
-                   /* dynamic list by local file */
-                   var Files = Java.type("java.nio.file.Files");
-                   var Paths = Java.type("java.nio.file.Paths");
-                   var autos = Files.readAllLines(Paths.get("/data/local/idp-3.4/conf/authn/autotoken.txt"));
-                   // logger.debug(rpid);
-                   for (i=0; i<autos.size(); i++) {
-                      // logger.debug("[[" + autos.get(i).trim() + "]]");
-                      if (rpid.startsWith(autos.get(i).trim())) {
-                         logger.debug("autotoken rp match: " + rpid);
+                   for each ( var auto in autoTokenRps ) {
+                      if (rpid.startsWith(auto)) {
+                         logger.info("2fa by autotoken: " + rpid);
                          need2f = "t";
                          break;
                        }
@@ -229,30 +228,55 @@
                    }
                 }
 
-              /** will by OBE when everyone gets 2fa all the time
+                // if user has optin cookie, that's the same as in optin group
+                if (need2f==null && hasOptinCookie=="t") need2f = "t";
+
                 // See if user opted in to 2nd factor and has no long-term session
-                if (need2f == null && hasCookie != "t") {
-                   // later
-                   // xml = webget.getResource("%{idp.uw.mfa-optin-urlbase}" + username);
-                   xml = null;
-                   if (xml != null) {
-                      if (xml.indexOf("class=\"member\"") > -1 ) {
-                         logger.info("user opted into 2f");
-                         need2f = "t";
-                         conversationScope.put("askRemember", "y");
-                         // if (hasCookie=="e") conversationScope.put("askRememberDefautl", "t");
+                if (need2f == null && hasCookie!="t") {
+
+                   // function to test if a userid is in a group
+                   var userInGroup = function(url) {
+                      try {
+                         logger.debug(".. looking for " + url);
+                         rsp = webget.getResource(url)
+                         if (rsp != null) {
+                            var Json = Java.type("javax.json.Json");
+                            var SR = Java.type("java.io.StringReader");
+                            var reader = Json.createReader(new SR(rsp));
+                            var jresp = reader.readObject();
+                            reader.close();
+                            data = jresp.getJsonArray("data");
+                            if (data != null && data.size()>0) {  // assume this means user is in group
+                               return true;
+                            }
+                         }
+                      } catch (e) {
+                         logger.warn("optin request failed for user '{}': {}", username, e);
+                      }
+                      return false;
+                   }
+
+                   url = "%{idp.uw.2fa-optin-urlbase}" + username 
+                   if (userInGroup(url)) {
+                      // verify user 'really' in group
+                      url2 = "%{idp.uw.2fa-optout-urlbase}" + username 
+                      if (!userInGroup(url2)) {
+                         need2f = 't';
+                         needsOptinCookie = 't';
+                         logger.info("user opts in to 2fa");
+                      } else {
+                         logger.info("user opts out of 2fa");
                       }
                    }
                 }
-              **/
-
   
-                // See if user has remember-me
-                if (need2f != null && hasCookie == "t") {
+                // If user has remember-me, skip 2fa
+                //   if (need2f != null && hasCookie == "t") {
+                if (hasCookie == "t") {
                    if (authCtx.isForceAuthn()) {
-                      logger.info("2FA: force authn.  skipping cookie test");
+                      logger.info("2FA: force authn.  skipping remember cookie test");
                    } else {
-                      logger.info("2FA: user has cookie.  skipping");
+                      logger.info("2FA: user has remember cookie.  skipping duo");
                       need2f = null;   
                       nextFlow = "authn/duo-bypass";
                    }
@@ -270,9 +294,9 @@
                   // function to test if a userid has Duo enrollment
                   var userHasDuo = function(id) {
                      try {
-                        var request = new Http("POST", "%{uw.idp.duo.api.apiHost:none}", "/auth/v2/preauth", 10);
+                        var request = new Http("POST", "%{uw.idp.duo.api.apiHost:null}", "/auth/v2/preauth", 10);
                         request.addParam("username", id);
-                        request.signRequest("%{uw.idp.duo.api.integrationKey:none}", "%{uw.idp.duo.api.secretKey:none}");
+                        request.signRequest("%{uw.idp.duo.api.integrationKey:null}", "%{uw.idp.duo.api.secretKey:null}");
 
                         ret = request.executeHttpRequest();
                         var rsp = ret.body().string();
@@ -294,7 +318,7 @@
                   // function to get a TAWS preauth array
                   var getTawsPreauth = function(id) {
                      try {
-                        rsp = webget.getResource("%{idp.uw.token-preauth-urlbase:none}" + id);
+                        rsp = webget.getResource("%{idp.uw.token-preauth-urlbase:null}" + id);
                         logger.debug("taws rsp=" + rsp);
                         var reader = Json.createReader(new SR(rsp));
                         var jresp = reader.readObject();
@@ -389,6 +413,17 @@
                   }
                } // end need2f
 
+               if (needsOptinCookie=="t") {
+                  logger.info("setting optin cookie");
+                  cookie = new Cookie("%{idp.uw.mfa-optin-cookie}" + username, "yes");
+                  cookie.setPath("/");
+                  cookie.setSecure(true);
+                  cookie.setHttpOnly(true);
+                  cookie.setMaxAge(31104000);  // 1 year
+                  response = custom.get("response");
+                  response.addCookie(cookie);
+               }
+
                nextFlow;
            ]]>
        </value>
@@ -422,17 +457,19 @@
 
                   remme = requestContext.getConversationScope().get("rememberme");
                   cname = requestContext.getConversationScope().get("duo_realuser");
+                  useq = requestContext.getConversationScope().get("user_seq");
                   if (!username.equals(cname)) {
                      logger.info("using cookie for: " + cname);
                      username = cname;
                   }
 
                   var maxAge = 0;
-                  if (remme!=null && remme.equals("y")) maxAge = %{idp.uw.mfa-remember-seconds}*10;
+                  if (remme!=null && remme.equals("y")) maxAge = %{idp.uw.mfa-remember-seconds};
                   var Random = Java.type("java.util.Random");
                   var Cookie = Java.type("javax.servlet.http.Cookie");
                   var System = Java.type("java.lang.System");
-                  tdata = new Random().nextInt(1000000) + "|" + username;
+                  tdata = new Random().nextInt(1000000) + "|" + username + "|" + useq;
+                  logger.debug("rcookie=" + tdata);
                   cdata = custom.get("sealer").wrap(tdata, System.currentTimeMillis() + %{idp.uw.mfa-remember-seconds}*1000);
                   cookie = new Cookie("%{idp.uw.mfa-remember-cookie}" + username, cdata);
                   cookie.setPath("/");

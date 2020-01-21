@@ -312,7 +312,7 @@
                 <bean parent="shibboleth.SAML2AuthnContextClassRef"
                     c:classRef="urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport" />
             </key>
-            <value>2</value>
+            <value>3</value>
         </entry>
     </util:map>
 

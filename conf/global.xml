@@ -20,8 +20,8 @@
 <!-- http client for group attr resolver -->
 <bean id="uw.HttpClient"  parent="shibboleth.NonCachingHttpClient" lazy-init="true"
         p:connectionDisregardTLSCertificate="%{idp.httpclient.connectionDisregardTLSCertificate:false}"
-        p:maxConnectionsPerRoute="20"
-        p:maxConnectionsTotal="20"
+        p:maxConnectionsPerRoute="5"
+        p:maxConnectionsTotal="10"
         p:connectionTimeout="PT5S"
         p:connectionRequestTimeout="PT5S"
         p:socketTimeout="PT5S"
@@ -63,7 +63,7 @@
     p:optionsHeader="full"
     p:connectTimeLimit="5"
     p:responseTimeLimit="5"
-    p:maxConnections="10"
+    p:maxConnections="5"
     />
 
 <!-- configuration for the group membership attribute -->

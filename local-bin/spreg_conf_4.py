@@ -15,7 +15,7 @@ spreg_db_DEV = {
  'db_pass': 'ae500169-e8b9-4945-ba56-10d59d380067',
 }
 spreg_db = {
- 'db_host': 'iamdb11',
+ 'db_host': 'iamdb21',
  'db_name': 'spregistry',
  'db_user': 'spreg1',
  'db_pass': '47dafbe2-2c28-4a16-a549-591285c62e5a',

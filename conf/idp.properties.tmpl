@@ -19,14 +19,15 @@ idp.entityID= urn:mace:incommon:washington.edu:dev
 idp.uw.awsEntityId = UWdev
 {% endif %}
 
-# users opting into mfa (not yet activated)
-idp.uw.mfa-optin-urlbase = https://iam-ws.u.washington.edu/group_sws/v2/group/u_weblogin_optin-mfa/effective_member/
+# users opting into 2fa
+idp.uw.2fa-optin-urlbase = https://groups.uw.edu/group_sws/v3/group/u_weblogin_optin-2fa/effective_member/
+idp.uw.mfa-optin-cookie = uw-optin-
 
 # auto authz group base
-idp.uw.slack-gws-urlbase = https://iam-ws.u.washington.edu/group_sws/v3/group/u_weblogin_idpauthz_
+idp.uw.slack-gws-urlbase = https://groups.uw.edu/group_sws/v3/group/u_weblogin_idpauthz_
 
 # auto 2fa group base
-idp.uw.2fa-gws-urlbase = https://iam-ws.u.washington.edu/group_sws/v3/group/u_weblogin_idp2fa_
+idp.uw.2fa-gws-urlbase = https://groups.uw.edu/group_sws/v3/group/u_weblogin_idp2fa_
 
 # tokend preauth
 idp.uw.token-preauth-urlbase = https://taws.s.uw.edu:716/token/v2/preauth/
@@ -39,8 +40,7 @@ idp.uw.token-auth-urlbase = https://taws.s.uw.edu:716/token/v2/auth/
 
 # mfa remember cookie name
 idp.uw.mfa-remember-cookie = uw-rememberme-
-idp.uw.mfa-remember-seconds = 86400
-## idp.uw.mfa-remember-seconds = 60
+idp.uw.mfa-remember-seconds = 2592000
 
 # google preauth parameters
 idp.uw.nws-urlbase = https://uwnetid.washington.edu/nws/v1/uwnetid/
@@ -48,13 +48,13 @@ idp.uw.google-subscription = 144
 idp.uw.uwnetid-manage-urlbase = https://uwnetid.washington.edu/manage
 
 # AWS 2factor needed
-idp.uw.aws-optin-2fa = https://iam-ws.u.washington.edu/group_sws/v2/group/u_weblogin_aws-optin-2fa/effective_member/
+idp.uw.aws-optin-2fa = https://groups.uw.edu/group_sws/v2/group/u_weblogin_aws-optin-2fa/effective_member/
 
 # Set the scope used in the attribute resolver for scoped attributes
 idp.scope= washington.edu
 
 # General cookie properties (maxAge only applies to persistent cookies)
-#idp.cookie.secure = false
+idp.cookie.secure = true
 #idp.cookie.httpOnly = true
 #idp.cookie.domain =
 #idp.cookie.path =
@@ -124,10 +124,10 @@ idp.encryption.optional = true
 #idp.errors.defaultView = error
 
 # Set to false to disable the IdP session layer
-#idp.session.enabled = true
+idp.session.enabled = true
 
 # Set to "shibboleth.StorageService" for server-side storage of user sessions
-#  idp.session.StorageService = shibboleth.JPAStorageService
+idp.session.StorageService = shibboleth.ClientPersistentStorageService
 
 # Size of session IDs
 #idp.session.idSize = 32

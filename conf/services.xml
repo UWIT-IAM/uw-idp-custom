@@ -121,6 +121,7 @@
         <value>%{idp.home}/conf/core-filter.xml</value>
         <value>%{idp.home}/conf/rs-filter.xml</value>
         <value>%{idp.home}/conf/rp-filter.xml</value>
+        <value>%{idp.home}/conf/oidc-filter.xml</value>
     </util:list>
 
     <util:list id ="shibboleth.NameIdentifierGenerationResources">

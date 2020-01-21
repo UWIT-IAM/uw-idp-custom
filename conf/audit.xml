@@ -10,17 +10,54 @@
     default-init-method="initialize"
     default-destroy-method="destroy">
 
+    <!-- Include requested principals in the audit -->
+    <bean id="shibboleth.PostAssertionAuditExtractors" parent="shibboleth.DefaultPostAssertionAuditExtractors">
+        <property name="sourceMap">
+            <map merge="true">
+                <entry key="UWRPS" value-ref="LookupRequestedPrincipalBean" />
+            </map>
+        </property>
+    </bean>
+
+    <bean id="LookupRequestedPrincipalBean" parent="shibboleth.ContextFunctions.Scripted" factory-method="inlineScript">
+        <constructor-arg>
+            <value>
+            <![CDATA[
+              var getinfo = function() {
+                 var result = "";
+                 var authCtx = input.getSubcontext("net.shibboleth.idp.authn.context.AuthenticationContext");
+                 if (authCtx!=null) {
+                    var rpCtx = authCtx.getSubcontext("net.shibboleth.idp.authn.context.RequestedPrincipalContext");
+                    if (rpCtx!=null) {
+                       var rps = rpCtx.getRequestedPrincipals();
+                       for each (var rp in rps) {
+                          var rpname = rp.getName();
+                          if (result.length()>0) result = result + ",";
+                          result = result + rpname;
+                       }
+                    }
+                 }
+                 return result;
+              }
+              getinfo();
+            ]]>
+            </value>
+        </constructor-arg>
+    </bean>
+
     <!--
     This bean defines a mapping between audit log categories and formatting strings. The default entry is
     for compatibility with V2 audit logging.
     -->
+
+<!--
     <util:map id="shibboleth.AuditFormattingMap">
         <entry key="Shibboleth-Audit" value="%T|%b|%I|%SP|%P|%IDP|%bb|%III|%u|%ac|%attr|%n|%i|%X" />
     </util:map>
-
-    <!-- exported audits -->
+ -->
+    <!-- local and exported audits -->
     <util:map id="shibboleth.AuditFormattingMap">
-        <entry key="Shibboleth-Audit" value="%T|%b|%I|%SP|%P|%IDP|%bb|%III|%u|%ac|%attr|%n|%i|%SSO|%ST| [%UA][%a]" />
+        <entry key="Shibboleth-Audit" value="%T|%b|%I|%SP|%P|%IDP|%bb|%III|%u|%ac|%attr|%n|%i|%SSO|%ST|%UWRPS [%UA][%a]" />
         <entry key="Shibboleth-Audit-2" value="%e|%a|%u|%SP|%i|%attr|%pasv|%fauth|%ac|%UA" />
     </util:map>
 

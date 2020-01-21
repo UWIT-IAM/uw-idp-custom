@@ -11,7 +11,7 @@
                         urn:oasis:names:tc:SAML:2.0:metadata http://docs.oasis-open.org/security/saml/v2.0/saml-schema-metadata-2.0.xsd">
                         
 
-<!-- see dynamic below 
+<!-- if full download of metadata.  See dynamic below 
         <MetadataProvider id="ICMD" xsi:type="FileBackedHTTPMetadataProvider" 
                           maxRefreshDelay="PT24H" minRefreshDelay="PT8H"
                           metadataURL="http://md.incommon.org/InCommon/InCommon-metadata.xml"
@@ -26,7 +26,7 @@
 -->
 
 
-<!--
+<!-- if doing only filesystem metadata.  requires external metadata fetcher
     <MetadataProvider id="InCommonMetadata"  xsi:type="FilesystemMetadataProvider"
          xmlns="urn:mace:shibboleth:2.0:metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="urn:mace:shibboleth:2.0:metadata http://shibboleth.net/schema/idp/shibboleth-metadata.xsd"
@@ -47,7 +47,7 @@
 
     <!-- InCommon Per-Entity Metadata Distribution Service -->
     <MetadataProvider id="incommon" xsi:type="DynamicHTTPMetadataProvider"
-             maxCacheDuration="PT8H" minCacheDuration="PT10M" persistentCacheManagerDirectory="%{idp.home}/metadata-cache">
+             maxCacheDuration="PT24H" minCacheDuration="PT10M" persistentCacheManagerDirectory="%{idp.home}/metadata-cache">
         <!-- Verify the signature on the root element (i.e., the EntityDescriptor element) -->
         <MetadataFilter xsi:type="SignatureValidation" requireSignedRoot="true"
             certificateFile="%{idp.home}/credentials/inc-md-cert-mdq.pem" />

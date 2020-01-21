@@ -17,6 +17,9 @@
 #set ($metadataContext = $samlPeerContext.getSubcontext('org.opensaml.saml.common.messaging.context.SAMLMetadataContext'))
 #set ($spEntity = $metadataContext.getEntityDescriptor())
 #set ($spOrgName = $spEntity.getOrganization().getDisplayNames().get(0).getValue())
+#if (!$spOrgName)
+  #set ($spOrgName = $spEntity.getEntityID())
+#end
 <!DOCTYPE html>
 <html>
   	<head>
