@@ -28,7 +28,8 @@ cd /data/local/idp-3.4/archive
 find . -maxdepth 1 -name 'UW-rp-metadata*' -mtime +30 -delete
 find . -maxdepth 1 -name 'attribute-resolver-activators*' -mtime +30 -delete
 find . -maxdepth 1 -name 'rp-filter*' -mtime +30 -delete
-find . -maxdepth 1 -name 'saml-nameid-exceptions*' -mtime +30 -delete
+find . -maxdepth 1 -name 'dynamic-mfa.txt*' -mtime +30 -delete
 find . -maxdepth 1 -name 'uw-auto-rps*' -mtime +60 -delete
 find . -maxdepth 1 -name 'autotoken*' -mtime +60 -delete
+find . -maxdepth 1 -name 'saml-nameid-exceptions*' -mtime +60 -delete
 

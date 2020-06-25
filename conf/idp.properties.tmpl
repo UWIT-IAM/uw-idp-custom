@@ -19,9 +19,15 @@ idp.entityID= urn:mace:incommon:washington.edu:dev
 idp.uw.awsEntityId = UWdev
 {% endif %}
 
+# local dynamic mfa config
+idp.uw.dynamic-mfa-file = /data/local/idp-3.4/conf/authn/dynamic-mfa.txt
+
 # users opting into 2fa
 idp.uw.2fa-optin-urlbase = https://groups.uw.edu/group_sws/v3/group/u_weblogin_optin-2fa/effective_member/
 idp.uw.mfa-optin-cookie = uw-optin-
+# users opting out of 2fa ( logical removal from above group )
+idp.uw.2fa-optout-urlbase = https://groups.uw.edu/group_sws/v3/group/u_weblogin_optout-2fa/effective_member/
+
 
 # auto authz group base
 idp.uw.slack-gws-urlbase = https://groups.uw.edu/group_sws/v3/group/u_weblogin_idpauthz_
@@ -127,7 +133,7 @@ idp.encryption.optional = true
 idp.session.enabled = true
 
 # Set to "shibboleth.StorageService" for server-side storage of user sessions
-idp.session.StorageService = shibboleth.ClientPersistentStorageService
+# idp.session.StorageService = shibboleth.ClientPersistentStorageService
 
 # Size of session IDs
 #idp.session.idSize = 32

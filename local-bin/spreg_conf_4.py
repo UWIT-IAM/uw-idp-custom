@@ -30,11 +30,12 @@ template_dir = conf_dir
 idp_conf_files = {
     'groups': [
       {'type': 'metadata', 'id':'uwrp', 'dir': 'metadata', 'filename': 'UW-rp-metadata.xml', 'min_rows': 500},
-      {'type': 'filter', 'id':'uwrp', 'dir': 'conf', 'filename': 'rp-filter.xml', 'min_rows': 300},
-      {'type': 'access_control', 'dir': 'conf', 'filename': 'uw-auto-rps.xml', 'min_rows': 0}
+      {'type': 'filter', 'id':'uwrp', 'dir': 'conf', 'filename': 'rp-filter.xml', 'min_rows': 300}
     ]
 }
+autorps_filename = 'uw-auto-rps.xml'
 autotoken_filename = 'autotoken.txt'
+dynamic_filename = 'dynamic-mfa.txt'
 
 # unedited files 
 #      {'type': 'filter', 'id':'uwcore', 'dir': 'conf', 'filename': 'core-filter.xml', 'min_rows': 2},

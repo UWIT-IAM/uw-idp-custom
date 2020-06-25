@@ -11,6 +11,7 @@ conf/admin/metrics.xml
 conf/attribute-resolver-activators.j2
 conf/attribute-resolver.xml.tmpl
 conf/audit.xml
+conf/authn/dynamic-mfa.base
 conf/authn/general-authn.xml
 conf/authn/mfa-authn-config.xml
 conf/authn/uwduo-config.xml

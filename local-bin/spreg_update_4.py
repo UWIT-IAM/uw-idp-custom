@@ -55,7 +55,6 @@ needFilterScan = False
 
 db = None
 
-
 # modify time of a file
 def mTime(filename):
     t = os.path.getmtime(filename)
@@ -192,17 +191,39 @@ def updateFiles(group):
 
 # -------- access control update ------------------
 
-warning_msg = '<!-- DON\'T EDIT!  This file created by, and overwritten by, spreg_update_2.py -->'
+warning_msg = '<!-- DON\'T EDIT!  This file created by, and overwritten by, spreg_update_4.py -->'
 
-def updateAccess(group):
+def updateAccess():
     global db
     num = 0
+
+    # see if we're needed ( two tables to check )
+    c1 = db.cursor()
+    mtime = mTime(config.idp_base + 'conf/' + config.autorps_filename)
+    query = "select count(*) from access_control where end_time is null and start_time > '%s';" % (mtime)
+    c1.execute(query)
+    row = c1.fetchone()
+    c1.close()
+
+    if row[0]==0:
+        c1 = db.cursor()
+        query = "select count(*) from netid_exceptions where start_time > '%s';" % (mtime)
+        c1.execute(query)
+        row = c1.fetchone()
+        c1.close()
+        if row[0]==0:
+           print("no new access control activity")
+           return
 
     auth_sps = {
         'authz': set([]),
         'mfa': set([]),
-        'mfa_authz': set([])
+        'mfa_authz': set([]),
+        'rkey': set([]),
+        'ciso': set([])
     }
+
+    # accumulate info from the tables
 
     c1 = db.cursor()
     c1.execute('select entity_id,conditional,auto_2fa from access_control where end_time is null order by entity_id')
@@ -213,21 +234,34 @@ def updateAccess(group):
         if row[2]:
             auth_sps['mfa'].add(row[0])
         num += 1
+    c1.close()
+
+    c1 = db.cursor()
+    c1.execute('select type,netid,trunc(extract(epoch from start_time)) from netid_exceptions')
+    rows = c1.fetchall()
+    for row in rows:
+        if len(row)==3:
+            if row[0]=='ciso':
+                auth_sps['ciso'].add((row[1], row[2]))
+            if row[0]=='rkey':
+                auth_sps['rkey'].add((row[1], row[2]))
+    c1.close()
+    print(auth_sps)
 
     # output the specials bean
     auth_sps['warning'] = warning_msg
-    dest = config.idp_base + group['dir'] + '/' + group['filename']
-    template = j2_env.get_template(group['filename'] + '.j2')
-    tout = config.tmp_dir + group['filename']
+    dest = config.idp_base + 'conf/' + config.autorps_filename
+    template = j2_env.get_template(config.autorps_filename + '.j2')
+    tout = config.tmp_dir + config.autorps_filename
     with open(tout, 'w') as f:
         f.write(template.render(info=auth_sps))
-    arc = config.archive_dir + group['filename'] + '.' + time.strftime('%s')
+    arc = config.archive_dir + config.autorps_filename + '.' + time.strftime('%s')
     shutil.copy2(dest, arc)
     os.rename(tout, dest)
     log(log_info, "Created new " + dest)
 
-    # output the autotoken list
-    dest = config.idp_base + group['dir'] + '/authn/' + config.autotoken_filename
+    # output the autotoken list - no need for this after dynamic config file is live
+    dest = config.idp_base + 'conf/authn/' + config.autotoken_filename
     tout = config.tmp_dir + config.autotoken_filename
     with open(tout, 'w') as f:
         f.write('# list of SPs needing auto 2fa\n# created by spreg_update_4.py\n')
@@ -237,6 +271,29 @@ def updateAccess(group):
         for l in auth_sps['mfa']:
             f.write(l + '\n')
     arc = config.archive_dir + config.autotoken_filename + '.' + time.strftime('%s')
+    shutil.copy2(dest, arc)
+    os.rename(tout, dest)
+    log(log_info, "Created new " + dest)
+
+    # output the dynamic config file
+    dest = config.idp_base + 'conf/authn/' + config.dynamic_filename
+    tout = config.tmp_dir + config.dynamic_filename
+    with open(tout, 'w') as f:
+        with open(tin, 'r') as fb:
+            f.write(fb.read())
+        # f.write('# dynamic configuration\n# created by spreg_update_4.py\n')
+        # f.write('auto|urn:amazon:webservices\n')
+        # f.write('auto|http://www.workday.com\n')
+        # f.write('auto|oidc/mosler.s.uw.edu\n')
+
+        for e in auth_sps['mfa']:
+            f.write('auto|%s\n' % (e))
+        for u,t in auth_sps['rkey']:
+            f.write('rkey|%s|%d\n' % (u, t))
+        for u,t in auth_sps['ciso']:
+            f.write('ciso|%s|%d\n' % (u, t))
+       
+    arc = config.archive_dir + config.dynamic_filename + '.' + time.strftime('%s')
     shutil.copy2(dest, arc)
     os.rename(tout, dest)
     log(log_info, "Created new " + dest)
@@ -305,6 +362,9 @@ else:
                 updateAccess(group)
             else:
                 updateFiles(group)
+
+        # update_access has it's own counter
+        updateAccess();
 
     # send keepalive every time script is run--dash alert will happen
 

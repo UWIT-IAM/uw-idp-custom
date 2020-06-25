@@ -56,6 +56,10 @@
 
  <p>You are not authorized to access the application:</p><p align="center"><b>$spOrgName</b></p>
 
+#if ($authzhelplink)
+ <p><a href="$authzhelplink">Learn more</a> about the service's access policy.</p>
+#end
+
 <!--
   <p><a href="https://itconnect.uw.edu/help/">Contact UW-IT</a> for assistance.</p>
  -->

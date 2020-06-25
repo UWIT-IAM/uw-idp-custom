@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # update uw rp filter and metadata from database
+# unless 'force', requires flag file present
 
 [[ "$1" == "force" ]] || {
    [[ -f /www/refresh_uw/data/refresh ]] || exit 0
@@ -9,8 +10,6 @@
 }
 
 date
-
-# requires flag file present
 rm -f /www/refresh_uw/data/refresh
 
 root=/data/local/idp-3.4
