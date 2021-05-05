@@ -6,9 +6,6 @@
                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
                            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
                            
-<!-- OIDC extension services definitions -->
-<import resource="services-oidc.xml" />
-
     <!-- Advanced configuration of services from SVN.
        
        To use an SVN resource you need to construct it and then inject it into 
@@ -133,10 +130,6 @@
     <util:list id="shibboleth.AccessControlResources">
         <value>%{idp.home}/conf/access-control.xml</value>
         <value>%{idp.home}/system/conf/access-control-system.xml</value>
-    </util:list>
-
-    <util:list id="shibboleth.CASServiceRegistryResources">
-        <value>%{idp.home}/conf/cas-protocol.xml</value>
     </util:list>
 
     <!--

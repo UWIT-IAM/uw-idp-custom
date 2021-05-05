@@ -4,9 +4,10 @@ need pg_config in PATH
 
 to recreate (rhel6)
 
-/usr/local/bin/virtualenv3.6 py-env
+virtualenv -p python3 py-env
 . py-env/bin/activate
-export PATH=$PATH:/usr/local/pgversion/bin
+pip install --upgrade pip
+export PATH=/usr/local/pgversion/bin:$PATH
 pip install -r py-requirements.txt
 
 

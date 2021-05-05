@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <AttributeResolver
         xmlns="urn:mace:shibboleth:2.0:resolver" 
-        xmlns:resolver="urn:mace:shibboleth:2.0:resolver"
-        xmlns:sec="urn:mace:shibboleth:2.0:security"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-        xmlns:oidcext="org.geant.idpextension.oidc.attribute.encoder"
+        xmlns:oidc="urn:mace:shibboleth:2.0:resolver:oidc"
         xsi:schemaLocation="urn:mace:shibboleth:2.0:resolver http://shibboleth.net/schema/idp/shibboleth-attribute-resolver.xsd
-                            urn:mace:shibboleth:2.0:security http://shibboleth.net/schema/idp/shibboleth-security.xsd
-                            org.geant.idpextension.oidc.attribute.encoder classpath:/schema/idp-oidc-extension-attribute-encoder.xsd
-                            ">
+                            urn:mace:shibboleth:2.0:resolver:oidc http://shibboleth.net/schema/oidc/shibboleth-attribute-encoder-oidc.xsd">
 
    <!-- ========================================== -->
    <!--      Attribute Definitions                 -->
@@ -17,7 +13,7 @@
 <!-- OIDC Subject -->
 <AttributeDefinition id="subject" xsi:type="Simple" >
    <InputDataConnector ref="loginNetid" attributeNames="uwNetID" />
-   <AttributeEncoder xsi:type="oidcext:OIDCString" name="sub" />
+   <AttributeEncoder xsi:type="oidc:OIDCString" name="sub" />
 </AttributeDefinition>
 
  <!-- Simple EDS attributes -->
@@ -102,7 +98,7 @@
     <AttributeDefinition id="preferredFirst" xsi:type="Simple" >
         <InputDataConnector ref="personreg" attributeNames="uwPersonPreferredFirst" />
         <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.2.840.113994.200.47" friendlyName="preferredFirst" />
-        <resolver:AttributeEncoder xsi:type="oidcext:OIDCString" name="preferred_first" />
+        <AttributeEncoder xsi:type="oidc:OIDCString" name="preferred_first" />
     </AttributeDefinition>
 
     <AttributeDefinition id="preferredMiddle" xsi:type="Simple" >
@@ -129,7 +125,7 @@
         <InputAttributeDefinition ref="uwRegID" />
         <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:sn" />
         <AttributeEncoder xsi:type="SAML2String" name="urn:oid:2.5.4.4" friendlyName="surname" />
-        <resolver:AttributeEncoder xsi:type="oidcext:OIDCString" name="family_name" />
+        <AttributeEncoder xsi:type="oidc:OIDCString" name="family_name" />
 
           <Script>
            <![CDATA[
@@ -185,7 +181,7 @@
         <InputDataConnector ref="personreg" attributeNames="displayName" />
         <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:displayName" />
         <AttributeEncoder xsi:type="SAML2String" name="urn:oid:2.16.840.1.113730.3.1.241" friendlyName="displayName" />
-        <resolver:AttributeEncoder xsi:type="oidcext:OIDCString" name="name" />
+        <AttributeEncoder xsi:type="oidc:OIDCString" name="name" />
     </AttributeDefinition>
 
  <!-- givenName = preferred or uwPersonRegisteredFirstMiddle -->
@@ -201,7 +197,7 @@
         <InputAttributeDefinition ref="uwNetID" />
         <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:givenName" />
         <AttributeEncoder xsi:type="SAML2String" name="urn:oid:2.5.4.42" friendlyName="givenName" />
-        <resolver:AttributeEncoder xsi:type="oidcext:OIDCString" name="given_name" />
+        <AttributeEncoder xsi:type="oidc:OIDCString" name="given_name" />
 
           <Script>
            <![CDATA[
@@ -224,9 +220,54 @@
           </Script>
     </AttributeDefinition>
 
+ <!--  name = registered given name  -->
 
+    <AttributeDefinition id="registeredGivenName" xsi:type="Simple" >
+        <InputDataConnector ref="personreg" attributeNames="uwPersonRegisteredFirstMiddle" />
+        <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.2.840.113994.200.32" friendlyName="registeredGivenName" />
+        <AttributeEncoder xsi:type="oidc:OIDCString" name="registered_given_name" />
+    </AttributeDefinition>
 
+ <!--  name = registered surname  -->
 
+    <AttributeDefinition id="registeredSurname" xsi:type="Simple" >
+        <InputDataConnector ref="personreg" attributeNames="uwPersonRegisteredSurname" />
+        <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.2.840.113994.200.31" friendlyName="registeredSurname" />
+        <AttributeEncoder xsi:type="oidc:OIDCString" name="registered_surname" />
+    </AttributeDefinition>
+
+ <!--  name = UW pronouns -->
+
+    <AttributeDefinition id="uwPronouns" xsi:type="Simple" >
+        <InputDataConnector ref="personreg" attributeNames="uwPersonPronoun" />
+        <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.2.840.113994.200.51" friendlyName="uwPronouns" />
+        <AttributeEncoder xsi:type="oidc:OIDCString" name="uw_pronouns" />
+    </AttributeDefinition>
+
+ <!--  name = display name and pronouns -->
+
+    <AttributeDefinition id="displayNameAndPronouns" xsi:type="ScriptedAttribute" >
+        <InputAttributeDefinition ref="displayName" />
+        <InputAttributeDefinition ref="uwPronouns" />
+        <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.2.840.113994.200.52" friendlyName="displayNameAndPronouns" />
+        <AttributeEncoder xsi:type="oidc:OIDCString" name="display_name_and_pronouns" />
+
+          <Script>
+           <![CDATA[
+              logger = Java.type("org.slf4j.LoggerFactory").getLogger("edu.washington.shibboleth");
+              displayNameAndPronouns.getValues().clear(); // just in case...
+              if (uwPronouns.getValues().size() > 0) {
+                   logger.debug("RES: non-empty uwPronouns found: {}", uwPronouns.getValues());
+                   displayNameAndPronouns.getValues().add(displayName.getValues().get(0) + " (" + uwPronouns.getValues().get(0) + ")");
+              } else {
+                   logger.debug("RES: uwPronouns is empty");
+                   displayNameAndPronouns.getValues().add(displayName.getValues().get(0));
+              }
+              logger.debug("RES: displayNameAndPronouns: {}", displayNameAndPronouns.getValues().get(0));
+             ]]>
+          </Script>
+
+    </AttributeDefinition>
 
  <!-- employeeNumber = uwEmployeeID -->
 
@@ -267,7 +308,7 @@
         <InputDataConnector ref="personreg" attributeNames="eduPersonAffiliation" />
         <AttributeEncoder xsi:type="SAML1ScopedString" name="urn:mace:dir:attribute-def:eduPersonScopedAffiliation" />
         <AttributeEncoder xsi:type="SAML2ScopedString" name="urn:oid:1.3.6.1.4.1.5923.1.1.1.9" friendlyName="eduPersonScopedAffiliation" />
-        <resolver:AttributeEncoder xsi:type="oidcext:OIDCString" name="scoped_affiliation" />
+        <AttributeEncoder xsi:type="oidc:OIDCString" name="scoped_affiliation" />
     </AttributeDefinition>
 
 
@@ -603,12 +644,9 @@
         <InputAttributeDefinition ref="student_email" />
         <InputAttributeDefinition ref="uwNetID" />
 
-        <AttributeEncoder xsi:type="SAML1String" 
-            name="urn:mace:dir:attribute-def:mail" />
-
-        <AttributeEncoder xsi:type="SAML2String" 
-            name="urn:oid:0.9.2342.19200300.100.1.3" friendlyName="mail" />
-<AttributeEncoder xsi:type="oidcext:OIDCString" name="email" />
+        <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:mail" />
+        <AttributeEncoder xsi:type="SAML2String" name="urn:oid:0.9.2342.19200300.100.1.3" friendlyName="mail" />
+        <AttributeEncoder xsi:type="oidc:OIDCString" name="mail" />
 
           <Script>
            <![CDATA[
@@ -648,7 +686,7 @@
 
         <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:isMemberOf" />
         <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.3.6.1.4.1.5923.1.5.1.1" friendlyName="isMemberOf" />
-        <resolver:AttributeEncoder xsi:type="oidcext:OIDCString" asArray="true" name="edumember_is_member_of" />
+        <AttributeEncoder xsi:type="oidc:OIDCString" name="edumember_is_member_of" />
 
           <Template>
            <![CDATA[
@@ -728,20 +766,15 @@
     <!-- Get uwNetID from login -->
     <DataConnector id="loginNetid" xsi:type="ScriptedDataConnector">
         <Script><![CDATA[
-           logger = Java.type("org.slf4j.LoggerFactory").getLogger("edu.washington.shibboleth");
-           logger.debug("==== scripted enter ====");
-    
            IdPAttribute = Java.type("net.shibboleth.idp.attribute.IdPAttribute");
            StringAttributeValue = Java.type("net.shibboleth.idp.attribute.StringAttributeValue");
            HashSet = Java.type("java.util.HashSet");
 
-           logger.info("Using login netid = " + resolutionContext.getPrincipal());
            attr = new IdPAttribute("uwNetID");
            set = new HashSet(1);
            set.add(new StringAttributeValue(resolutionContext.getPrincipal()));
            attr.setValues(set);
            connectorResults.add(attr);
-           logger.debug("==== scripted exit ====");
         ]]></Script>
     </DataConnector>
 
@@ -762,36 +795,40 @@
             <Value>43200</Value>
         </Attribute>
         <Attribute id="netsuiteAccount">
-            <Value>4487126_SB1</Value>
+            <Value>4487126</Value>
         </Attribute>
         <Attribute id="netsuiteSite">
-            <Value>2</Value>
+            <Value>3</Value>
         </Attribute>
     </DataConnector>
 
     <!-- EDS ldap service -->
 
     <DataConnector id="personreg" xsi:type="LDAPDirectory" 
+
 {% if location == 'uwtc' %}
-           ldapURL="ldap://seneca22.s.uw.edu:389 ldap://seneca21.s.uw.edu:389 ldap://seneca23.s.uw.edu:389"
+           ldapURL="ldap://seneca33.s.uw.edu:389 ldap://seneca31.s.uw.edu:389 ldap://seneca32.s.uw.edu:389"
 {% elif location == 'ads' %}
-           ldapURL="ldap://seneca21.s.uw.edu:389 ldap://seneca22.s.uw.edu:389 ldap://seneca23.s.uw.edu:389"
+           ldapURL="ldap://seneca31.s.uw.edu:389 ldap://seneca33.s.uw.edu:389 ldap://seneca32.s.uw.edu:389"
 {% else %}
-           ldapURL="ldap://seneca23.s.uw.edu:389 ldap://seneca22.s.uw.edu:389 ldap://seneca21.s.uw.edu:389"
+           ldapURL="ldap://seneca32.s.uw.edu:389 ldap://seneca31.s.uw.edu:389 ldap://seneca33.s.uw.edu:389"
 {% endif %}
+
            baseDN="dc=washington,dc=edu"
            principal="cn=idp.u.washington.edu"
            maxResultSize="10"
            searchTimeLimit="P0Y0M0DT0H0M10.000S"
-           authenticationType="EXTERNAL"
            useStartTLS="true"
            connectTimeout="PT3S"
            responseTimeout="PT5S"
-           trustFile="/data/local/idp-3.4/credentials/uw-incommon-ca.crt"
-           authCert="/data/local/idp-3.4/credentials/idp-uw.crt"
-           authKey="/data/local/idp-3.4/credentials/idp-uw.key"
+           trustFile="%{idp.home}/credentials/uw-incommon-ca.crt"
+           authCert="%{idp.home}/credentials/idp-uw.crt"
+           authKey="%{idp.home}/credentials/idp-uw.key"
            propagateResolutionExceptions="false"
+           failFastInitialize="false" 
            >
+         <SASLConfig mechanism="EXTERNAL">
+         </SASLConfig>
         <FilterTemplate>
             <![CDATA[
                (uwNetID=${resolutionContext.principal})
@@ -807,7 +844,8 @@
             validateTimerPeriod="PT15M"
             validateDN="dc=washington,dc=edu"
             validateFilter="(ou=People,dc=personregistry)"
-            failFastInitialize="false" />
+            />
+
 
     </DataConnector>
 
@@ -824,7 +862,6 @@
 
 
     <DataConnector id="tgtid2" xsi:type="RelationalDatabase" 
-         readOnlyConnection="false"
          queryTimeout="PT5S"
          propagateResolutionExceptions="false"
          >
@@ -859,7 +896,7 @@
     <ResponseMapping>
         <ScriptFile>%{idp.home}/conf/http-gws.js</ScriptFile>
     </ResponseMapping>
-        <ResultCache expireAfterWrite="PT5M"/>
+        <ResultCache expireAfterWrite="PT2M"/>
  
 </DataConnector>
 

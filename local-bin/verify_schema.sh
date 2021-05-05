@@ -1,6 +1,7 @@
 #!/bin/bash
 echo "[[ $1 ]]"
-/data/local/idp-3.4/local-bin/xmlsectool-2.0.0/xmlsectool.sh \
+export JAVA_HOME=/usr/local/java
+/data/local/idp/local-bin/xmlsectool-3.0.0/xmlsectool.sh \
    --inFile $1 \
      --validateSchema \
-     --schemaDirectory /data/local/idp-3.4/local-bin/xmlsectool-2.0.0/schemas 
+     --schemaDirectory /data/local/idp/local-bin/xmlsectool-3.0.0/schemas 

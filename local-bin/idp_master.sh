@@ -4,7 +4,7 @@
 
 echo $$ > /var/run/idpmaster.pid
 
-cd /data/local/idp-3.4/local-bin
+cd /data/local/idp/local-bin
 . py-env/bin/activate
 
 while :;

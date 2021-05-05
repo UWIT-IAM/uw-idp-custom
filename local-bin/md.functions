@@ -2,7 +2,7 @@
 # utility functions for metadata file manipulation
 #
 
-root=/data/local/idp-3.4
+root=/data/local/idp
 export JAVA_HOME=/usr/local/java
 
 #

@@ -12,7 +12,7 @@
 date
 rm -f /www/refresh_uw/data/refresh
 
-root=/data/local/idp-3.4
+root=/data/local/idp
 cd ${root}/local-bin
 
 . py-env/bin/activate
@@ -28,7 +28,8 @@ auto_pre="`date +%s -r ${root}/conf/uw-auto-rps.xml`"
 
 uparg=
 [[ $1 == "force" ]] && uparg="-f"
-python spreg_update_4.py $uparg -v
+# python spreg_update_4.py $uparg -v
+python spreg_processor.py $uparg -v
 
 # if rp-metadata changed, notify idp
 md_post="`date +%s -r ${root}/metadata/UW-rp-metadata.xml`"

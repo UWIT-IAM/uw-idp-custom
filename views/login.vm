@@ -68,7 +68,22 @@ window.onload = function() {
     }
     document.getElementById("uwsignin").innerHTML = 'Please sign in with your <span style="color: #600000" text-decoration: underline;">UW NetID</span>';
     return false;
-}}
+  };
+  closingMs = 5*60*1000;  // 5 min
+  setTimeout(function() {
+    document.getElementById('uwsignin').innerHTML = '<p style="color: #600000">Your sign in window has closed.<br>Return to your application to reauthenticate.</p>';
+    field = document.getElementById('weblogin_netid');
+    field.disabled = true;
+    field.style.backgroundColor = "#f0f0f0";
+    field.placeholder = "";
+    field = document.getElementById('weblogin_password');
+    field.disabled = true;
+    field.style.backgroundColor = "#f0f0f0";
+    field.placeholder = "";
+    document.getElementById('submit_button').disabled = true;
+    document.getElementById('submit_button').value = "------";
+   }, closingMs);
+}
 
 
 </script>

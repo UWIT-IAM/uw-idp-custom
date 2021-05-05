@@ -44,17 +44,18 @@
     <!-- Logs our addons -->
     <logger name="edu.washington" level="DEBUG"/>
 
-    <logger name="org.geant.idpextension.oidc.profile" level="INFO"/>
+    <!-- Logs oids plugin -->
+    <logger name="net.shibboleth.oidc" level="DEBUG"/>
 
     <!-- Logs http client detail -->
     <logger name="org.apache.http.headers" level="WARN"/>
 
     <!-- Logs IdP, but not OpenSAML, messages -->
-    <logger name="net.shibboleth.idp" level="${idp.loglevel.idp:-INFO}"/>
+    <logger name="net.shibboleth.idp" level="INFO"/>
     <logger name="net.shibboleth.idp.authn" level="INFO"/>
 
     <!-- Logs OpenSAML, but not IdP, messages -->
-    <logger name="org.opensaml.saml" level="${idp.loglevel.opensaml:-INFO}"/>
+    <logger name="org.opensaml.saml" level="INFO"/>
     
     <!-- Logs LDAP related messages -->
     <logger name="org.ldaptive" level="${idp.loglevel.ldap:-WARN}"/>
@@ -136,7 +137,7 @@
     
     <!-- Audit log to syslog. -->
     <appender name="IDP_AUDIT_2" class="ch.qos.logback.classic.net.SyslogAppender">
-        <syslogHost>logger3.s.uw.edu</syslogHost>
+        <syslogHost>logger4.s.uw.edu</syslogHost>
         <facility>LOCAL2</facility>
         <suffixPattern>idp-audit %msg</suffixPattern>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">

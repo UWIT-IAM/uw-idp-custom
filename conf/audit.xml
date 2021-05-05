@@ -10,31 +10,43 @@
     default-init-method="initialize"
     default-destroy-method="destroy">
 
-    <!-- Include requested principals in the audit -->
+    <!-- Include our MFA generated attributes in the audit -->
     <bean id="shibboleth.PostAssertionAuditExtractors" parent="shibboleth.DefaultPostAssertionAuditExtractors">
         <property name="sourceMap">
             <map merge="true">
-                <entry key="UWRPS" value-ref="LookupRequestedPrincipalBean" />
+                <entry key="UWMFA" value-ref="uw.LookupMFACommentBean" />
             </map>
         </property>
     </bean>
 
-    <bean id="LookupRequestedPrincipalBean" parent="shibboleth.ContextFunctions.Scripted" factory-method="inlineScript">
+
+
+    <!-- Include mfa commentary in the audit. We do the '|' assembly so that we don't need six of these. -->
+    <bean id="uw.LookupMFACommentBean" parent="shibboleth.ContextFunctions.Scripted" factory-method="inlineScript">
         <constructor-arg>
             <value>
             <![CDATA[
               var getinfo = function() {
-                 var result = "";
-                 var authCtx = input.getSubcontext("net.shibboleth.idp.authn.context.AuthenticationContext");
-                 if (authCtx!=null) {
-                    var rpCtx = authCtx.getSubcontext("net.shibboleth.idp.authn.context.RequestedPrincipalContext");
-                    if (rpCtx!=null) {
-                       var rps = rpCtx.getRequestedPrincipals();
-                       for each (var rp in rps) {
-                          var rpname = rp.getName();
-                          if (result.length()>0) result = result + ",";
-                          result = result + rpname;
-                       }
+                 var result = "@@";
+                 var reqCtx = input.getSubcontext("net.shibboleth.idp.profile.context.SpringRequestContext").getRequestContext();
+                 if (reqCtx!=null) {
+                    result = "reqCtx:: ";
+                    cs = reqCtx.getConversationScope();
+                    if (cs!=null) {
+                      var log_rqp = "";       // requested principals
+                      var log_auto = "";      // auto-2fa bu SP
+                      var log_no2fa = "false";  // sp decilnes 2fa
+                      // var log_2fa = "false";      // needed?
+                      var log_optin = "";     // user optin status
+                      var log_2famethod = ""; // 2fa authn method ( duo | cookie )
+
+                      if (cs.contains("log_rqp")) log_rqp = cs.get("log_rqp");
+                      if (cs.contains("log_auto")) log_auto = cs.get("log_auto");
+                      if (cs.contains("log_no2fa")) log_no2fa = cs.get("log_no2fa");
+                      // if (cs.contains("log_2fa")) log_2fa = cs.get("log_2fa");
+                      if (cs.contains("log_optin")) log_optin = cs.get("log_optin");
+                      if (cs.contains("log_2famethod")) log_2famethod = cs.get("log_2famethod");
+                      result = log_rqp + "|" + log_auto + "|" + log_optin + "|" + log_no2fa + "|" + log_2famethod;
                     }
                  }
                  return result;
@@ -57,9 +69,15 @@
  -->
     <!-- local and exported audits -->
     <util:map id="shibboleth.AuditFormattingMap">
-        <entry key="Shibboleth-Audit" value="%T|%b|%I|%SP|%P|%IDP|%bb|%III|%u|%ac|%attr|%n|%i|%SSO|%ST|%UWRPS [%UA][%a]" />
+        <entry key="Shibboleth-Audit" value="%T|%a|%IDP|%b|%I|%SP|%P|%bb|%III|%u|%ac|%attr|%n|%i|%pasv|%fauth|%UWMFA|%D|%UA" />
+        <entry key="Shibboleth-Audit-2" value="|%T|%a|%IDP|%b|%I|%SP|%P|%bb|%III|%u|%ac|%attr|%n|%i|%pasv|%fauth|%UWMFA|%D|%UA" />
+    </util:map>
+<!-- old ones
+    <util:map id="shibboleth.AuditFormattingMap">
+        <entry key="Shibboleth-Audit" value="%T|%b|%I|%SP|%P|%IDP|%bb|%III|%u|%ac|%attr|%n|%i|%SSO|%ST|%UWRPS|%UWMFA|%UA" />
         <entry key="Shibboleth-Audit-2" value="%e|%a|%u|%SP|%i|%attr|%pasv|%fauth|%ac|%UA" />
     </util:map>
+ -->
 
     <!-- Allows auditing to be disabled selectively for particular profiles/flows. -->
     <util:list id="shibboleth.AuditSuppressedProfiles">

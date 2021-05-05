@@ -6,13 +6,20 @@
 # should be redone in python?
 #
 
+# need the full InCommon metadata file
+# curl -o /data/local/idp/tmp/icmd.xml http://md.incommon.org/InCommon/InCommon-metadata.xml
+
+# need a combined UW RP metadata
+# echo "<rpmd>" > /data/local/idp/tmp/uwmd.xml
+# cat /data/local/idp/rp-metadata/*.xml >> /data/local/idp/tmp/uwmd.xml
+# echo "</rpmd>" >> /data/local/idp/tmp/uwmd.xml
+
 # local perl libraries required
-# ~fox/.cpan -> /data/local/src/fox/.cpan
+## export PERL5LIB=/data/local/idp/local-bin/.cpan/build/XML-DOM-1.46-CAyV12/blib/arch:/data/local/idp/local-bin/.cpan/build/XML-DOM-1.46-CAyV12/blib/lib:/data/local/idp/local-bin/.cpan/build/XML-RegExp-0.04-EkvIVE/blib/arch:/data/local/idp/local-bin/.cpan/build/XML-RegExp-0.04-EkvIVE/blib/lib
 
-cd /data/local/idp-3.4/local-bin
+export PERL5LIB=/data/local/idp/local-bin/.perl5/lib/perl5
 
-export PERL5LIB=/usr/lusers/fox/.cpan/build/XML-DOM-1.46-5M9hkB/blib/arch:/usr/lusers/fox/.cpan/build/XML-DOM-1.46-5M9hkB/blib/lib:/usr/lusers/fox/.cpan/build/XML-RegExp-0.04-mVkl0x/blib/arch:/usr/lusers/fox/.cpan/build/XML-RegExp-0.04-mVkl0x/blib/lib
-
-perl sp-contacts.pl >> /logs/idp/sp-contacts.log
+# perl sp-contacts.pl >> /logs/idp/sp-contacts.log
+perl sp-contacts.pl 
 
 

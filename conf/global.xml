@@ -14,17 +14,18 @@
 
     <!-- Use this file to define any custom beans needed globally. -->
 
-<!-- OIDC extension global bean definitions -->
-<import resource="global-oidc.xml" />
+<bean id="uw.SessionReuse" class="edu.washington.idp.authn.SessionReuse"
+      p:userFile="/data/local/idp/conf/authn/dynamic-mfa.txt"
+      />
 
 <!-- http client for group attr resolver -->
 <bean id="uw.HttpClient"  parent="shibboleth.NonCachingHttpClient" lazy-init="true"
         p:connectionDisregardTLSCertificate="%{idp.httpclient.connectionDisregardTLSCertificate:false}"
         p:maxConnectionsPerRoute="5"
         p:maxConnectionsTotal="10"
-        p:connectionTimeout="PT5S"
-        p:connectionRequestTimeout="PT5S"
-        p:socketTimeout="PT5S"
+        p:connectionTimeout="PT15S"
+        p:connectionRequestTimeout="PT15S"
+        p:socketTimeout="PT15S"
         p:tLSSocketFactory-ref="shibboleth.SecurityEnhancedTLSSocketFactoryWithClientTLS" />
 
 <bean id="uw.GwsSecurity" class="org.opensaml.security.httpclient.HttpClientSecurityParameters" lazy-init="true">
@@ -56,9 +57,9 @@
 
 
 <bean id="uw.UWHttpClient" class="edu.washington.shibboleth.tools.UWHttpClient" destroy-method="close"
-    p:certificateFile="/data/local/idp-3.4/credentials/idp-uw.crt"
-    p:keyFile="/data/local/idp-3.4/credentials/idp-uw.key"
-    p:caCertificateFile="/data/local/idp-3.4/credentials/uw-incommon-ca.crt"
+    p:certificateFile="%{idp.home}/credentials/idp-uw.crt"
+    p:keyFile="%{idp.home}/credentials/idp-uw.key"
+    p:caCertificateFile="%{idp.home}/credentials/uw-incommon-ca.crt"
     p:acceptHeader="application/json"
     p:optionsHeader="full"
     p:connectTimeLimit="5"
@@ -68,19 +69,17 @@
 
 <!-- configuration for the group membership attribute -->
 
-<!--
+<!-- These predated shibboleth's own http data source
 <bean id="uw.GwsDataSource" class="edu.washington.shibboleth.attribute.resolver.dc.rws.HttpDataSource" destroy-method="close"
-    p:certificateFile="/data/local/idp-3.4/credentials/gws.cac-uw.crt"
-    p:keyFile="/data/local/idp-3.4/credentials/gws.cac-uw.key"
-    p:caCertificateFile="/data/local/idp-3.4/credentials/uw-incommon-ca.crt"
+    p:certificateFile="%{idp.home}/credentials/gws.cac-uw.crt"
+    p:keyFile="%{idp.home}/credentials/gws.cac-uw.key"
+    p:caCertificateFile="%{idp.home}/credentials/uw-incommon-ca.crt"
     p:acceptHeader="text/xml" />
--->
 
-<!--
 <bean id="GwsDataSourceBasicTest" class="edu.washington.shibboleth.attribute.resolver.dc.rws.HttpDataSource" destroy-method="close"
     p:username="spud"
     p:password="1234"
-    p:caCertificateFile="/data/local/idp-3.4/credentials/uwca.crt"
+    p:caCertificateFile="%{idp.home}/credentials/uwca.crt"
     p:acceptHeader="text/xml" />
 -->
 
@@ -176,7 +175,8 @@
         <entry key="request" value-ref="shibboleth.HttpServletRequest"/>
         <entry key="response" value-ref="shibboleth.HttpServletResponse"/>
         <entry key="sealer" value-ref="shibboleth.DataSealer"/>
-        <entry key="autotoken" value-ref="uw.AutoTokenRPIds"/>
+        <!-- <entry key="autotoken" value-ref="uw.AutoTokenRPIds"/> -->
+        <entry key="reuse" value-ref="uw.SessionReuse"/>
     </util:map>
 
     

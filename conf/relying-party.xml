@@ -12,9 +12,6 @@
        default-init-method="initialize"
        default-destroy-method="destroy">
 
-    <!-- OIDC extension relying party definitions -->
-    <import resource="oidc-relying-party.xml" />
-
     <!--
     Unverified RP configuration, defaults to no support for any profiles. Add <ref> elements to the list
     to enable specific default profile settings (as below), or create new beans inline to override defaults.
@@ -28,8 +25,7 @@
     </bean>
 
     <!-- Default configuration. -->
-
-    <bean id="shibboleth.DefaultRelyingParty" p:responderIdLookupStrategy-ref="profileResponderIdLookupFunction" parent="RelyingParty">
+    <bean id="shibboleth.DefaultRelyingParty" parent="RelyingParty">
         <property name="profileConfigurations">
             <list>
                 <bean parent="Shibboleth.SSO" p:includeAttributeStatement="true" />
@@ -70,8 +66,7 @@
         c:_0-ref="uwWorkdayRegexPredicate" />
      -->
 
-    <!-- uw.AutoTokenRPs: automatic 2fa authn
-         uw.AutoAuthzRPs: post authn by-group authz check
+    <!-- uw.AutoAuthzRPs: post authn by-group authz check
          -->
 
     <import resource="uw-auto-rps.xml" />
@@ -103,27 +98,43 @@
         </bean>
 
         <!-- needing signed assertions -->
-        <bean parent="RelyingPartyByName" c:relyingPartyIds="#{ {'https://az1.qualtrics.com'} }">
+        <bean parent="RelyingPartyByName" c:relyingPartyIds="#{ {'https://az1.qualtrics.com','https://saml.enplug.com','https://uweducation.communityforce.com','https://uweducationstaging.communityforce.com'} }">
             <property name="profileConfigurations">
                 <list>
                     <bean parent="SAML2.SSO"
                      p:authenticationFlows="#{{'MFA'}}"
                      p:signResponses="false"
                      p:signAssertions="true" p:encryptAssertions="false" p:includeAttributeStatement="true"
-                    p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'}}"/>
+                 p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent','urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified','urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress','urn:oasis:names:tc:SAML:2.0:nameid-format:transient'}}"
+                    />
+                </list>
+            </property>
+        </bean>
+
+        <!-- needing signed and encrypted assertions -->
+        <bean parent="RelyingPartyByName" c:relyingPartyIds="#{ {'https://uw.pressbooks.pub/wp/shibboleth'} }">
+            <property name="profileConfigurations">
+                <list>
+                    <bean parent="SAML2.SSO"
+                     p:authenticationFlows="#{{'MFA'}}"
+                     p:signResponses="false"
+                     p:signAssertions="true" p:encryptAssertions="true" p:includeAttributeStatement="true"
+                 p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent','urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified','urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress','urn:oasis:names:tc:SAML:2.0:nameid-format:transient'}}"
+                    />
                 </list>
             </property>
         </bean>
 
         <!-- needing signed responses and assertions ? -->
-        <bean parent="RelyingPartyByName" c:relyingPartyIds="#{{'https://seattle-edc-test.forteresearchapps.com/forte-platform-web/SAML2/SP','https://seattle-edc-prod.forteresearchapps.com/forte-platform-web/SAML2/SP'}}">
+        <bean parent="RelyingPartyByName" c:relyingPartyIds="#{{'https://seattle-edc-test.forteresearchapps.com/forte-platform-web/SAML2/SP','https://seattle-edc-prod.forteresearchapps.com/forte-platform-web/SAML2/SP','uwtcsi.getconnect2.com','https://login.staging.rstudio.cloud/saml/sp.xml','https://login.rstudio.cloud/saml/sp.xml'}}">
             <property name="profileConfigurations">
                 <list>
                     <bean parent="SAML2.SSO"
                      p:authenticationFlows="#{{'MFA'}}"
                      p:signResponses="true"
                      p:signAssertions="true" p:encryptAssertions="false" p:includeAttributeStatement="true"
-                    p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'}}"/>
+                 p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent','urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified','urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress','urn:oasis:names:tc:SAML:2.0:nameid-format:transient'}}"
+                    />
                 </list>
             </property>
         </bean>
@@ -234,75 +245,35 @@
         </bean>
 
 
-
-<!-- this bean uses the separate wd flow 
-        <bean id="CustomRelyingParty" parent="RelyingParty">
-            <property name="activationCondition" ref="uwWorkday.RelyingPartyCondition" />
+        <!-- RPs requiring different oidc timeout -->
+        <bean parent="RelyingPartyByName"  c:relyingPartyIds="#{ {'oidc/myuw'} }">
             <property name="profileConfigurations">
-                <list>
+               <list>
+                <bean parent="Shibboleth.SSO" p:includeAttributeStatement="true" />
                 <bean parent="SAML2.SSO"
-                 p:authenticationFlows="#{{'wdmfa'}}"
-                 p:encryptAssertions="false"
-                 p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'}}"
-                  />
-                </list>
+                     p:authenticationFlows="#{{'MFA'}}"
+                     p:signResponses="true"
+                     p:signAssertions="false" p:encryptAssertions="false" p:includeAttributeStatement="true"
+                     p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent','urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified','urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress','urn:oasis:names:tc:SAML:2.0:nameid-format:transient'}}" />
+                <ref bean="SAML2.ECP" />
+                <ref bean="SAML2.Logout" />
+                <ref bean="Liberty.SSOS" />
+                <bean parent="OIDC.SSO"
+                p:accessTokenLifetime="PT1H"
+                p:refreshTokenLifetime="PT168H"
+                 />
+                <bean parent="OIDC.UserInfo"/>
+                <bean parent="OAUTH2.Revocation"/>
+               </list>
             </property>
         </bean>
--->
-
-<!-- this bean would use the standard mfa flow but workday sometimes requests an authn context. 
-
-        <bean id="WorkdayRelyingParty" parent="RelyingParty">
-            <property name="activationCondition" ref="uwWorkday.RelyingPartyCondition" />
-            <property name="profileConfigurations">
-                <list>
-                <bean parent="SAML2.SSO"
-                 p:authenticationFlows="#{{'MFA'}}"
-                 p:encryptAssertions="false"
-                 p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'}}"
-                 p:disallowedFeatures-ref="SAML2.SSO.FEATURE_AUTHNCONTEXT" >
-                       <property name="defaultAuthenticationMethods">
-                         <list>
-                             <ref bean="uwTokenReqPrincipal" />
-                             <ref bean="uwPasswordReqPrincipal" />
-                         </list>
-                       </property>
-                </bean>
-                </list>
-            </property>
-        </bean>
--->
-
-        <!-- other auto token -->
-<!-- 
-        <bean id="uw.AutoTokenRelyingParty" parent="RelyingParty">
-            <property name="activationCondition" ref="uw.AutoTokenRPs" />
-            <property name="profileConfigurations">
-                <list>
-                <bean parent="SAML2.SSO"
-                 p:authenticationFlows="#{{'MFA'}}"
-                 p:signResponses="true"
-                 p:signAssertions="false" p:encryptAssertions="false" p:includeAttributeStatement="true"
-                 p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent','urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified','urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress','urn:oasis:names:tc:SAML:2.0:nameid-format:transient'}}"
-                 p:disallowedFeatures-ref="SAML2.SSO.FEATURE_AUTHNCONTEXT" >
-                       <property name="defaultAuthenticationMethods">
-                         <list>
-                             <ref bean="uwTokenReqPrincipal" />
-                             <ref bean="uwPasswordReqPrincipal" />
-                         </list>
-                       </property>
-                </bean>
-                </list>
-            </property>
-        </bean>
--->
 
 
         <!-- RPs needing post-authn authz -->
         <bean parent="RelyingParty">
             <property name="activationCondition" ref="uw.AutoAuthzRPs" />
             <property name="profileConfigurations">
-                <list>
+               <list>
                 <bean parent="Shibboleth.SSO" p:includeAttributeStatement="true" />
                  <bean parent="SAML2.SSO"
                      p:signResponses="true"
@@ -310,37 +281,12 @@
                      p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent','urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified','urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress','urn:oasis:names:tc:SAML:2.0:nameid-format:transient'}}" 
                    p:postAuthenticationFlows="#{{'slack-check'}}"
                  />
-            <bean parent="OIDC.SSO" p:postAuthenticationFlows="#{{'slack-check'}}" />
-            <bean parent="OIDC.UserInfo"/>
-            <bean parent="OAUTH2.Revocation"/>
-                </list>
+                <bean parent="OIDC.SSO" p:postAuthenticationFlows="#{{'slack-check'}}" />
+                <bean parent="OIDC.UserInfo"/>
+                <bean parent="OAUTH2.Revocation"/>
+               </list>
             </property>
         </bean>
-
-        <!-- needing auto token AND post authn authz -->
-<!--
-        <bean id="uw.AutoTokenAutoAuthzRelyingParty" parent="RelyingParty">
-            <property name="activationCondition" ref="uw.AutoTokenAutoAuthzRPs" />
-            <property name="profileConfigurations">
-                <list>
-                <bean parent="SAML2.SSO"
-                 p:authenticationFlows="#{{'MFA'}}"
-                 p:signResponses="true"
-                 p:signAssertions="false" p:encryptAssertions="false" p:includeAttributeStatement="true"
-                 p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent','urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified','urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress','urn:oasis:names:tc:SAML:2.0:nameid-format:transient'}}"
-                 p:postAuthenticationFlows="#{{'slack-check'}}"
-                 p:disallowedFeatures-ref="SAML2.SSO.FEATURE_AUTHNCONTEXT" >
-                       <property name="defaultAuthenticationMethods">
-                         <list>
-                             <ref bean="uwTokenReqPrincipal" />
-                             <ref bean="uwPasswordReqPrincipal" />
-                         </list>
-                       </property>
-                </bean>
-                </list>
-            </property>
-        </bean>
--->
 
     </util:list>
 </beans>

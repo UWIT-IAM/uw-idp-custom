@@ -1,2 +1,2 @@
 export JAVA_HOME=/usr/local/java
-/data/local/idp-3.4/bin/reload-service.sh -id shibboleth.MetadataResolverService
+/data/local/idp/bin/reload-service.sh -id shibboleth.MetadataResolverService

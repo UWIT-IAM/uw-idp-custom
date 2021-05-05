@@ -17,7 +17,7 @@ apache_restart_failed = 'server-status: Down\n\nstatus-by: idp_master: apache re
 tomcat_restart_failed = 'server-status: Down\n\nstatus-by: idp_master: tomcat restart failed\n'
 host_status_file = '/www/host_status.txt'
 
-tomcat_restarter = '/data/local/idp-3.4/local-bin/restart_tomcat.sh'
+tomcat_restarter = '/data/local/idp/local-bin/restart_tomcat.sh'
 
 alert_component = 'idp-master'
 alert_kba = 'KB0028717'

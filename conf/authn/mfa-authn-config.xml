@@ -62,12 +62,12 @@
            <![CDATA[
                var AuthnContextClassRefPrincipal = Java.type("net.shibboleth.idp.saml.authn.principal.AuthnContextClassRefPrincipal");
                var Cookie = Java.type("javax.servlet.http.Cookie");
-               var System = Java.type("java.lang.System");
                logger = Java.type("org.slf4j.LoggerFactory").getLogger("edu.washington.shibboleth");
 
                request = custom.get("request");
                webget = custom.get("webget");
-               autotoken = custom.get("autotoken");
+               dynamic_info = custom.get("reuse");
+
                cookies = request.getCookies();
                nextFlow = null;
                need2f = null;
@@ -75,6 +75,7 @@
                hasOptinCookie = null;
                needsOptinCookie = null;
                disusered = false;
+               duoByOptinOnly = false;
                
                // Get the username
                CanonicalUsernameLookupStrategy = Java.type("net.shibboleth.idp.session.context.navigate.CanonicalUsernameLookupStrategy");
@@ -89,6 +90,7 @@
                conversationScope.put("remember_checked", null);
                conversationScope.put("duo_username", null);
                conversationScope.put("show_duo_username", null);
+               conversationScope.put("needsOptinCookie", null);
 
                /* Get relying party id */ 
                var rpCtx = input.getSubcontext("net.shibboleth.idp.profile.context.RelyingPartyContext");
@@ -96,54 +98,37 @@
                rpid = rpCtx.relyingPartyId;
                logger.info("rpid = " + rpid);
 
-               /* Load dynamic configs (mfa not on-the-fly reloadable) */
-
-               var Files = Java.type("java.nio.file.Files");
-               var Paths = Java.type("java.nio.file.Paths");
-               var ArrayList = Java.type("java.util.ArrayList");
-               var HashMap = Java.type("java.util.HashMap");
-               var locals = Files.readAllLines(Paths.get("%{idp.uw.dynamic-mfa-file}"));
-
                userSeq = "1";
                autoTokenRp = false;
 
-               logger.debug("locals...");
-               for each (var local in locals) {
-                   
-                  logger.debug(local);
-                  if (local.length()==0 || local[0]=='#') continue;
-                  lv = local.replaceAll("\\s","").split("|");
-                  if (lv.length>=2 && lv[0]=="ciso" && lv[1]==username) {
-                     logger.info("User " + username + " is disusered!");
-                     disusered = true;
-                  }
-                  if (lv.length==3 && lv[0]=="rkey" && lv[1]==username && lv[2].length>0 ) {
-                     logger.info("seq for " + username + " set to " + lv[2]);
-                     userSeq = lv[2];
-                  }
-                  if (lv.length==2 && lv[0]=="auto" && lv[1].length>0 ) {
-                     if (rpid.startsWith(lv[1])) {
-                         logger.info("2fa suggested by autotoken: " + rpid);
-                         autoTokenRp = true;
-                     }
-                  }
-                  if (lv.length==2 && lv[0]=="no2fa" && lv[1].length>0 ) {
-                     if (rpid.startsWith(lv[1])) {
-                         logger.info("2fa forbidden by auto-no-2fa: " + rpid);
-                         need2f = 'f';
-                     }
-                  }
-                  if (lv.length==3 && lv[0]=="zlink" && lv[1].length>0 && lv[2].length>10 ) {
-                     if (rpid.startsWith(lv[1])) {
-                        conversationScope.put("authzhelplink", lv[2]);
-                     }
-                  }
+               if (dynamic_info.isDisusered(username)) {
+                  logger.info("User " + username + " is disusered!");
+                  disusered = true;
+               }
+               if (dynamic_info.isAuto2fa(rpid)) {
+                  logger.info("2fa suggested by autotoken: " + rpid);
+                  autoTokenRp = true;
+                  conversationScope.put("log_auto", "auto");
+               }
+               if (dynamic_info.isNo2fa(rpid)) {
+                  logger.info("2fa denied by no-2fa: " + rpid);
+                  need2f = 'f';
+                  conversationScope.put("log_no2fa", "true");
+               }
+
+               resetTime = dynamic_info.getReuserTime(username);   // is zero for most users
+               logger.info("User " + username + " resetTime = " + resetTime);
+
+               if (dynamic_info.getZLink(rpid)!=null) {
+                  conversationScope.put("authzhelplink", dynamic_info.getZLink(username));
+                  logger.debug("SP " + rpid + " has zlink");
                }
                conversationScope.put("user_seq", userSeq);
                
                /* Check cookies.  See if the user has a long-term 2fa session.
                 */
 
+               var Long = Java.type("java.lang.Long");
                for ( i=0; cookies!=null && i< cookies.length; i++ ) {
                   cookie = cookies[i];
                   if (cookie.getName().equals("%{idp.uw.mfa-remember-cookie}" + username)) {
@@ -151,13 +136,14 @@
                         val = custom.get("sealer").unwrap(cookie.getValue());
                         logger.debug("rememberme cookie value=" + val);
                         vals = val.split("|");
-                        if (vals[1].equals(username) && vals[2].equals(userSeq)) hasCookie = "t";
-                        // conversationScope.put("remember_checked", "t");
+                        if (vals[1].equals(username) && ( Long.parseLong(vals[2])>resetTime)) {
+                           hasCookie = "t";
+                           conversationScope.put("log_2fa", "cookie");
+                        }
                      } catch (e) {
                         if (e instanceof Java.type("net.shibboleth.utilities.java.support.security.DataExpiredException")) {
                             logger.debug("cookie has expired");
                             hasCookie = "e";
-                            // conversationScope.put("remember_checked", "t");
                         } else {
                            logger.debug(e);
                         }
@@ -167,6 +153,7 @@
                   if (cookie.getName().equals("%{idp.uw.mfa-optin-cookie}" + username)) {
                      logger.debug("has optin cookie");
                      hasOptinCookie = "t";
+                     conversationScope.put("log_optin", "cookie");
                   }
                }
  
@@ -186,7 +173,8 @@
                    if (id.indexOf("http://")==0) id = id.substring(7);
                    else if (id.indexOf("https://")==0) id = id.substring(8);
                    else if (id.indexOf("oidc/")==0) id = id.substring(5);
-                   else return ""  // must have 'standard' id
+                   // else just make a safe name from the id
+                   else id = id.toLowerCase().replaceAll("[^a-z0-9\\.\\-]", "-");
                    if (id.indexOf("/")>0) id = id.substring(0,id.indexOf("/"));
                    // logger.debug("fixed dns: " + id);
                    return "%{idp.uw.2fa-gws-urlbase}" + id + "/effective_member/"
@@ -199,26 +187,33 @@
                // See if 2fa requested.
                if (rpCtx != null) {
                   rps = rpCtx.getRequestedPrincipals();
+                  var rqp = "";
                   for (i=0; i<rps.size(); i++) {
                      rpname = rps.get(i).getName();
+                     if (rqp.length()>0) rqp = rqp + ",";
+                     rqp = rqp + rpname;
                      if (rpname.equals("https://refeds.org/profile/mfa") || 
                          rpname.equals("urn:oasis:names:tc:SAML:2.0:ac:classes:TimeSyncToken")) { 
                            logger.debug("2fa requested by " + rpname);
-                           if (need2f==null) need2f = "t";
-                           else nextFlow = "authn/duo-bypass";
+                           need2f = "t";   // this overrides the no2fa flag
                            break;
                      }
                   }
+                  conversationScope.put("log_rqp", rqp);
                 }
          
                 // var rpCtx = input.getSubcontext("net.shibboleth.idp.profile.context.RelyingPartyContext");
                 // var rpCtxId = rpCtx.getConfiguration().getId();
                 // rpid = rpCtx.relyingPartyId;
 
+                // if user has optin cookie, that's the same as in optin group
+                if (need2f==null && hasOptinCookie=="t") need2f = "t";
+
                 // If 2fa auto triggered, see if user really needs it ( config token + group exists + not a member = no 2fa needed )
                 if (need2f == null && autoTokenRp) {
                       logger.info("2fa by autotoken: " + rpid);
                       need2f = 't';
+                      conversationScope.put("log_auto", "member");
                       try {
                           url = rpToGroupUrlBase(rpid) + username;
                           logger.debug("member url = " + url);
@@ -238,6 +233,7 @@
                                  if (substat.equals("m404")) {
                                     logger.debug("group exists. member not found");
                                     need2f = null;
+                                    conversationScope.put("log_auto", "notmember");
                                  }
                               }
                           }
@@ -245,9 +241,6 @@
                           logger.warn("Member request failed for user '{}': {}", username, e);
                       }
                 }
-
-                // if user has optin cookie, that's the same as in optin group
-                if (need2f==null && hasOptinCookie=="t") need2f = "t";
 
                 // See if user opted in to 2nd factor and has no long-term session
                 if (need2f == null && hasCookie!="t") {
@@ -276,20 +269,23 @@
 
                    url = "%{idp.uw.2fa-optin-urlbase}" + username 
                    if (userInGroup(url)) {
+                      conversationScope.put("log_optin", "optin");
                       // verify user 'really' in group
                       url2 = "%{idp.uw.2fa-optout-urlbase}" + username 
                       if (!userInGroup(url2)) {
                          need2f = 't';
                          needsOptinCookie = 't';
+                         conversationScope.put("needsOptinCookie", "t");
+                         duoByOptinOnly = true;
                          logger.info("user opts in to 2fa");
                       } else {
                          logger.info("user opts out of 2fa");
+                         conversationScope.put("log_optin", "optout");
                       }
                    }
                 }
   
                 // If user has remember-me, skip 2fa
-                //   if (need2f != null && hasCookie == "t") {
                 if (hasCookie == "t") {
                    if (authCtx.isForceAuthn()) {
                       logger.info("2FA: force authn.  skipping remember cookie test");
@@ -297,6 +293,7 @@
                       logger.info("2FA: user has remember cookie.  skipping duo");
                       need2f = null;   
                       nextFlow = "authn/duo-bypass";
+                      conversationScope.put("log_2famethod", "cookie");
                    }
                 }
 
@@ -426,21 +423,29 @@
 
                   // If no 2f found, suggest duo enrollment - form w/o iframe
                   if (nextFlow == null) {
-                     logger.info("Using Duo for 2f notification.");
-                     nextFlow = "authn/needduo";
+                     if (duoByOptinOnly && ( rpid.equals("https://identity.uw.edu/shibboleth") ||
+                                             rpid.equals("https://identity-tom.iamdev.s.uw.edu/saml") ||
+                                             rpid.equals("https://diafine5.s.uw.edu/shibboleth") ) ) {
+                        logger.info("User optin but no Duo and SP is Identity. Skipping 2fa.");
+                     } else {
+                        logger.info("Using Duo for 2f notification.");
+                        nextFlow = "authn/needduo";
+                        // clear any bogus optin
+                        if (hasOptinCookie=="t") {
+                           logger.info("clearing bogus optin cookie");
+                           cookie = new Cookie("%{idp.uw.mfa-optin-cookie}" + username, "xxx");
+                           cookie.setPath("/");
+                           cookie.setSecure(true);
+                           cookie.setHttpOnly(true);
+                           cookie.setMaxAge(0);  // delete
+                           response = custom.get("response");
+                           response.addCookie(cookie);
+                        }
+                     }
                   }
                } // end need2f
+               if (nextFlow != null && nextFlow.equals("authn/uwduo"))  conversationScope.put("log_2famethod", "duo");
 
-               if (needsOptinCookie=="t") {
-                  logger.info("setting optin cookie");
-                  cookie = new Cookie("%{idp.uw.mfa-optin-cookie}" + username, "yes");
-                  cookie.setPath("/");
-                  cookie.setSecure(true);
-                  cookie.setHttpOnly(true);
-                  cookie.setMaxAge(31104000);  // 1 year
-                  response = custom.get("response");
-                  response.addCookie(cookie);
-               }
                if (disusered) nextFlow = "authn/disusered";
                logger.debug("leaving, nextFlow=" + nextFlow);
                nextFlow;
@@ -470,13 +475,13 @@
                   CanonicalUsernameLookupStrategy = Java.type("net.shibboleth.idp.session.context.navigate.CanonicalUsernameLookupStrategy");
                   culs = new CanonicalUsernameLookupStrategy();
                   username = culs.apply(input);
-                  logger.debug("username = " + username);
    
                   // set or delete cookie, depends on rememberme checked
 
                   remme = requestContext.getConversationScope().get("rememberme");
+                  logger.debug("check rememberme username = " + username + ", remme=" + remme + ".");
                   cname = requestContext.getConversationScope().get("duo_realuser");
-                  useq = requestContext.getConversationScope().get("user_seq");
+                  needsOptin = requestContext.getConversationScope().get("needsOptinCookie");
                   if (!username.equals(cname)) {
                      logger.info("using cookie for: " + cname);
                      username = cname;
@@ -486,10 +491,11 @@
                   if (remme!=null && remme.equals("y")) maxAge = %{idp.uw.mfa-remember-seconds};
                   var Random = Java.type("java.util.Random");
                   var Cookie = Java.type("javax.servlet.http.Cookie");
-                  var System = Java.type("java.lang.System");
-                  tdata = new Random().nextInt(1000000) + "|" + username + "|" + useq;
+                  var Instant = Java.type("java.time.Instant");
+                  var uNow = Instant.now().getEpochSecond();
+                  tdata = new Random().nextInt(1000000) + "|" + username + "|" + uNow;
                   logger.debug("rcookie=" + tdata);
-                  cdata = custom.get("sealer").wrap(tdata, System.currentTimeMillis() + %{idp.uw.mfa-remember-seconds}*1000);
+                  cdata = custom.get("sealer").wrap(tdata, Instant.ofEpochMilli(uNow*1000 + %{idp.uw.mfa-remember-seconds}*1000));
                   cookie = new Cookie("%{idp.uw.mfa-remember-cookie}" + username, cdata);
                   cookie.setPath("/");
                   cookie.setSecure(true);
@@ -497,6 +503,17 @@
                   cookie.setMaxAge(maxAge);
                   response = custom.get("response");
                   response.addCookie(cookie);
+
+                  // set optin as needed
+                  if (needsOptin!=null) {
+                     logger.info("setting optin cookie");
+                     cookie = new Cookie("%{idp.uw.mfa-optin-cookie}" + username, "yes");
+                     cookie.setPath("/");
+                     cookie.setSecure(true);
+                     cookie.setHttpOnly(true);
+                     cookie.setMaxAge(31104000);  // 1 year
+                     response.addCookie(cookie);
+                  }
                }
                nextFlow;
            ]]>

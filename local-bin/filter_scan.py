@@ -257,7 +257,7 @@ parser.add_option('-c', '--conf', action='store', type='string', dest='config', 
 options, args = parser.parse_args()
 
 # import config
-config_source = 'spreg_conf_2'
+config_source = 'spreg_conf'
 if options.config is not None:
     config_source = options.config
     _print('using config=' + config_source)

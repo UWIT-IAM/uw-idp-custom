@@ -3,6 +3,13 @@
 # copy local mods to git directory
 # done this way to lessen the possibility of sending private stuff to the repository
 
+# assure we're on the right branch
+branch=`cd /data/local/src/uw-idp-custom; git branch | grep '\*' | awk -e '{print $2}'`
+[[ $branch == '4.1' ]] || {
+   echo "uw-idp-custom must br set to 4.1 branch"
+   exit 1
+}
+
 files="
 fixperms
 update-git
@@ -21,11 +28,11 @@ conf/credentials.xml
 conf/errors.xml
 conf/global.xml
 conf/idp.properties.tmpl
-conf/idp.properties.tmpl
 conf/intercept/google-check-intercept-config.xml
 conf/intercept/slack-check-intercept-config.xml
 conf/logback.xml
 conf/metadata-providers.xml
+conf/oidc.properties.tmpl
 conf/relying-party.xml
 conf/rs-filter.xml
 conf/saml-nameid-exceptions.j2
@@ -36,17 +43,13 @@ flows/intercept/slack-check/slack-check-beans.xml
 flows/intercept/slack-check/slack-check-flow.xml
 flows/intercept/google-check/google-check-flow.xml
 flows/intercept/google-check/google-check-beans.xml
-flows/authn/smstoken/smstoken-flow.xml
-flows/authn/smstoken/smstoken-beans.xml
 flows/authn/crn-select/crn-select-beans.xml
 flows/authn/crn-select/crn-select-flow.xml
 flows/authn/duo-bypass/duo-bypass-flow.xml
 flows/authn/duo-bypass/duo-bypass-beans.xml
-flows/authn/wdmfa/wdmfa-flow.xml
-flows/authn/wdmfa/wdmfa-beans.xml
 flows/authn/uwduo/uwduo-flow.xml
 flows/authn/uwduo/uwduo-beans.xml
-flows/authn/noworkday/noworkday-flow.xml
+flows/authn/disusered/disusered-flow.xml
 flows/authn/needduo/needduo-flow.xml
 views/login.vm
 views/crnselect.vm
@@ -56,11 +59,9 @@ views/templates/add-html-body-content.vm
 views/login-error.vm
 views/no-slack.vm
 views/logout-complete.vm
-views/noworkday.vm
 views/duo.vm
 views/logout.vm
 views/google-redirect.vm
-views/entrust.vm
 views/needduo.vm
 local-bin/README.python
 local-bin/alert_conf.py
@@ -73,23 +74,28 @@ local-bin/idp_master.sh
 local-bin/idp_master_conf.py
 local-bin/make_contacts.py
 local-bin/md.functions
+local-bin/netid_exception.py
+local-bin/netid_exception.sh
+local-bin/netid_exceptions_html.j2
 local-bin/orphan_policy.py
 local-bin/py-requirements.txt
 local-bin/refresh_ic.sh
 local-bin/refresh_uw.sh
+local-bin/reload_attributeresolver
 local-bin/reload_clientinfo
-local-bin/reload_resolver
 local-bin/reload_filter
+local-bin/reload_logging
 local-bin/reload_metadata
 local-bin/reload_relyingparty
+local-bin/reload_resolver
 local-bin/restart_tomcat.sh
 local-bin/sp-contacts.pl
 local-bin/sp-contacts.sh
-local-bin/spreg_conf.py
 local-bin/spreg_conf_4.py
 local-bin/spreg_update_4.py
 local-bin/test_deps.sh
 local-bin/verify_schema.sh
+local-bin/vfy
 messages/messages.properties
 messages/authn-messages.properties
 messages/error-messages.properties

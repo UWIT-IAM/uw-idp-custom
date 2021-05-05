@@ -57,7 +57,7 @@
  <p>You are not authorized to access the application:</p><p align="center"><b>$spOrgName</b></p>
 
 #if ($authzhelplink)
- <p><a href="$authzhelplink">Learn more</a> about the service's access policy.</p>
+ <p><a href="$authzhelplink">Get help</a> with this issue.</p>
 #end
 
 <!--

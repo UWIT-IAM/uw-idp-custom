@@ -19,9 +19,9 @@ mv refresh_ic.new refresh_ic.log
 
 # cleanup the archive
 
-cd /data/local/idp-3.4/archive
-[[ `pwd` == "/data/local/idp-3.4/archive" ]] || {
-   echo "No //data/local/idp-3.4/archive??"
+cd /data/local/idp/archive
+[[ `pwd` == "/data/local/idp/archive" ]] || {
+   echo "No //data/local/idp/archive??"
    exit 1
 }
 
