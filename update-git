@@ -91,8 +91,8 @@ local-bin/reload_resolver
 local-bin/restart_tomcat.sh
 local-bin/sp-contacts.pl
 local-bin/sp-contacts.sh
-local-bin/spreg_conf_4.py
-local-bin/spreg_update_4.py
+local-bin/spreg_conf.py
+local-bin/spreg_processor.py
 local-bin/test_deps.sh
 local-bin/verify_schema.sh
 local-bin/vfy

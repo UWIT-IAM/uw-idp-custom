@@ -216,6 +216,9 @@
 
     <logger name="Shibboleth-Audit-2" level="ALL">
         <appender-ref ref="IDP_AUDIT_2"/>
+    </logger>
+
+    <logger name="Shibboleth-Audit-3" level="ALL">
         <appender-ref ref="IDP_AUDIT_3"/>
     </logger>
 

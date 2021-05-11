@@ -120,8 +120,8 @@
                logger.info("User " + username + " resetTime = " + resetTime);
 
                if (dynamic_info.getZLink(rpid)!=null) {
-                  conversationScope.put("authzhelplink", dynamic_info.getZLink(username));
-                  logger.debug("SP " + rpid + " has zlink");
+                  conversationScope.put("authzhelplink", dynamic_info.getZLink(rpid));
+                  logger.debug("SP " + rpid + " has zlink: " + dynamic_info.getZLink(rpid));
                }
                conversationScope.put("user_seq", userSeq);
                
@@ -213,7 +213,6 @@
                 if (need2f == null && autoTokenRp) {
                       logger.info("2fa by autotoken: " + rpid);
                       need2f = 't';
-                      conversationScope.put("log_auto", "member");
                       try {
                           url = rpToGroupUrlBase(rpid) + username;
                           logger.debug("member url = " + url);
@@ -235,6 +234,8 @@
                                     need2f = null;
                                     conversationScope.put("log_auto", "notmember");
                                  }
+                              } else { // no errors; group found and user is a member
+                                 conversationScope.put("log_auto", "member");
                               }
                           }
                       } catch (e) {

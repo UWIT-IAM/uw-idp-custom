@@ -36,17 +36,17 @@
                       var log_rqp = "";       // requested principals
                       var log_auto = "";      // auto-2fa bu SP
                       var log_no2fa = "false";  // sp decilnes 2fa
-                      // var log_2fa = "false";      // needed?
                       var log_optin = "";     // user optin status
                       var log_2famethod = ""; // 2fa authn method ( duo | cookie )
+                      var log_pw_reuse = "false"; // password session reused
 
                       if (cs.contains("log_rqp")) log_rqp = cs.get("log_rqp");
                       if (cs.contains("log_auto")) log_auto = cs.get("log_auto");
                       if (cs.contains("log_no2fa")) log_no2fa = cs.get("log_no2fa");
-                      // if (cs.contains("log_2fa")) log_2fa = cs.get("log_2fa");
                       if (cs.contains("log_optin")) log_optin = cs.get("log_optin");
                       if (cs.contains("log_2famethod")) log_2famethod = cs.get("log_2famethod");
-                      result = log_rqp + "|" + log_auto + "|" + log_optin + "|" + log_no2fa + "|" + log_2famethod;
+                      if (cs.contains("password_session_reuse")) log_pw_reuse = cs.get("password_session_reuse");
+                      result = log_rqp + "|" + log_auto + "|" + log_optin + "|" + log_no2fa + "|" + log_2famethod + "|" + log_pw_reuse;;
                     }
                  }
                  return result;
@@ -71,6 +71,7 @@
     <util:map id="shibboleth.AuditFormattingMap">
         <entry key="Shibboleth-Audit" value="%T|%a|%IDP|%b|%I|%SP|%P|%bb|%III|%u|%ac|%attr|%n|%i|%pasv|%fauth|%UWMFA|%D|%UA" />
         <entry key="Shibboleth-Audit-2" value="|%T|%a|%IDP|%b|%I|%SP|%P|%bb|%III|%u|%ac|%attr|%n|%i|%pasv|%fauth|%UWMFA|%D|%UA" />
+        <entry key="Shibboleth-Audit-3" value="%e|%a|%u|%SP|%i|%attr|%pasv|%fauth|%ac|%UA" />
     </util:map>
 <!-- old ones
     <util:map id="shibboleth.AuditFormattingMap">
