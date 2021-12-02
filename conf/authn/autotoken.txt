@@ -1,0 +1,10 @@
+# list of SPs needing auto 2fa
+# created by spreg_update_4.py
+urn:amazon:webservices
+http://www.workday.com
+oidc/mosler.s.uw.edu
+https://calldb-dev.labmed.uw.edu/saml/metadata
+https://www.myreportlist.com/shibboleth
+https://dev.groups.uw.edu/
+https://ctms.rit.uw.edu/mellon
+urn:amazon:cognito:sp:us-west-2_wfuighQ6A

@@ -17,6 +17,7 @@ cd ${root}/local-bin
 
 . py-env/bin/activate
 export JAVA_HOME=`java -XshowSettings:properties -version 2>&1  |grep java.home | awk '{print  $3}'`
+export LD_LIBRARY_PATH=/usr/local/pgsql-12.2/lib
 
 {
 

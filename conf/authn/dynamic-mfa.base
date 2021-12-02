@@ -1,0 +1,15 @@
+# dynamic configuration
+# created by spreg_update_4.py
+
+# fixed settings
+auto|urn:amazon:webservices
+auto|http://www.workday.com
+auto|oidc/mosler.s.uw.edu
+no2fa|http://sts.netid.washington.edu/adfs/services/trust
+no2fa|http://sts.dogfood.netid.washington.edu/adfs/services/trust
+no2fa|https://diafine12.sandbox.iam.s.uw.edu
+
+# no2fa|https://diafine5.s.uw.edu/shibboleth
+
+# spreg settings
+
