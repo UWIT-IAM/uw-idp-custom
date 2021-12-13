@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AttributeResolver xmlns="urn:mace:shibboleth:2.0:resolver"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:oidc="urn:mace:shibboleth:2.0:resolver:oidc"
+    xsi:schemaLocation="urn:mace:shibboleth:2.0:resolver http://shibboleth.net/schema/idp/shibboleth-attribute-resolver.xsd
+                        urn:mace:shibboleth:2.0:resolver:oidc http://shibboleth.net/schema/oidc/shibboleth-attribute-encoder-oidc.xsd">
+
+    <!--
+    Some of the examples assume conf/attributes/oidc-claim-rules.xml is loaded
+    into the registry service.
+    -->
+
+    <!--
+    Exactly one attribute needs to supply the "sub" claim, but this can't be
+    fully standardized. There are suggested approaches below. Using the Scoped
+    definition is recommended to ensure intrinsic uniqueness.
+    -->
+    
+    <!--
+    These two examples use activation conditions and filter rules elsewhere to
+    allow for different public and pairwise behavior. This is a nice strategy
+    because using a "knowable" value for public sub claims is easier to support,
+    and allows provisioning by out of band systems.
+    
+    While these examples do expose "uid" as the value for public sub claims,
+    this is simply to provide a "working" out of the box example. Using something
+    more stable, managed by IDM infrastructure, is the advisable approach.
+    -->
+    <AttributeDefinition id="subject-public" xsi:type="Scoped" scope="%{idp.scope}"
+            activationConditionRef="shibboleth.oidc.Conditions.PublicRequired">
+        <InputAttributeDefinition ref="uid" />
+        <AttributeEncoder xsi:type="oidc:OIDCScopedString" name="sub" />
+    </AttributeDefinition>
+
+    <AttributeDefinition id="subject-pairwise" xsi:type="Scoped" scope="%{idp.scope}"
+            activationConditionRef="shibboleth.oidc.Conditions.PairwiseRequired">
+        <InputDataConnector ref="computedSubjectId" attributeNames="subjectId"/>
+        <AttributeEncoder xsi:type="oidc:OIDCScopedString" name="sub" />
+    </AttributeDefinition>
+
+    <!-- 
+    This example (the data connector in particular) will generate public or
+    pairwise values depending on client registration. The public values will
+    depend on, but not expose, an underlying value, which is again set to "uid"
+    for simplicity, but this is not a good strategy unless "uid" itself is a
+    stable, managed value.
+    -->
+    <!--
+    <AttributeDefinition id="subject" xsi:type="Scoped" scope="%{idp.scope}"
+            activationConditionRef="shibboleth.oidc.Conditions.SubjectRequired">
+        <InputDataConnector ref="computedSubjectId" attributeNames="subjectId"/>
+        <AttributeEncoder xsi:type="oidc:OIDCScopedString" name="sub" />
+    </AttributeDefinition>
+    -->
+    
+    <!--
+    The EPPN is the most common federated username in higher education.
+    For guidelines on the implementation of this attribute, refer to eduPerson
+    and/or federation documentation. Above all, do not expose a value for this
+    attribute without considering the long term implications.
+    -->
+    <AttributeDefinition id="eduPersonPrincipalName" xsi:type="Scoped" scope="%{idp.scope}">
+        <InputAttributeDefinition ref="uid" />
+        <AttributeEncoder xsi:type="oidc:OIDCScopedString" name="eppn" />
+    </AttributeDefinition>
+
+    <!--
+    The uid is the closest thing to a "standard" LDAP attribute representing
+    a local username, but you should generally *never* expose uid to federated
+    services, as it is rarely globally unique. The default mapping for OIDC is
+    to preferred_username, which seems suitably meaningless.
+    -->
+    <AttributeDefinition id="uid" xsi:type="PrincipalName" />
+
+    <!-- This is just for illustrative purposes given that the connector is static.  -->
+    <AttributeDefinition id="mail" xsi:type="Template">
+        <InputAttributeDefinition ref="uid" />
+        <Template><![CDATA[
+               ${uid}@%{idp.scope}
+          ]]></Template>
+    </AttributeDefinition>
+
+    <!--
+    Start of static attributes. In actual deployment you would use a real source
+    for most of these attributes/claims.
+    -->
+
+    <AttributeDefinition id="eduPersonScopedAffiliation" xsi:type="Scoped" scope="%{idp.scope}">
+        <InputDataConnector ref="staticAttributes" attributeNames="affiliation" />
+    </AttributeDefinition>
+
+    <!--
+    This demonstrates a complex claim constructed by forming a JSON structure.
+    The default transcoding rule for the address claim expects such a structure.
+    -->
+    <AttributeDefinition id="address" xsi:type="ScriptedAttribute">
+        <InputDataConnector ref="staticAttributes" attributeNames="street_address locality region postal_code country"/>
+        <Script>
+        <![CDATA[
+        address.addValue("{\"street_address\":\""+street_address.getValues().get(0) + "\","
+            +"\"locality\":\""+locality.getValues().get(0) + "\","
+            +"\"region\":\""+region.getValues().get(0) + "\","
+            +"\"postal_code\":\""+postal_code.getValues().get(0) + "\","
+            +"\"country\":\""+country.getValues().get(0) + "\"}");
+        ]]>
+        </Script>
+    </AttributeDefinition>
+
+    <!--
+    Data Connector for generating 'sub' claim. It may be used to generate both
+    public and pairwise subject values because it recognizes the OIDC sector_id
+    if used during client registration.
+    -->
+    <DataConnector id="computedSubjectId" xsi:type="ComputedId"
+            generatedAttributeID="subjectId"
+            salt="%{idp.oidc.subject.salt}"
+            algorithm="%{idp.oidc.subject.algorithm:SHA}"
+            encoding="BASE32">
+        <InputAttributeDefinition ref="%{idp.oidc.subject.sourceAttribute}"/>
+    </DataConnector>
+
+    <!--
+    Static example to populate default claims. Most of these are directly exposed and
+    handled by the default set of transcoding rules provided for optional inclusion.
+    -->
+    <DataConnector id="staticAttributes" xsi:type="Static"
+            exportAttributes="telephoneNumber phone_number_verified email_verified displayName sn givenName middle_name eduPersonNickname profile picture website gender birthdate zoneinfo preferredLanguage updated_at">
+        <Attribute id="affiliation">
+            <Value>member</Value>
+            <Value>staff</Value>
+        </Attribute>
+        <Attribute id="telephoneNumber">
+            <Value>+1 (604) 555-1234;ext=5678</Value>
+        </Attribute>
+        <Attribute id="phone_number_verified">
+            <Value>true</Value>
+        </Attribute>
+        <Attribute id="email_verified">
+            <Value>false</Value>
+        </Attribute>
+        <Attribute id="displayName">
+            <Value>Mr.Teppo Matias Testaaja</Value>
+        </Attribute>
+        <Attribute id="sn">
+            <Value>Testaaja</Value>
+        </Attribute>
+        <Attribute id="givenName">
+            <Value>Teppo Matias</Value>
+        </Attribute>
+        <Attribute id="middle_name">
+            <Value>Matias</Value>
+        </Attribute>
+        <Attribute id="eduPersonNickname">
+            <Value>TT</Value>
+        </Attribute>
+        <Attribute id="profile">
+            <Value>https://fi.wikipedia.org/wiki/Tom_Cruise</Value>
+        </Attribute>
+        <Attribute id="picture">
+            <Value>https://pixabay.com/fi/pentu-kissa-kukka-potin-tabby-pentu-2766820/</Value>
+        </Attribute>
+        <Attribute id="website">
+            <Value>https://www.facebook.com/officialtomcruise/</Value>
+        </Attribute>
+        <Attribute id="gender">
+            <Value>male</Value>
+        </Attribute>
+        <Attribute id="birthdate">
+            <Value>1969-07-20</Value>
+        </Attribute>
+        <Attribute id="zoneinfo">
+            <Value>America/Los_Angeles</Value>
+        </Attribute>
+        <Attribute id="preferredLanguage">
+            <Value>en-US</Value>
+        </Attribute>
+        <Attribute id="updated_at">
+            <Value>1509450347</Value>
+        </Attribute>
+        <Attribute id="street_address">
+            <Value>234 Hollywood Blvd.</Value>
+        </Attribute>
+        <Attribute id="locality">
+            <Value>Los Angeles</Value>
+        </Attribute>
+        <Attribute id="region">
+            <Value>CA</Value>
+        </Attribute>
+        <Attribute id="postal_code">
+            <Value>90210</Value>
+        </Attribute>
+        <Attribute id="country">
+            <Value>US</Value>
+        </Attribute>
+    </DataConnector>
+    
+</AttributeResolver>

@@ -16,8 +16,16 @@ use LWP::Simple;
 
 # filter and metadata files
 my $rp_filter_file = "/data/local/idp/conf/rp-filter.xml";
-my $uw_metadata_file = "/data/local/idp/tmp/uwmd.xml";
-my $ic_metadata_file = "/data/local/idp/tmp/icmd.xml";
+my $uw_metadata_file = "/data/local/idp/metadata/UW-rp-metadata.xml";
+my $ic_metadata_file = "/data/local/idp/metadata/InCommon-metadata.xml";
+
+# get the dynamic files from idp eval
+# my $url = 'https://idp11.s.uw.edu/metadata/UW-rp-metadata.xml';
+# getstore($url, $uw_metadata_file);
+
+# my $url = 'https://idp11.s.uw.edu/metadata/rp-filter.xml';
+# getstore($url, $uw_filter_file);
+
 
 ## see end of file
 # mebers of this group are contacts
@@ -29,8 +37,7 @@ my $webpage_file = "";
 my $webpage_file_tmp = ".tmp";
 
 # authentication
-# $ENV{HTTPS_CA_FILE} = "/data/local/idp/credentials/uwca.crt";
-$ENV{HTTPS_CA_FILE} = "/usr/local/ssl/certs/cacerts.cert";
+$ENV{HTTPS_CA_DIR} = "/data/local/idp/credentials/uwca.crt";
 $ENV{HTTPS_CERT_FILE} = "/data/local/idp/credentials/idp-uw.crt";
 $ENV{HTTPS_KEY_FILE}  = "/data/local/idp/credentials/idp-uw.key";
 
@@ -222,13 +229,7 @@ sub updateWebpage {
 
 # $ENV{HTTPS_DEBUG} = 1;
 
-my $agent = LWP::UserAgent->new(ssl_opts => { 
-                    SSL_ca_file         => '/data/local/idp/credentials/uwca.crt',
-                    SSL_cert_file       => '/data/local/idp/credentials/idp-uw.crt',
-                    SSL_key_file        => '/data/local/idp/credentials/idp-uw.key'
-                   }
-                ); 
-# ssl_opts => { verify_hostname => 0 }
+my $agent = LWP::UserAgent->new;
 
 
 # get current group membership ( we collect only eppn (email))
@@ -242,6 +243,7 @@ sub getMembers {
      print "get members status: $response->code\n";
 
      $xml = trim($response->decoded_content());
+     # print "\[$xml\]\n";
      my $doc = $parser->parse($xml);
 
      my $grp = $doc->getElementsByTagName('group')->item(0);
@@ -378,7 +380,7 @@ $nkeep = 0;
 parseMetadata ($ic_metadata_file, 'ic');
 $group_name = "u_weblogin_sp-contacts";
 $gws_group_url = "https://iam-ws.u.washington.edu/group_sws/v2/group/u_weblogin_sp-contacts/member/";
-$webpage_file = "/www/idp-dev.u.washington.edu/sp-contacts/sp-contacts.html";
+$webpage_file = "/www/sp-contacts/sp-contacts.html";
 $webpage_file_tmp = $webpage_file . ".tmp";
 
 # get existing membership

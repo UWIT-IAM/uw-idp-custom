@@ -179,5 +179,119 @@
         <entry key="reuse" value-ref="uw.SessionReuse"/>
     </util:map>
 
-    
+    <util:list id="uw.SameSite.iframeSites">
+        <!-- This set is for the UW gifts site, -->
+        <value>https://ua-websrv.gifts.washington.edu/shibboleth</value>
+        <value>https://ua-eval-websrv.gifts.washington.edu/shibboleth</value>
+        <value>https://ua-dev-websrv.gifts.washington.edu/shibboleth</value>
+        <value>https://advweb1.s.uw.edu/shibboleth</value>
+        <!-- The next entry is used by the uwdawgdaze.com site within an iframe. -->
+        <value>https://uwmosaic.com/simplesaml/module.php/saml/sp/metadata.php/default-sp</value>
+        <!-- The following are the various electronic document service apps. -->
+        <value>https://apps.concert.uw.edu/shibboleth</value>
+        <value>https://apps.test.concert.uw.edu/shibboleth</value>     
+        <value>https://apps.dev.concert.uw.edu/shibboleth</value>
+        <value>https://webcenter.admin.uw.edu/shibboleth</value>
+        <value>https://webcenter-eval.admin.uw.edu/shibboleth</value>
+        <value>https://webcenter-dev.admin.uw.edu/shibboleth</value>
+    </util:list>
+
+    <bean id="uw.SameSiteControl" parent="shibboleth.Functions.Scripted" factory-method="inlineScript"
+        p:inputType="org.apache.catalina.connector.RequestFacade" p:outputType="java.lang.Boolean"
+        p:customObject-ref="uw.SameSite.iframeSites">
+        <constructor-arg>
+            <value>
+                <![CDATA[
+                    var logger = Java.type("org.slf4j.LoggerFactory").getLogger("edu.washington.shibboleth");
+                    var debug = false; // Set to true to enable enhanced logging.
+                    var returnValue = false; // true == enable SameSite, false == disable.
+                    
+                    try {
+                        // Look for a SAMLRequest parameter. If not found, exit with SameSite off.
+                        var samlParam = input.getParameter("SAMLRequest");
+                        if (samlParam == null || samlParam.length() == 0) {
+                            if (debug) {
+                                logger.info("Request has no SAMLRequest parameter. Disabling SameSite.");
+                            }
+                            returnValue = false;
+                        } else {
+                            if (debug) {
+                                logger.info("SAMLRequest parameter found. Parsing to extract entityId.");
+                            }
+                    
+                            // Parse the SAMLRequest to extract the entityId of the relying party.
+                            // This requires Base64 decoding the parameter, then unzipping it,
+                            // then parsing the XML content to get the field that holds the entityId.
+                            var encodedBytes = samlParam.getBytes("UTF-8");
+                            var decodedBytes = Java.type("java.util.Base64").getMimeDecoder().decode(encodedBytes);
+                            
+                            // The SAMLRequest may or may not be compressed depending on the request type.
+                            var xmlBytes = decodedBytes;
+                            var xmlLength = decodedBytes.length;
+                            // The request is compressed unless the request type is a post, which can be inferred in several ways.
+                            var isPost = false;
+                            var requestBinding = input.getParameter("requestBinding");
+                            if (requestBinding == null) {
+                                isPost = "POST".equalsIgnoreCase(input.getMethod());
+                            } else {
+                                isPost = "HTTP-POST".equals(requestBinding);
+                            }
+                            if ( !isPost ) {
+                                try {
+                                    var InflaterType = Java.type("java.util.zip.Inflater");
+                                    var inflater = new InflaterType(true);
+                                    inflater.setInput(decodedBytes);
+                                    var ByteArrayType = Java.type("byte[]");
+                                    xmlBytes = new ByteArrayType(10*decodedBytes.length);
+                                    xmlLength = inflater.inflate(xmlBytes);
+                                    inflater.end();
+                                } catch (e) {
+                                    // We will assume the SAMLRequest was not compressed.
+                                    logger.info("Failed to decompress SAMLRequest: {}", e);
+                                }
+                            }
+                            
+                            var StringType = Java.type("java.lang.String");
+                            var xmlString = new StringType(xmlBytes, 0, xmlLength, "UTF-8");
+                            if (debug) {
+                                logger.info("xmlString = '" + xmlString + "'.");
+                            }
+                    
+                            // "Best" would be to parse the xml content as an XML document and extract the desired node.
+                            // Since that would require including XML libraries, here we use a regex pattern to find the element.
+                            // The desired data is text inside a "saml:Issuer" element.
+                            var pattern = Java.type("java.util.regex.Pattern").compile(".*<saml:Issuer[^>]*>([^<]+)</saml:Issuer>.*");
+                            var matcher = pattern.matcher(xmlString);
+                            if (matcher.matches()) {
+                                var entityId = matcher.group(1);
+                                if (debug) {
+                                    logger.info("Pattern matches. EntityId = '" + entityId + "'.");
+                                }
+                        
+                                returnValue = (custom.contains(entityId));
+                                // Always log the cases where SameSite is set. Otherwise only log if debugging enabled.
+                                if (returnValue || debug) {
+                                    logger.info("Setting SameSite activation to '" + returnValue + "' for entityId '" + entityId + "'.");
+                                }
+                            } else {
+                                if (debug) {
+                                    logger.info("Pattern did not match. EntityId not found. Disabling SameSite.");
+                                }
+                                returnValue = false;
+                            }
+                        }
+                    } catch (e) {
+                        logger.error("Exception while checking SameSiteControl: {}", e);
+                        logger.info("Disabling SameSite due to exception during processing.");
+                        returnValue = false;
+                    }
+                    returnValue; // This returns true or false to the caller.
+                ]]>
+            </value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="uw.SameSiteCondition" class="net.shibboleth.ext.spring.util.SpringExpressionPredicate"
+        c:expression="#custom.apply(#input)"
+        p:customObject-ref="uw.SameSiteControl" />
 </beans>

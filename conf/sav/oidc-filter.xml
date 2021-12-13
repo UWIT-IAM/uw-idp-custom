@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?> <AttributeFilterPolicyGroup id="CoreFilterPolicy" 
+  xmlns="urn:mace:shibboleth:2.0:afp"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:oidcext="org.geant.idpextension.oidc.attribute.filter"
+  xsi:schemaLocation="urn:mace:shibboleth:2.0:afp classpath:/schema/shibboleth-2.0-afp.xsd
+                      org.geant.idpextension.oidc.attribute.filter classpath:/schema/idp-oidc-extension-afp.xsd">
+
+
+<AttributeFilterPolicy id="OPENID_SCOPE">
+    <PolicyRequirementRule xsi:type="oidcext:OIDCScope" value="openid" />
+    <AttributeRule attributeID="subject">
+        <PermitValueRule xsi:type="ANY" />
+    </AttributeRule>
+</AttributeFilterPolicy> 
+
+    <AttributeFilterPolicy id="OPENID_urizen">
+        <PolicyRequirementRule xsi:type="Requester" value="oidc/urizen.s.uw.edu"/>
+        <AttributeRule attributeID="preferredFirst">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+    </AttributeFilterPolicy>
+
+    <AttributeFilterPolicy id="OPENID_SCOPE_EMAIL">
+        <PolicyRequirementRule xsi:type="oidcext:OIDCScope" value="email" />
+        <AttributeRule attributeID="email">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+        <AttributeRule attributeID="email_verified">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+    </AttributeFilterPolicy>
+
+    <!-- This demonstrates a rule that releases address claims in response to all oidc authentication requests having scope
+        address. The requester needs to have scope address as a registered scope. -->
+
+    <AttributeFilterPolicy id="OPENID_SCOPE_ADDRESS">
+        <PolicyRequirementRule xsi:type="oidcext:OIDCScope" value="address" />
+        <AttributeRule attributeID="address">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+    </AttributeFilterPolicy>
+
+    <AttributeFilterPolicy id="OPENID_SCOPE_PROFILE">
+        <PolicyRequirementRule xsi:type="oidcext:OIDCScope" value="profile" />
+        <AttributeRule attributeID="name">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+        <AttributeRule attributeID="preferredFirst">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+        <AttributeRule attributeID="displayName">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+        <AttributeRule attributeID="surname">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+        <AttributeRule attributeID="givenName">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+        <AttributeRule attributeID="nickname">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+        <AttributeRule attributeID="preferred_username">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+        <AttributeRule attributeID="profile">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+        <AttributeRule attributeID="picture">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+        <AttributeRule attributeID="website">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+        <AttributeRule attributeID="gender">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+        <AttributeRule attributeID="birthdate">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+        <AttributeRule attributeID="zoneinfo">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+        <AttributeRule attributeID="locale">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+        <AttributeRule attributeID="updated_at">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+    </AttributeFilterPolicy>
+
+    <AttributeFilterPolicy id="OPENID_SCOPED_AFFILIATION">
+        <PolicyRequirementRule xsi:type="oidcext:OIDCScope" value="eduperson_scoped_affiliation" />
+        <AttributeRule attributeID="scopedAffiliation">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+    </AttributeFilterPolicy>
+
+
+    <AttributeFilterPolicy id="OPENID_MEMBER_OF_SAND">
+        <PolicyRequirementRule xsi:type="AND">
+           <Rule xsi:type="Requester" value="oidc/gws.sandbox.iam.s.uw.edu" />
+           <Rule xsi:type="oidcext:OIDCScope" value="edumember_is_member_of" />
+        </PolicyRequirementRule>
+        <AttributeRule attributeID="gws_groups">
+           <PermitValueRule xsi:type="OR">
+            <Rule xsi:type="Value" value="urn:mace:washington.edu:groups:u_fox_00-spud99"/>
+            <Rule xsi:type="Value" value="urn:mace:washington.edu:groups:uw_employee"/>
+            <Rule xsi:type="Value" value="urn:mace:washington.edu:groups:uw_member"/>
+            <Rule xsi:type="Value" value="urn:mace:washington.edu:groups:uw_staff"/>
+            <Rule xsi:type="ValueRegex" regex="urn:mace:washington.edu:groups:u_fox_brow.*"/>
+           </PermitValueRule>
+        </AttributeRule>
+    </AttributeFilterPolicy>
+
+    <AttributeFilterPolicy id="OPENID_MEMBER_OF_URIZEN">
+        <PolicyRequirementRule xsi:type="OR">
+           <Rule xsi:type="Requester" value="oidc/urizen.s.uw.edu" />
+           <Rule xsi:type="Requester" value="oidc/urizen99.s.uw.edu" />
+        </PolicyRequirementRule>
+        <AttributeRule attributeID="gws_groups">
+           <PermitValueRule xsi:type="OR">
+            <Rule xsi:type="Value" value="urn:mace:washington.edu:groups:u_fox_00-spud99"/>
+            <Rule xsi:type="Value" value="urn:mace:washington.edu:groups:uw_employee"/>
+            <Rule xsi:type="Value" value="urn:mace:washington.edu:groups:uw_member"/>
+            <Rule xsi:type="Value" value="urn:mace:washington.edu:groups:uw_staff"/>
+            <Rule xsi:type="ValueRegex" regex="urn:mace:washington.edu:groups:u_fox_brow.*"/>
+           </PermitValueRule>
+        </AttributeRule>
+    </AttributeFilterPolicy>
+
+    <AttributeFilterPolicy id="OPENID_MEMBER_OF_ORIS">
+        <PolicyRequirementRule xsi:type="OR">
+           <Rule xsi:type="Requester" value="oidc/myresearch-dev.ui.oris.washington.edu" />
+           <Rule xsi:type="Requester" value="oidc/myresearch-int.ui.oris.washington.edu" />
+           <Rule xsi:type="Requester" value="oidc/myresearch.washington.edu" />
+           <Rule xsi:type="Requester" value="oidc/research-eval.ui.oris.washington.edu" />
+           <Rule xsi:type="Requester" value="oidc/research-int.ui.oris.washington.edu" />
+           <Rule xsi:type="Requester" value="oidc/research-dev.ui.oris.washington.edu" />
+        </PolicyRequirementRule>
+        <AttributeRule attributeID="gws_groups">
+           <PermitValueRule xsi:type="OR">
+            <Rule xsi:type="ValueRegex" regex="urn:mace:washington.edu:groups:u_oris_provs_.*"/>
+           </PermitValueRule>
+        </AttributeRule>
+    </AttributeFilterPolicy>
+    <AttributeFilterPolicy id="OPENID_MEMBER_OF_MOSLER">
+        <PolicyRequirementRule xsi:type="AND">
+           <Rule xsi:type="Requester" value="oidc/mosler.s.uw.edu" />
+           <Rule xsi:type="oidcext:OIDCScope" value="edumember_is_member_of" />
+        </PolicyRequirementRule>
+        <AttributeRule attributeID="gws_groups">
+           <PermitValueRule xsi:type="OR">
+            <Rule xsi:type="ValueRegex" regex="urn:mace:washington.edu:groups:u_mciman_mosler_.*"/>
+           </PermitValueRule>
+        </AttributeRule>
+    </AttributeFilterPolicy>
+
+    <AttributeFilterPolicy id="OPENID_MEMBER_OF_DOCFINITY">
+        <PolicyRequirementRule xsi:type="AND">
+           <Rule xsi:type="Requester" value="oidc/sandbox-edu.cloudtest.docfinity.com" />
+           <Rule xsi:type="oidcext:OIDCScope" value="edumember_is_member_of" />
+        </PolicyRequirementRule>
+        <AttributeRule attributeID="gws_groups">
+           <PermitValueRule xsi:type="OR">
+            <Rule xsi:type="ValueRegex" regex="urn:mace:washington.edu:groups:u_edms_dev_.*"/>
+           </PermitValueRule>
+        </AttributeRule>
+    </AttributeFilterPolicy>
+
+    <AttributeFilterPolicy id="OPENID_MEMBER_OF_RUPERT">
+        <PolicyRequirementRule xsi:type="AND">
+           <Rule xsi:type="Requester" value="oidc/rupert-localhost" />
+           <Rule xsi:type="oidcext:OIDCScope" value="edumember_is_member_of" />
+        </PolicyRequirementRule>
+        <AttributeRule attributeID="gws_groups">
+           <PermitValueRule xsi:type="OR">
+            <Rule xsi:type="Value" value="urn:mace:washington.edu:groups:uw_entarch_team"/>
+           </PermitValueRule>
+        </AttributeRule>
+    </AttributeFilterPolicy>
+</AttributeFilterPolicyGroup>
+

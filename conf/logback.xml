@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <!-- UW logging - PROD -->
-
     <!--
     Variables for simplifying logging configuration.
     http://logback.qos.ch/manual/configuration.html#variableSubstitution
@@ -42,32 +40,29 @@
     <!-- =========================================================== -->
 
     <!-- Logs our addons -->
-    <logger name="edu.washington" level="DEBUG"/>
-
-    <!-- Logs oids plugin -->
-    <logger name="net.shibboleth.oidc" level="DEBUG"/>
+    <logger name="edu.washington.shibboleth" level="INFO"/>
 
     <!-- Logs http client detail -->
     <logger name="org.apache.http.headers" level="WARN"/>
 
     <!-- Logs IdP, but not OpenSAML, messages -->
-    <logger name="net.shibboleth.idp" level="INFO"/>
+    <logger name="net.shibboleth.idp" level="${idp.loglevel.idp:-INFO}"/>
     <logger name="net.shibboleth.idp.authn" level="INFO"/>
 
     <!-- Logs OpenSAML, but not IdP, messages -->
-    <logger name="org.opensaml.saml" level="INFO"/>
+    <logger name="org.opensaml.saml" level="${idp.loglevel.opensaml:-INFO}"/>
     
     <!-- Logs LDAP related messages -->
     <logger name="org.ldaptive" level="${idp.loglevel.ldap:-WARN}"/>
     
-    <!-- Logs inbound and outbound protocols messages at DEBUG level -->
+    <!-- Logs inbound and outbound protocols messages -->
     <logger name="PROTOCOL_MESSAGE" level="${idp.loglevel.messages:-INFO}" />
 
-    <!-- Logs unencrypted SAML at DEBUG level -->
+    <!-- Logs unencrypted SAML -->
     <logger name="org.opensaml.saml.saml2.encryption.Encrypter" level="${idp.loglevel.encryption:-INFO}" />
 
-    <!-- Logs system properties during startup at DEBUG level -->
-    <logger name="net.shibboleth.idp.log.LogbackLoggingService" level="${idp.loglevel.props:-DEBUG}" />
+    <!-- Logs system properties during startup -->
+    <logger name="net.shibboleth.idp.log.LogbackLoggingService" level="${idp.loglevel.props:-INFO}" />
 
     <!-- Especially chatty. -->
     <logger name="net.shibboleth.idp.saml.attribute.mapping" level="INFO" />
@@ -161,12 +156,12 @@
     <appender name="IDP_PASSWORD" class="ch.qos.logback.classic.net.SyslogAppender">
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
           <evaluator>
-            <expression>return message.contains("Login by {} failed");</expression>
+            <expression>return message.contains("Login by '{}' failed");</expression>
           </evaluator>
           <OnMismatch>DENY</OnMismatch>
           <OnMatch>NEUTRAL</OnMatch>
         </filter>
-        <syslogHost>logger3.s.uw.edu</syslogHost>
+        <syslogHost>logger4.s.uw.edu</syslogHost>
         <facility>LOCAL2</facility>
         <throwableExcluded>true</throwableExcluded>
         <suffixPattern>idp-pass |%mdc{idp.remote_addr}|password failed</suffixPattern>
@@ -177,7 +172,7 @@
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>WARN</level>
         </filter>
-        <syslogHost>logger3.s.uw.edu</syslogHost>
+        <syslogHost>logger4.s.uw.edu</syslogHost>
         <facility>LOCAL2</facility>
         <throwableExcluded>true</throwableExcluded>
         <suffixPattern>idp-warn %msg</suffixPattern>
