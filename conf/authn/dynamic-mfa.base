@@ -12,5 +12,18 @@ no2fa|https://diafine12.sandbox.iam.s.uw.edu
 
 # no2fa|https://diafine5.s.uw.edu/shibboleth
 
+# Exempting Clearpass sites per REQ5156921
+no2fa|https://cppm-ads-01.infra.washington.edu/networkservices/saml2/sp
+no2fa|https://cppm-ads-02.infra.washington.edu/networkservices/saml2/sp
+no2fa|https://cppm-ads-03.infra.washington.edu/networkservices/saml2/sp
+no2fa|https://cppm-ads-04.infra.washington.edu/networkservices/saml2/sp
+no2fa|https://cppm-ads-05.infra.washington.edu/networkservices/saml2/sp
+no2fa|https://cppm-uwtc-01.infra.washington.edu/networkservices/saml2/sp
+no2fa|https://cppm-uwtc-02.infra.washington.edu/networkservices/saml2/sp
+no2fa|https://cppm-uwtc-03.infra.washington.edu/networkservices/saml2/sp
+no2fa|https://cppm-uwtc-04.infra.washington.edu/networkservices/saml2/sp
+no2fa|https://cppm-uwtc-05.infra.washington.edu/networkservices/saml2/sp
+no2fa|https://ndt-cp-eval1.s.uw.edu/networkservices/saml2/sp
+
 # spreg settings
 
