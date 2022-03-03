@@ -6,6 +6,9 @@ auto|urn:amazon:webservices
 auto|http://www.workday.com
 auto|oidc/mosler.s.uw.edu
 auto|oidc/uw.cloudtest.docfinity.com
+auto|oidc/uw-beta.cloudtest.docfinity.com
+auto|oidc/uw.cloud.docfinity.com
+
 no2fa|http://sts.netid.washington.edu/adfs/services/trust
 no2fa|http://sts.dogfood.netid.washington.edu/adfs/services/trust
 no2fa|https://diafine12.sandbox.iam.s.uw.edu
@@ -26,4 +29,3 @@ no2fa|https://cppm-uwtc-05.infra.washington.edu/networkservices/saml2/sp
 no2fa|https://ndt-cp-eval1.s.uw.edu/networkservices/saml2/sp
 
 # spreg settings
-
