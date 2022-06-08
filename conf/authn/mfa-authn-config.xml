@@ -35,7 +35,7 @@
         <entry key="authn/crn-select">
             <bean parent="shibboleth.authn.MFA.Transition" p:nextFlowStrategy-ref="checkSecondFactorNeeded" />
         </entry>
-
+        
         <!-- just for debug logging 
         <entry key="authn/duo-bypass">
             <bean parent="shibboleth.authn.MFA.Transition" p:nextFlowStrategy-ref="completeDuoBypass" />
@@ -195,7 +195,7 @@
                      if (rpname.equals("https://refeds.org/profile/mfa") || 
                          rpname.equals("urn:oasis:names:tc:SAML:2.0:ac:classes:TimeSyncToken")) { 
                            logger.debug("2fa requested by " + rpname);
-                           need2f = "t";   // this overrides the no2fa flag
+                           need2f = 't';   // this overrides the no2fa flag
                            break;
                      }
                   }
@@ -207,7 +207,7 @@
                 // rpid = rpCtx.relyingPartyId;
 
                 // if user has optin cookie, that's the same as in optin group
-                if (need2f==null && hasOptinCookie=="t") need2f = "t";
+                if (need2f==null && hasOptinCookie=="t") need2f = 't';
 
                 // If 2fa auto triggered, see if user really needs it ( config token + group exists + not a member = no 2fa needed )
                 if (need2f == null && autoTokenRp) {
@@ -243,30 +243,30 @@
                       }
                 }
 
+                // function to test if a userid is in a group
+                var userInGroup = function(url) {
+                   try {
+                      logger.debug(".. looking for " + url);
+                      rsp = webget.getResource(url)
+                      if (rsp != null) {
+                         var Json = Java.type("javax.json.Json");
+                         var SR = Java.type("java.io.StringReader");
+                         var reader = Json.createReader(new SR(rsp));
+                         var jresp = reader.readObject();
+                         reader.close();
+                         data = jresp.getJsonArray("data");
+                         if (data != null && data.size()>0) {  // assume this means user is in group
+                            return true;
+                         }
+                      }
+                   } catch (e) {
+                      logger.warn("optin request failed for user '{}': {}", username, e);
+                   }
+                   return false;
+                }
+
                 // See if user opted in to 2nd factor and has no long-term session
                 if (need2f == null && hasCookie!="t") {
-
-                   // function to test if a userid is in a group
-                   var userInGroup = function(url) {
-                      try {
-                         logger.debug(".. looking for " + url);
-                         rsp = webget.getResource(url)
-                         if (rsp != null) {
-                            var Json = Java.type("javax.json.Json");
-                            var SR = Java.type("java.io.StringReader");
-                            var reader = Json.createReader(new SR(rsp));
-                            var jresp = reader.readObject();
-                            reader.close();
-                            data = jresp.getJsonArray("data");
-                            if (data != null && data.size()>0) {  // assume this means user is in group
-                               return true;
-                            }
-                         }
-                      } catch (e) {
-                         logger.warn("optin request failed for user '{}': {}", username, e);
-                      }
-                      return false;
-                   }
 
                    url = "%{idp.uw.2fa-optin-urlbase}" + username 
                    if (userInGroup(url)) {
@@ -448,6 +448,18 @@
                if (nextFlow != null && nextFlow.equals("authn/uwduo"))  conversationScope.put("log_2famethod", "duo");
 
                if (disusered) nextFlow = "authn/disusered";
+               
+               // if 2FA not required, check if 2FA will be required soon, if so prompt the user to opt in
+               if (need2f != 't') {
+                 url = "%{idp.uw.2fa-optin-soon-urlbase}" + username;
+                 if (userInGroup(url)) {
+                     // check if the user is opted out
+                     url = "%{idp.uw.2fa-optout-urlbase}" + username;
+                     if (!userInGroup(url)) {
+                         nextFlow = "authn/duo-soon";
+                     }
+                 }
+               }
                logger.debug("leaving, nextFlow=" + nextFlow);
                nextFlow;
            ]]>

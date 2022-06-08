@@ -22,6 +22,8 @@ idp.uw.2fa-optin-urlbase = https://groups.uw.edu/group_sws/v3/group/u_weblogin_o
 idp.uw.mfa-optin-cookie = uw-optin-
 # users opting out of 2fa ( logical removal from above group )
 idp.uw.2fa-optout-urlbase = https://groups.uw.edu/group_sws/v3/group/u_weblogin_optout-2fa/effective_member/
+# users soon to be opted in to 2fa
+idp.uw.2fa-optin-soon-urlbase = https://groups.uw.edu/group_sws/v3/group/u_weblogin_optin-2fa-soon/effective_member/
 
 # auto authz group base
 idp.uw.slack-gws-urlbase = https://groups.uw.edu/group_sws/v3/group/u_weblogin_idpauthz_
