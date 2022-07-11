@@ -1,5 +1,5 @@
 ##
-## Velocity Template for DisplayUsernamePasswordPage view-state
+## Velocity Template for Display 2FARequiredSoonNotification view-state
 ##
 ## Velocity context will contain the following properties
 ## flowExecutionUrl - the form action location

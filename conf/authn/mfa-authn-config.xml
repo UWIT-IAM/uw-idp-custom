@@ -260,7 +260,7 @@
                          }
                       }
                    } catch (e) {
-                      logger.warn("optin request failed for user '{}': {}", username, e);
+                      logger.warn("group lookup request failed for user '{}', url '{}': {}", username, url, e);
                    }
                    return false;
                 }
