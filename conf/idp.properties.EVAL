@@ -11,8 +11,8 @@ idp.additionalProperties=/credentials/duo.properties
 
 # Set the entityID of the IdP and the AWS ident
 
-idp.entityID= urn:mace:incommon:washington.edu:dev
-idp.uw.awsEntityId = UWdev
+idp.entityID= urn:mace:incommon:washington.edu:eval
+idp.uw.awsEntityId = UWeval
 
 # local dynamic mfa config
 idp.uw.dynamic-mfa-file = %{idp.home}/conf/authn/dynamic-mfa.txt
