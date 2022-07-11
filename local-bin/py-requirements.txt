@@ -1,6 +1,4 @@
-psycopg2
-psycopg2-binary
-lxml
+psycopg2==2.6
+lxml==4.6.5
 jinja2
 pep8
-requests
