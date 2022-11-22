@@ -60,26 +60,25 @@
 
           <form name="idpduointercept" id="idpduointerceptdiv" method="POST" action="$flowExecutionUrl" autocomplete="off">
 
-            <p>
-              <h3>Lock down your login now</h3>
-              On <strong>November 2, 2022</strong>, two-factor authentication (2FA) is required for your UW NetID.
+            <p/>
+              <h3 style="color:red">Warning</h3>
+              <strong><span style="color:red">Set up Duo and opt in to 2FA, or you WILL lose access to Canvas,
+                  MyUW, Zoom, UW Office 365, and UW Google.</span></strong>
               <p>
-              <strong><span style="color:red">You need to enroll in Duo/2FA to continue logging in to UW web-based apps/systems.</span></strong>
+              <h3>Lock down your login now</h3>
+              You are <strong>required</strong> to enroll in Duo and opt in to 2FA via Identity.UW.
 
-              <ul style="list-style:disc outside none">
+              <ol>
                 <li><a target="_blank" href="https://itconnect.uw.edu/security/uw-netids/2fa/enrollment-guide/">
                        Learn how to set up the Duo app on your smartphone</a>.</li>
-                <li><a href="" onclick="document.getElementById('submit_button').click();return false;">
-                    Click here to proceed with your login if you are not able to enroll in Duo at this moment</a></li>
-              </ul>
-            </p>
-            <p>
-              <h3>Set up 2FA now</h3>
-            </p>
-
-            <ul style="list-style:disc outside none">
-              <li><a target="_blank" href="https://identity.uw.edu/2fa/">Opt-in to use 2FA on the web</a>.</li>
-            </ul>
+                <li><a target="_blank" href="https://identity.uw.edu/2fa/">Opt-in to 2FA now</a></li>
+              </ol>
+            <p/>
+            Not recommended:
+            <p/>
+            <a href="" onclick="document.getElementById('submit_button').click();return false;">
+                Click here to proceed with your login if you are not able to enroll in Duo at this moment
+            </a>
 
             <span style="display:none">
                 <input type="submit" id="submit_button" name="_eventId_proceed" value="Continue">
