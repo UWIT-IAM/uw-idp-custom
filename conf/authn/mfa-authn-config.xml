@@ -485,8 +485,9 @@
                }
                
                // if 2FA not required, check if 2FA will be required soon, if so prompt the user to opt in
-               if (need2f != 't' && hasCookie != 't' && !hasMfaSoonCookie) {
-                   // no cookie, so check group membership to see if the user should be notified
+               // don't show the prompt for the page to set up 2FA (that would be redundant)
+               if (need2f != 't' && hasCookie != 't' && rpid != 'https://identity.uw.edu/shibboleth') {
+                   // check group membership to see if the user should be notified
                    url = "%{idp.uw.2fa-optin-soon-urlbase}" + username;
                    if (userInGroup(url)) {
                        // check if the user is opted out
