@@ -448,81 +448,84 @@
                if (nextFlow != null && nextFlow.equals("authn/uwduo"))  conversationScope.put("log_2famethod", "duo");
 
                if (disusered) nextFlow = "authn/disusered";
-               
-               // Check for and clear an expired mfa-soon notification cookie.
-               var hasMfaSoonCookie = false;
-               var clearMfaSoonCookie = false;
-               var needMfaSoonCookie = false;
-               
-               var Instant = Java.type("java.time.Instant");
-               var mfaSoonCookieValidSec = Instant.now().getEpochSecond() - %{idp.uw.mfa-soon-seconds};
-               for (i=0; cookies != null && i < cookies.length; i++) {
-                   cookie = cookies[i];
-                   if (cookie.getName().equals("%{idp.uw.mfa-soon-cookie}" + username)) {
-                       try {
-                           val = custom.get("sealer").unwrap(cookie.getValue());
-                           logger.debug("duo-soon cookie value=" + val);
-                           vals = val.split("|");
-                           if (vals[1].equals(username) && ( Long.parseLong(vals[2]) > mfaSoonCookieValidSec ) ) {
-                               // skip further processing since the cookie is valid
-                               hasMfaSoonCookie = true;
-                               break;
-                           } else if (vals[1].equals(username)) {
-                               //clear the expired cookie
-                               clearMfaSoonCookie = true;
-                               break;
-                           }
-                       } catch (e) {
-                           if (e instanceof Java.type("net.shibboleth.utilities.java.support.security.DataExpiredException")) {
-                               logger.debug("cookie has expired");
-                               clearMfaSoonCookie = true;
-                               break;
-                           } else {
-                               logger.info(e);
+
+               // if enabled, handle users who are not yet opted in but will be soon.
+               if ("%{idp.uw.2fa-optin-soon-check}" == "true") {
+                   // Check for and clear an expired mfa-soon notification cookie.
+                   var hasMfaSoonCookie = false;
+                   var clearMfaSoonCookie = false;
+                   var needMfaSoonCookie = false;
+                   
+                   var Instant = Java.type("java.time.Instant");
+                   var mfaSoonCookieValidSec = Instant.now().getEpochSecond() - %{idp.uw.mfa-soon-seconds};
+                   for (i=0; cookies != null && i < cookies.length; i++) {
+                       cookie = cookies[i];
+                       if (cookie.getName().equals("%{idp.uw.mfa-soon-cookie}" + username)) {
+                           try {
+                               val = custom.get("sealer").unwrap(cookie.getValue());
+                               logger.debug("duo-soon cookie value=" + val);
+                               vals = val.split("|");
+                               if (vals[1].equals(username) && ( Long.parseLong(vals[2]) > mfaSoonCookieValidSec ) ) {
+                                   // skip further processing since the cookie is valid
+                                   hasMfaSoonCookie = true;
+                                   break;
+                               } else if (vals[1].equals(username)) {
+                                   //clear the expired cookie
+                                   clearMfaSoonCookie = true;
+                                   break;
+                               }
+                           } catch (e) {
+                               if (e instanceof Java.type("net.shibboleth.utilities.java.support.security.DataExpiredException")) {
+                                   logger.debug("cookie has expired");
+                                   clearMfaSoonCookie = true;
+                                   break;
+                               } else {
+                                   logger.info(e);
+                               }
                            }
                        }
                    }
-               }
-               
-               // if 2FA not required, check if 2FA will be required soon, if so prompt the user to opt in
-               // don't show the prompt for the page to set up 2FA (that would be redundant)
-               if (need2f != 't' && hasCookie != 't' && rpid != 'https://identity.uw.edu/shibboleth') {
-                   // check group membership to see if the user should be notified
-                   url = "%{idp.uw.2fa-optin-soon-urlbase}" + username;
-                   if (userInGroup(url)) {
-                       // check if the user is opted out
-                       url = "%{idp.uw.2fa-optout-urlbase}" + username;
-                       if (!userInGroup(url)) {
-                           // set the next flow to the notification display
-                           nextFlow = "authn/duo-soon";
-                           needMfaSoonCookie = true;
+                   
+                   // if 2FA not required, check if 2FA will be required soon, if so prompt the user to opt in
+                   // don't show the prompt for the page to set up 2FA (that would be redundant)
+                   if (need2f != 't' && hasCookie != 't' && !hasMfaSoonCookie && rpid != 'https://identity.uw.edu/shibboleth') {
+                       // check group membership to see if the user should be notified
+                       url = "%{idp.uw.2fa-optin-soon-urlbase}" + username;
+                       if (userInGroup(url)) {
+                           // check if the user is opted out
+                           url = "%{idp.uw.2fa-optout-urlbase}" + username;
+                           if (!userInGroup(url)) {
+                               // set the next flow to the notification display
+                               nextFlow = "authn/duo-soon";
+                               needMfaSoonCookie = true;
+                           }
                        }
                    }
-               }
-               // set or clear cookie as needed to control future notfications
-               if (needMfaSoonCookie) {
-                   var Random = Java.type("java.util.Random");
-                   var Cookie = Java.type("javax.servlet.http.Cookie");
-                   var uNow = Instant.now().getEpochSecond();
-                   tdata = new Random().nextInt(1000000) + "|" + username + "|" + uNow;
-                   logger.debug("scookie=" + tdata);
-                   cdata = custom.get("sealer").wrap(tdata, Instant.ofEpochMilli(uNow*1000 + %{idp.uw.mfa-soon-seconds}*1000));
-                   cookie = new Cookie("%{idp.uw.mfa-soon-cookie}" + username, cdata);
-                   cookie.setPath("/");
-                   cookie.setSecure(true);
-                   cookie.setHttpOnly(true);
-                   cookie.setMaxAge(%{idp.uw.mfa-soon-seconds});
-                   response = custom.get("response");
-                   response.addCookie(cookie);
-               } else if (clearMfaSoonCookie) {
-                   var Cookie = Java.type("javax.servlet.http.Cookie");
-                   cookie = new Cookie("%{idp.uw.mfa-soon-cookie}" + username, "xxx");
-                   cookie.setPath("/");
-                   cookie.setSecure(true);
-                   cookie.setHttpOnly(true);
-                   cookie.setMaxAge(0);  // delete
-                   response = custom.get("response");
-                   response.addCookie(cookie);
+                   // set or clear cookie as needed to control future notfications
+                   if (needMfaSoonCookie) {
+                       var Random = Java.type("java.util.Random");
+                       var Cookie = Java.type("javax.servlet.http.Cookie");
+                       var uNow = Instant.now().getEpochSecond();
+                       tdata = new Random().nextInt(1000000) + "|" + username + "|" + uNow;
+                       logger.debug("scookie=" + tdata);
+                       cdata = custom.get("sealer").wrap(tdata, Instant.ofEpochMilli(uNow*1000 + %{idp.uw.mfa-soon-seconds}*1000));
+                       cookie = new Cookie("%{idp.uw.mfa-soon-cookie}" + username, cdata);
+                       cookie.setPath("/");
+                       cookie.setSecure(true);
+                       cookie.setHttpOnly(true);
+                       cookie.setMaxAge(%{idp.uw.mfa-soon-seconds});
+                       response = custom.get("response");
+                       response.addCookie(cookie);
+                   } else if (clearMfaSoonCookie) {
+                       var Cookie = Java.type("javax.servlet.http.Cookie");
+                       cookie = new Cookie("%{idp.uw.mfa-soon-cookie}" + username, "xxx");
+                       cookie.setPath("/");
+                       cookie.setSecure(true);
+                       cookie.setHttpOnly(true);
+                       cookie.setMaxAge(0);  // delete
+                       response = custom.get("response");
+                       response.addCookie(cookie);
+                   }
                }
 
                logger.debug("leaving, nextFlow=" + nextFlow);
