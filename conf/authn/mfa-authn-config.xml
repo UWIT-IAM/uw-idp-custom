@@ -450,7 +450,7 @@
                if (disusered) nextFlow = "authn/disusered";
 
                // if enabled, handle users who are not yet opted in but will be soon.
-               if ("%{idp.uw.2fa-optout-urlbase}" != '') {
+               if ("%{idp.uw.2fa-optin-soon-check}" == "true") {
                    // Check for and clear an expired mfa-soon notification cookie.
                    var hasMfaSoonCookie = false;
                    var clearMfaSoonCookie = false;
