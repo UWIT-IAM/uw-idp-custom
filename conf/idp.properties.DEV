@@ -23,10 +23,11 @@ idp.uw.mfa-optin-cookie = uw-optin-
 # users opting out of 2fa ( logical removal from above group )
 idp.uw.2fa-optout-urlbase = https://groups.uw.edu/group_sws/v3/group/u_weblogin_optout-2fa/effective_member/
 # users soon to be opted in to 2fa
+idp.uw.2fa-optin-soon-check = false
 idp.uw.2fa-optin-soon-urlbase = https://groups.uw.edu/group_sws/v3/group/u_weblogin_optin-2fa-soon/effective_member/
 idp.uw.mfa-soon-cookie = uw-optin-soon-
-# Cookie duration set to 1 week = 7*24*3600 seconds.
-idp.uw.mfa-soon-seconds = 604800
+# Cookie duration set to 5 minutes = 300 seconds.
+idp.uw.mfa-soon-seconds = 300
 
 # auto authz group base
 idp.uw.slack-gws-urlbase = https://groups.uw.edu/group_sws/v3/group/u_weblogin_idpauthz_

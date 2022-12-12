@@ -60,25 +60,29 @@
 
           <form name="idpduointercept" id="idpduointerceptdiv" method="POST" action="$flowExecutionUrl" autocomplete="off">
 
-            <p>
+            <p/>
+              <h3 style="color:red">Warning</h3>
+              <strong><span style="color:red">Set up Duo and opt in to 2FA, or you WILL lose access to Canvas,
+                  MyUW, Zoom, UW Office 365, and UW Google.</span></strong>
+              <p>
               <h3>Lock down your login now</h3>
-              On <strong>November 2, 2022</strong>, Two-factor authentication (2FA) will be enabled for your UW NetID to protect UW data.
-              You'll need to use Duo/2FA for sign-in to UW web-based apps. Enable 2FA:
+              You are <strong>required</strong> to enroll in Duo and opt in to 2FA via Identity.UW.
 
-              <ul style="list-style:disc outside none">
-                <li>I'm ready now - <a target="_blank" href="https://identity.uw.edu/2fa/">Opt-in to use 2FA on the web</a>.</li>
-                <li>I need help - <a target="_blank" href="https://itconnect.uw.edu/security/uw-netids/2fa/enrollment-guide/">
+              <ol>
+                <li><a target="_blank" href="https://itconnect.uw.edu/security/uw-netids/2fa/enrollment-guide/">
                        Learn how to set up the Duo app on your smartphone</a>.</li>
-              </ul>
-            </p>
-            <p>
-              <h3>I'll set up 2FA later</h3>
-              Click Continue to continue where you were going.
-            </p>
+                <li><a target="_blank" href="https://identity.uw.edu/2fa/">Opt-in to 2FA now</a></li>
+              </ol>
+            <p/>
+            Not recommended:
+            <p/>
+            <a href="" onclick="document.getElementById('submit_button').click();return false;">
+                Click here to proceed with your login if you are not able to enroll in Duo at this moment
+            </a>
 
-            <ul class="submit">
-              <li><input type="submit" id="submit_button" name="_eventId_proceed" value="Continue"></li>
-            </ul>
+            <span style="display:none">
+                <input type="submit" id="submit_button" name="_eventId_proceed" value="Continue">
+            </span>
 
             </form>
 
