@@ -244,6 +244,11 @@
         <AttributeEncoder xsi:type="SAML2String" name="GivenName" />
     </AttributeDefinition>
 
+    <AttributeDefinition id="alt2_givenName" xsi:type="Simple" >
+        <InputAttributeDefinition ref="givenName" />
+        <AttributeEncoder xsi:type="SAML2String" name="FirstName" />
+    </AttributeDefinition>
+
  <!--  name = registered given name  -->
 
     <AttributeDefinition id="registeredGivenName" xsi:type="Simple" >
