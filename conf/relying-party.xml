@@ -140,7 +140,7 @@
         </bean>
 
         <!-- pinnacle -->
-        <bean parent="RelyingPartyByName" c:relyingPartyIds="https://www.mypinnaclelogin.com/">
+        <bean parent="RelyingPartyByName" c:relyingPartyIds="#{ {'https://www.mypinnaclelogin.com/'} }">
             <property name="profileConfigurations">
                 <list>
                     <bean parent="SAML2.SSO"
@@ -149,6 +149,20 @@
                      p:signAssertions="true" p:encryptAssertions="false" p:includeAttributeStatement="true"
                      p:securityConfiguration-ref="SHA1SecurityConfig"
                     p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'}}"/>
+                </list>
+            </property>
+        </bean>
+
+        <!-- uw.retain.io -->
+        <bean parent="RelyingPartyByName" c:relyingPartyIds="#{ {'https://uw.retain.io/users/saml/metadata'} }">
+            <property name="profileConfigurations">
+                <list>
+                    <bean parent="SAML2.SSO"
+                     p:authenticationFlows="#{{'MFA'}}"
+                     p:signResponses="false"
+                     p:signAssertions="true" p:encryptAssertions="false" p:includeAttributeStatement="true"
+                     p:securityConfiguration-ref="SHA1SecurityConfig"
+                     p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent','urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified','urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress','urn:oasis:names:tc:SAML:2.0:nameid-format:transient'}}" />
                 </list>
             </property>
         </bean>
