@@ -190,7 +190,7 @@
                      p:encryptAssertions="false"
                      p:securityConfiguration-ref="LegacySecurityConfig" 
                      p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'}}"
-                     p:postAuthenticationFlows="#{{'google-check'}}"
+                     p:postAuthenticationFlows="#{{'google-check', 'warning'}}"
                      />
                 </list>
             </property>
