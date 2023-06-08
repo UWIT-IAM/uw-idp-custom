@@ -224,12 +224,6 @@
                      p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'}}" 
                      p:additionalAudiencesForAssertion="http://saml.marketo.com/sp" 
                      p:disallowedFeatures-ref="SAML2.SSO.FEATURE_AUTHNCONTEXT" >
-                       <property name="defaultAuthenticationMethods">
-                         <list>
-                             <ref bean="uwTokenReqPrincipal" />
-                             <ref bean="uwPasswordReqPrincipal" />
-                         </list>
-                       </property>
                 </bean>
                 </list>
             </property>
