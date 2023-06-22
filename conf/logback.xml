@@ -167,6 +167,32 @@
         <suffixPattern>idp-pass |%mdc{idp.remote_addr}|password failed</suffixPattern>
     </appender>
 
+    <!-- Local log of password failures for export to ciso tools. -->
+    <!-- The output has four fields: timestamp, client IP address, error message including the userid,
+         and the first line of the exception stack trace which indicates the failure mode (unknown user or bad password). -->
+    <appender name="IDP_PASSWORD_FAILURES" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${idp.logfiles}/loginFailures.log</File>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${idp.logfiles}/loginFailures-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>${idp.loghistory:-180}</maxHistory>
+        </rollingPolicy>
+
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+          <evaluator>
+            <expression>return message.contains("Login by '{}' failed");</expression>
+          </evaluator>
+          <OnMismatch>DENY</OnMismatch>
+          <OnMatch>NEUTRAL</OnMatch>
+        </filter>
+
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <Pattern>%date{ISO8601}|%mdc{idp.remote_addr}|%msg |%replace(%ex){'([^\n]*)\n.*','$1'}%n</Pattern>
+        </encoder>
+    </appender>
+
+
     <!-- Warn log to syslog. -->
     <appender name="IDP_WARN_2" class="ch.qos.logback.classic.net.SyslogAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -229,6 +255,7 @@
         <appender-ref ref="${idp.process.appender:-IDP_PROCESS}"/>
         <appender-ref ref="${idp.warn.appender:-IDP_WARN}" />
         <appender-ref ref="IDP_PASSWORD" />
+        <appender-ref ref="IDP_PASSWORD_FAILURES" />
     </root>
 
 </configuration>
