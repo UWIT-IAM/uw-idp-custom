@@ -126,6 +126,16 @@
         <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.2.840.113994.200.49" friendlyName="preferredSurname" />
     </AttributeDefinition>
 
+    <AttributeDefinition id="alt1_preferredFirst" xsi:type="Simple" >
+        <InputAttributeDefinition ref="preferredFirst" />
+        <AttributeEncoder xsi:type="SAML2String" name="first_name" friendlyName="first_name" nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" />
+    </AttributeDefinition>
+
+    <AttributeDefinition id="alt1_preferredSurname" xsi:type="Simple" >
+        <InputAttributeDefinition ref="preferredSurname" />
+        <AttributeEncoder xsi:type="SAML2String" name="last_name" friendlyName="last_name" nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" />
+    </AttributeDefinition>
+
  <!-- surname = preferred or uwPersonRegisteredSurname -->
 
     <AttributeDefinition id="surnameDummy" xsi:type="Simple" >
