@@ -126,16 +126,6 @@
         <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.2.840.113994.200.49" friendlyName="preferredSurname" />
     </AttributeDefinition>
 
-    <AttributeDefinition id="alt1_preferredFirst" xsi:type="Simple" >
-        <InputAttributeDefinition ref="preferredFirst" />
-        <AttributeEncoder xsi:type="SAML2String" name="first_name" friendlyName="first_name" nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" />
-    </AttributeDefinition>
-
-    <AttributeDefinition id="alt1_preferredSurname" xsi:type="Simple" >
-        <InputAttributeDefinition ref="preferredSurname" />
-        <AttributeEncoder xsi:type="SAML2String" name="last_name" friendlyName="last_name" nameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" />
-    </AttributeDefinition>
-
  <!-- surname = preferred or uwPersonRegisteredSurname -->
 
     <AttributeDefinition id="surnameDummy" xsi:type="Simple" >
@@ -173,7 +163,17 @@
 
     <AttributeDefinition id="alt1_surname" xsi:type="Simple" >
         <InputAttributeDefinition ref="surname" />
+        <AttributeEncoder xsi:type="SAML2String" name="Surname" />
+    </AttributeDefinition>
+
+    <AttributeDefinition id="alt2_surname" xsi:type="Simple" >
+        <InputAttributeDefinition ref="surname" />
         <AttributeEncoder xsi:type="SAML2String" name="LastName" />
+    </AttributeDefinition>
+
+    <AttributeDefinition id="alt3_surname" xsi:type="Simple" >
+        <InputAttributeDefinition ref="surname" />
+        <AttributeEncoder xsi:type="SAML2String" name="last_name" />
     </AttributeDefinition>
 
  <!-- homeDepartment = uwEmployeeHomeDepartment -->
@@ -257,6 +257,11 @@
     <AttributeDefinition id="alt2_givenName" xsi:type="Simple" >
         <InputAttributeDefinition ref="givenName" />
         <AttributeEncoder xsi:type="SAML2String" name="FirstName" />
+    </AttributeDefinition>
+
+    <AttributeDefinition id="alt3_givenName" xsi:type="Simple" >
+        <InputAttributeDefinition ref="givenName" />
+        <AttributeEncoder xsi:type="SAML2String" name="first_name" />
     </AttributeDefinition>
 
  <!--  name = registered given name  -->
