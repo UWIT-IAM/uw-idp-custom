@@ -267,9 +267,15 @@
                 <ref bean="SAML2.Logout" />
                 <ref bean="Liberty.SSOS" />
                 <bean parent="OIDC.SSO"
-                p:accessTokenLifetime="PT1H"
-                p:refreshTokenLifetime="PT168H"
-                 />
+                    p:accessTokenLifetime="PT1H"
+                    p:refreshTokenTimeout="PT168H"
+                    p:refreshTokenChainLifetime="PT168H"
+                />
+                <bean parent="OAUTH2.Token"
+                    p:accessTokenLifetime="PT1H"
+                    p:refreshTokenTimeout="PT168H"
+                    p:refreshTokenChainLifetime="PT168H"
+                />
                 <bean parent="OIDC.UserInfo"/>
                 <bean parent="OAUTH2.Revocation"/>
                </list>
