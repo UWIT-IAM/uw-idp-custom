@@ -50,37 +50,24 @@ function _clear_screen() {
    docdiv.className='visuallyhidden';
 }
 
-/* Validate the netid (login id) entered by the user.
-   Reject any id that includes invalid special characters.
-   Allow @uw.edu, @washington.edu, and @u.washington.edu, but reject any other @something. */
+/* Allow @uw.edu and @washington.edu, but reject any other @something. */
 
 window.onload = function() {
   document.getElementById('idplogindiv').onsubmit=function(e) {
     id = document.getElementById("weblogin_netid").value.toLowerCase();
     document.getElementById("weblogin_netid").value = id;
-    
-    invalidChars = ["!","#","$","%","^","&","*","(",")","=","+","[","]","{","}","\\","|",";",":","\'","\"",",","<",">","/","?"];
-    let validNetid = ! invalidChars.some(invalidChar => id.includes(invalidChar));
-    
-    if (validNetid) {
-      at = id.indexOf("@");
-      if (at >= 0) {
-        if (id.substr(at)=="@uw.edu" || id.substr(at)=="@washington.edu" || id.substr(at)=="@u.washington.edu") {
-          id = id.substr(0,at);
-          document.getElementById("weblogin_netid").value = id;
-        } else {
-          validNetid = false;
-        }
-      }
-    }
-        
-    if (validNetid) {
+    at = id.indexOf("@");
+    if (at<0) {
        _clear_screen();
        return true;
-    } else {
-      document.getElementById("uwsignin").innerHTML = 'Please sign in with your <span style="color: #600000" text-decoration: underline;">UW NetID</span>';
-      return false;
     }
+    if (id.substr(at)=="@uw.edu" || id.substr(at)=="@washington.edu" || id.substr(at)=="@u.washington.edu") {
+       document.getElementById("weblogin_netid").value = id.substr(0,at);
+       _clear_screen();
+       return true;
+    }
+    document.getElementById("uwsignin").innerHTML = 'Please sign in with your <span style="color: #600000" text-decoration: underline;">UW NetID</span>';
+    return false;
   };
   closingMs = 5*60*1000;  // 5 min
   setTimeout(function() {
