@@ -126,7 +126,7 @@
         </bean>
 
         <!-- needing signed responses and assertions ? -->
-        <bean parent="RelyingPartyByName" c:relyingPartyIds="#{{'https://seattle-edc-test.forteresearchapps.com/forte-platform-web/SAML2/SP','https://seattle-edc-prod.forteresearchapps.com/forte-platform-web/SAML2/SP','uwtcsi.getconnect2.com','https://login.staging.rstudio.cloud/saml/sp.xml','https://login.rstudio.cloud/saml/sp.xml'}}">
+        <bean parent="RelyingPartyByName" c:relyingPartyIds="#{{'https://seattle-edc-test.forteresearchapps.com/forte-platform-web/SAML2/SP','https://seattle-edc-prod.forteresearchapps.com/forte-platform-web/SAML2/SP','uwtcsi.getconnect2.com','https://login.staging.rstudio.cloud/saml/sp.xml','https://login.rstudio.cloud/saml/sp.xml','https://hcvs.education.uw.edu'}}">
             <property name="profileConfigurations">
                 <list>
                     <bean parent="SAML2.SSO"
