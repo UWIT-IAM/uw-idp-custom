@@ -60,18 +60,18 @@
 
           <form name="idpgooglestorageintercept" id="idpgooglestorageinterceptdiv" method="POST" action="$flowExecutionUrl" autocomplete="off">
 
-          <p/><strong><span data-contrast="auto">WARNING</span></strong>
+          <br /><strong><span data-contrast="auto">WARNING</span></strong>
           <span data-contrast="auto">: UW Google 100GB storage limit enforcement begins June 11, 2024.</span>
           
-          <p/>
+          <br /><br/>
           Your UW Google account is currently approaching or over the 100GB storage limit.
           Accounts that are at or over the 100GB limit will be restricted starting Tuesday June 11, 2024.
-          <p/>
 
+          <br /><br />
           All UW Google accounts in a restricted state are subject to permanent deletion.
           Any associated Google content—including My Drive, Gmail, Sites, etc.—will be deleted.
-          <p/>
 
+          <br /><br />
           Preserve your UW Google data by
           <a target="blank" href="https://itconnect.uw.edu/tools-services-support/software-computers/productivity-platforms/migrate-uw-google-or-uw-microsoft-content/migrate-uw-google-content/">migrating</a>
           and/or deleting enough content to fall within the 100GB storage limit.
