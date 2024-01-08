@@ -19,7 +19,7 @@
     the warning is displayed, and the duration is the interval between warnings.
     -->
     <util:map id="shibboleth.warning.ConditionMap">
-        <entry key="google-shared-warning">
+        <entry key="google-storage-warning">
             <bean parent="shibboleth.Pair">
                 <constructor-arg index="0">
                     <bean id="uw.WarningIntercept"
@@ -27,7 +27,7 @@
                         p:webClient-ref="uw.UWHttpClient"
                         p:gwsUrlbase = "%{idp.uw.slack-gws-urlbase}"
                         p:targetRpid = "google.com"
-                        p:groupId = "warning_google-shared"
+                        p:groupId = "warning_google-storage"
                     />
                 </constructor-arg>
                 <constructor-arg index="1">
