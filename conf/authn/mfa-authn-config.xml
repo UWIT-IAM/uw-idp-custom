@@ -26,11 +26,6 @@
             <bean parent="shibboleth.authn.MFA.Transition" p:nextFlowStrategy-ref="checkSecondFactorNeeded" />
         </entry>
 
-        <!-- Following a Duo flow, check the 'remember me' toggle.  If duo login failed, it will be rerun. -->
-        <entry key="authn/uwduo">
-            <bean parent="shibboleth.authn.MFA.Transition" p:nextFlowStrategy-ref="checkRememberMe" />
-        </entry>
-
         <!-- Run crn selections through the second factor checker.  -->
         <entry key="authn/crn-select">
             <bean parent="shibboleth.authn.MFA.Transition" p:nextFlowStrategy-ref="checkSecondFactorNeeded" />
@@ -129,6 +124,7 @@
                 */
 
                var Long = Java.type("java.lang.Long");
+               var rememberMeCookieCreationDttm = 0;
                for ( i=0; cookies!=null && i< cookies.length; i++ ) {
                   cookie = cookies[i];
                   if (cookie.getName().equals("%{idp.uw.mfa-remember-cookie}" + username)) {
@@ -136,7 +132,8 @@
                         val = custom.get("sealer").unwrap(cookie.getValue());
                         logger.debug("rememberme cookie value=" + val);
                         vals = val.split("|");
-                        if (vals[1].equals(username) && ( Long.parseLong(vals[2])>resetTime)) {
+                        rememberMeCookieCreationDttm = Long.parseLong(vals[2]);
+                        if (vals[1].equals(username) && ( rememberMeCookieCreationDttm>resetTime)) {
                            hasCookie = "t";
                            conversationScope.put("log_2fa", "cookie");
                         }
@@ -286,11 +283,31 @@
                    }
                 }
   
-                // If user has remember-me, skip 2fa
-                if (hasCookie == "t") {
-                   if (authCtx.isForceAuthn()) {
-                      logger.info("2FA: force authn.  skipping remember cookie test");
+                // Handle remember-me cookies.
+                if (authCtx.isForceAuthn()) {
+                   // Use a Duo integration that does not support remember-me.
+                   conversationScope.put("duo_integration", "forceAuthnDuo");
+                   logger.info("2FA: force authn. Ignoring remember cookie");
+                } else if (hasCookie == "t") {
+                   // We are phasing out UW remember-me cookies.
+                   // This is calculated based on the current time and the cookie creation time (calculated above).
+                   var Calendar = Java.type("java.util.Calendar");
+                   var currentTime = Calendar.getInstance().getTimeInMillis();
+                   var acceptRememberMeCookie = "t";
+
+                   if (currentTime > %{idp.uw.mfa-remember-invalid-after}) {
+                      // All UW remember-me cookies are invalid after this configured time.
+                      acceptRememberMeCookie = "f";
+                   } else if (currentTime < %{idp.uw.mfa-remember-valid-until}) {
+                      // All unexpired UW remember-me cookies are valid until this time.
+                      acceptRememberMeCookie = "t";
                    } else {
+                      // In this intermediate time, remember-me cookies are invalid if their creation date is older than this configured time.
+                      if (rememberMeCookieCreationDttm < %{idp.uw.mfa-remember-old-cookie-dttm}) {
+                         acceptRememberMeCookie = "f";
+                      }
+                   }
+                   if ("t" == acceptRememberMeCookie) {
                       logger.info("2FA: user has remember cookie.  skipping duo");
                       need2f = null;   
                       nextFlow = "authn/duo-bypass";
@@ -367,7 +384,7 @@
                      if (userHasDuo(username)) {
                         logger.info("Choosing Duo for 2f");
                         conversationScope.put("duo_username", username);
-                        nextFlow = "authn/uwduo";
+                        nextFlow = "authn/DuoOIDC";
                      } else {
                         // user may have CRN entry
                         // this stuff runs rarely
@@ -380,7 +397,7 @@
                            // first possibility: simple single CRN.  We get back user with duo 
                            // this is the more common case
 
-                           nextFlow = hasTawsVendor(devs, "duo", "authn/uwduo");
+                           nextFlow = hasTawsVendor(devs, "duo", "authn/DuoOIDC");
 
                            // other possibility: bunch of CRN 
                            // this happens once in a blue moon
@@ -402,7 +419,7 @@
                                     if (crn==null) break;
                                     if (crn.equals(duser)) {  // if already selected, go with it
                                         var pdevs = getTawsPreauth(duser);
-                                        nextFlow = hasTawsVendor(pdevs, "duo", "authn/uwduo");
+                                        nextFlow = hasTawsVendor(pdevs, "duo", "authn/DuoOIDC");
                                         if (nextFlow != null) break;
                                     }
                                     logger.info("adding: " + crn);
@@ -415,7 +432,7 @@
                         } catch (e) {
                            logger.warn("Taws CRN error for user '{}': {}", username, e);
                            conversationScope.put("duo_username", username);
-                           nextFlow = "authn/uwduo";
+                           nextFlow = "authn/DuoOIDC";
                         }
                      }
                   } catch (e) {
@@ -445,7 +462,7 @@
                      }
                   }
                } // end need2f
-               if (nextFlow != null && nextFlow.equals("authn/uwduo"))  conversationScope.put("log_2famethod", "duo");
+               if (nextFlow != null && nextFlow.equals("authn/DuoOIDC"))  conversationScope.put("log_2famethod", "duo");
 
                if (disusered) nextFlow = "authn/disusered";
 
@@ -529,73 +546,6 @@
                }
 
                logger.debug("leaving, nextFlow=" + nextFlow);
-               nextFlow;
-           ]]>
-       </value>
-       </constructor-arg>
-   </bean>
-
-    <!-- Finish A Duo authn.  Check for rememberme -->
-    <bean id="checkRememberMe" parent="shibboleth.ContextFunctions.Scripted" factory-method="inlineScript"
-          p:customObject-ref="uw.ComboBean">
-       <constructor-arg>
-           <value>
-           <![CDATA[
-               var AuthnContextClassRefPrincipal = Java.type("net.shibboleth.idp.saml.authn.principal.AuthnContextClassRefPrincipal");
-               logger = Java.type("org.slf4j.LoggerFactory").getLogger("edu.washington.shibboleth");
-               logger.debug("checkRememberMe");
-               nextFlow = null;
-
-               // if duo failed, rerun
-               requestContext = input.getSubcontext("net.shibboleth.idp.profile.context.SpringRequestContext").getRequestContext();
-               currentEvent = requestContext.getCurrentEvent().toString();
-               logger.debug("duo status = " + currentEvent);
-               if (currentEvent.equals("ReselectFlow") || currentEvent.equals("NoCredentials")) nextFlow = "authn/uwduo";
-
-               if (nextFlow==null) {
-                  CanonicalUsernameLookupStrategy = Java.type("net.shibboleth.idp.session.context.navigate.CanonicalUsernameLookupStrategy");
-                  culs = new CanonicalUsernameLookupStrategy();
-                  username = culs.apply(input);
-   
-                  // set or delete cookie, depends on rememberme checked
-
-                  remme = requestContext.getConversationScope().get("rememberme");
-                  logger.debug("check rememberme username = " + username + ", remme=" + remme + ".");
-                  cname = requestContext.getConversationScope().get("duo_realuser");
-                  needsOptin = requestContext.getConversationScope().get("needsOptinCookie");
-                  if (!username.equals(cname)) {
-                     logger.info("using cookie for: " + cname);
-                     username = cname;
-                  }
-
-                  var maxAge = 0;
-                  if (remme!=null && remme.equals("y")) maxAge = %{idp.uw.mfa-remember-seconds};
-                  var Random = Java.type("java.util.Random");
-                  var Cookie = Java.type("javax.servlet.http.Cookie");
-                  var Instant = Java.type("java.time.Instant");
-                  var uNow = Instant.now().getEpochSecond();
-                  tdata = new Random().nextInt(1000000) + "|" + username + "|" + uNow;
-                  logger.debug("rcookie=" + tdata);
-                  cdata = custom.get("sealer").wrap(tdata, Instant.ofEpochMilli(uNow*1000 + %{idp.uw.mfa-remember-seconds}*1000));
-                  cookie = new Cookie("%{idp.uw.mfa-remember-cookie}" + username, cdata);
-                  cookie.setPath("/");
-                  cookie.setSecure(true);
-                  cookie.setHttpOnly(true);
-                  cookie.setMaxAge(maxAge);
-                  response = custom.get("response");
-                  response.addCookie(cookie);
-
-                  // set optin as needed
-                  if (needsOptin!=null) {
-                     logger.info("setting optin cookie");
-                     cookie = new Cookie("%{idp.uw.mfa-optin-cookie}" + username, "yes");
-                     cookie.setPath("/");
-                     cookie.setSecure(true);
-                     cookie.setHttpOnly(true);
-                     cookie.setMaxAge(31104000);  // 1 year
-                     response.addCookie(cookie);
-                  }
-               }
                nextFlow;
            ]]>
        </value>
