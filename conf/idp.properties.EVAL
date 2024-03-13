@@ -6,8 +6,8 @@
 # auto load conf/**/*.properties
 idp.searchForProperties = true
 
-# Load cresdentials properties
-idp.additionalProperties=/credentials/duo.properties
+# Load credentials properties
+idp.additionalProperties=/credentials/secrets.properties
 
 # Set the entityID of the IdP and the AWS ident
 
@@ -47,6 +47,12 @@ idp.uw.token-auth-urlbase = https://taws.s.uw.edu:716/token/v2/auth/
 # mfa remember cookie name
 idp.uw.mfa-remember-cookie = uw-rememberme-
 idp.uw.mfa-remember-seconds = 2592000
+# All unexpired remember-me cookies valid until this date. 2024-03-06 06:00:00, in milliseconds
+idp.uw.mfa-remember-valid-until = 1709733600000
+# All remember-me cookies invalid after this date. 2024-03-07 06:00:00, in milliseconds
+idp.uw.mfa-remember-invalid-after = 1709820000000
+# Remember cookies older than this date become invalid after mfa-remember-valid-until. 2024-02-20 06:00:00, in seconds.
+idp.uw.mfa-remember-old-cookie-dttm = 1708437600
 
 # google preauth parameters
 idp.uw.nws-urlbase = https://uwnetid.washington.edu/nws/v1/uwnetid/
