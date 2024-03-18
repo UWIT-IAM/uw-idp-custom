@@ -47,7 +47,7 @@
 
     <!-- After a successful Password flow, see if 2nd factor is needed.
          1) Token authn requested
-         2) User opted into mfa and has no 'remember' cookie
+         2) User opted into mfa
        -->
 
     <bean id="checkSecondFactorNeeded" parent="shibboleth.ContextFunctions.Scripted" factory-method="inlineScript"
@@ -66,7 +66,6 @@
                cookies = request.getCookies();
                nextFlow = null;
                need2f = null;
-               hasCookie = "f";
                hasOptinCookie = null;
                needsOptinCookie = null;
                disusered = false;
@@ -82,7 +81,6 @@
                requestContext = input.getSubcontext("net.shibboleth.idp.profile.context.SpringRequestContext").getRequestContext();
                conversationScope = requestContext.getConversationScope();
 
-               conversationScope.put("remember_checked", null);
                conversationScope.put("duo_username", null);
                conversationScope.put("show_duo_username", null);
                conversationScope.put("needsOptinCookie", null);
@@ -120,33 +118,11 @@
                }
                conversationScope.put("user_seq", userSeq);
                
-               /* Check cookies.  See if the user has a long-term 2fa session.
+               /* Check cookies.  See if the user has an optin cookie.
                 */
 
-               var Long = Java.type("java.lang.Long");
-               var rememberMeCookieCreationDttm = 0;
                for ( i=0; cookies!=null && i< cookies.length; i++ ) {
                   cookie = cookies[i];
-                  if (cookie.getName().equals("%{idp.uw.mfa-remember-cookie}" + username)) {
-                     try {
-                        val = custom.get("sealer").unwrap(cookie.getValue());
-                        logger.debug("rememberme cookie value=" + val);
-                        vals = val.split("|");
-                        rememberMeCookieCreationDttm = Long.parseLong(vals[2]);
-                        if (vals[1].equals(username) && ( rememberMeCookieCreationDttm>resetTime)) {
-                           hasCookie = "t";
-                           conversationScope.put("log_2fa", "cookie");
-                        }
-                     } catch (e) {
-                        if (e instanceof Java.type("net.shibboleth.utilities.java.support.security.DataExpiredException")) {
-                            logger.debug("cookie has expired");
-                            hasCookie = "e";
-                        } else {
-                           logger.debug(e);
-                        }
-                     }
-                     conversationScope.put("remember_checked", "t");
-                  }
                   if (cookie.getName().equals("%{idp.uw.mfa-optin-cookie}" + username)) {
                      logger.debug("has optin cookie");
                      hasOptinCookie = "t";
@@ -262,8 +238,8 @@
                    return false;
                 }
 
-                // See if user opted in to 2nd factor and has no long-term session
-                if (need2f == null && hasCookie!="t") {
+                // See if user opted in to 2nd factor
+                if (need2f == null) {
 
                    url = "%{idp.uw.2fa-optin-urlbase}" + username 
                    if (userInGroup(url)) {
@@ -283,36 +259,12 @@
                    }
                 }
   
-                // Handle remember-me cookies.
+                // Handle remember-me cookies. Since Duo controls the cookies,
+                // use a Duo integration with no remember-me if requested.
                 if (authCtx.isForceAuthn()) {
                    // Use a Duo integration that does not support remember-me.
                    conversationScope.put("duo_integration", "forceAuthnDuo");
                    logger.info("2FA: force authn. Ignoring remember cookie");
-                } else if (hasCookie == "t") {
-                   // We are phasing out UW remember-me cookies.
-                   // This is calculated based on the current time and the cookie creation time (calculated above).
-                   var Calendar = Java.type("java.util.Calendar");
-                   var currentTime = Calendar.getInstance().getTimeInMillis();
-                   var acceptRememberMeCookie = "t";
-
-                   if (currentTime > %{idp.uw.mfa-remember-invalid-after}) {
-                      // All UW remember-me cookies are invalid after this configured time.
-                      acceptRememberMeCookie = "f";
-                   } else if (currentTime < %{idp.uw.mfa-remember-valid-until}) {
-                      // All unexpired UW remember-me cookies are valid until this time.
-                      acceptRememberMeCookie = "t";
-                   } else {
-                      // In this intermediate time, remember-me cookies are invalid if their creation date is older than this configured time.
-                      if (rememberMeCookieCreationDttm < %{idp.uw.mfa-remember-old-cookie-dttm}) {
-                         acceptRememberMeCookie = "f";
-                      }
-                   }
-                   if ("t" == acceptRememberMeCookie) {
-                      logger.info("2FA: user has remember cookie.  skipping duo");
-                      need2f = null;   
-                      nextFlow = "authn/duo-bypass";
-                      conversationScope.put("log_2famethod", "cookie");
-                   }
                 }
 
                // If 2nd factor needed, several choices
@@ -505,7 +457,7 @@
                    
                    // if 2FA not required, check if 2FA will be required soon, if so prompt the user to opt in
                    // don't show the prompt for the page to set up 2FA (that would be redundant)
-                   if (need2f != 't' && hasCookie != 't' && !hasMfaSoonCookie && rpid != 'https://identity.uw.edu/shibboleth') {
+                   if (need2f != 't' && !hasMfaSoonCookie && rpid != 'https://identity.uw.edu/shibboleth') {
                        // check group membership to see if the user should be notified
                        url = "%{idp.uw.2fa-optin-soon-urlbase}" + username;
                        if (userInGroup(url)) {

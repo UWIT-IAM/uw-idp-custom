@@ -868,13 +868,7 @@
 
     <DataConnector id="personreg" xsi:type="LDAPDirectory" 
 
-{% if location == 'uwtc' %}
-           ldapURL="ldap://seneca33.s.uw.edu:389 ldap://seneca31.s.uw.edu:389 ldap://seneca32.s.uw.edu:389"
-{% elif location == 'ads' %}
-           ldapURL="ldap://seneca31.s.uw.edu:389 ldap://seneca33.s.uw.edu:389 ldap://seneca32.s.uw.edu:389"
-{% else %}
-           ldapURL="ldap://seneca32.s.uw.edu:389 ldap://seneca31.s.uw.edu:389 ldap://seneca33.s.uw.edu:389"
-{% endif %}
+           ldapURL="ldap://eds.u.washington.edu:389"
 
            baseDN="dc=washington,dc=edu"
            principal="cn=idp.u.washington.edu"
