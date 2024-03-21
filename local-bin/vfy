@@ -1,0 +1,5 @@
+/data/local/idp/local-bin/samlsign-1.0/samlsign.sh \
+   --inFile $1 \
+     --validateSchema \
+     --schemaExtension /schema/shibboleth-2.0-afp-mf-basic.xsd \
+     --schemaExtension /schema/shibboleth-2.0-afp-mf-saml.xsd

@@ -1,0 +1,58 @@
+<html>
+
+<body>
+
+
+<h2>Auto 2fa SPs</h2>
+<table colsep="10">
+<tr> <th>SP id</th> </tr>
+{% for item in items.auto|sort(attribute='sp') %}
+ <tr><td>{{item.sp}}</td></tr>
+{% endfor %}
+<table>
+
+<h2>Never 2fa SPs</h2>
+<table colsep="10">
+<tr> <th>SP id</th> </tr>
+{% for item in items.no2fa|sort(attribute='sp') %}
+ <tr><td>{{item.sp}}</td></tr>
+{% endfor %}
+<table>
+
+<h2>Disusered ids</h2>
+<table colsep="10">
+<tr> <th>UW NetID</th> <th>Time</th> </tr>
+{% for item in items.disuser|sort(attribute='netid') %}
+ <tr><td>{{item.netid}}</td> <td>{{item.time}}</td></tr>
+{% endfor %}
+<table>
+
+
+<h2>Re-usered ids</h2>
+<table colsep="10">
+<tr> <th>UW NetID</th> <th>Time</th> </tr>
+{% for item in items.reuser|sort(attribute='netid') %}
+ <tr><td>{{item.netid}}</td> <td>{{item.time}}</td></tr>
+{% endfor %}
+<table>
+
+
+<h2>Rememberme rekey ids</h2>
+<table colsep="10">
+<tr> <th>UW NetID</th> <th>key</th> </tr>
+{% for item in items.rkey|sort(attribute='netid') %}
+ <tr><td>{{item.netid}}</td> <td>{{item.key}}</td></tr>
+{% endfor %}
+<table>
+
+
+<h2>Authz fail urls</h2>
+<table colsep="10">
+<tr> <th>SP id</th> <th>URL</th> </tr>
+{% for item in items.zlink|sort(attribute='sp') %}
+ <tr><td>{{item.sp}}</td> <td>{{item.url}}</td></tr>
+{% endfor %}
+<table>
+
+
+

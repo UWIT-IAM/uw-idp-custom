@@ -1,0 +1,11 @@
+/data/local/src/fox/.cpan/build/XML-DOM-1.46-5M9hkB/lib
+/data/local/src/fox/.cpan/build/XML-DOM-1.46-5M9hkB/blib/lib
+/data/local/src/fox/.cpan/build/XML-RegExp-0.04-mVkl0x/lib
+/data/local/src/fox/.cpan/build/XML-RegExp-0.04-mVkl0x/blib/lib
+/data/local/src/fox/.cpan/build/XML-DOM-1.46-ksmiJ_/lib
+/data/local/src/fox/.cpan/build/XML-DOM-1.46-ksmiJ_/blib/lib
+/data/local/src/fox/.cpan/build/XML-RegExp-0.04-cjz0Km/lib
+/data/local/src/fox/.cpan/build/XML-RegExp-0.04-cjz0Km/blib/lib
+
+export PERL5LIB="$PERL5LIB:/usr/lusers/fox/.cpan/build/XML-DOM-1.46-5M9hkB/lib:/usr/lusers/fox/.cpan/build/XML-DOM-1.46-5M9hkB/blib/lib:/usr/lusers/fox/.cpan/build/XML-RegExp-0.04-mVkl0x/lib:/usr/lusers/fox/.cpan/build/XML-RegExp-0.04-mVkl0x/blib/lib
+

@@ -16,10 +16,11 @@ cd $wd
 
 ## . /data/local/iam-test/testlib.sh
 ## . /data/local/gws-provisioning/bin/gws_lib.sh
-certdir=/data/local/idp-3.4/credentials
+certdir=/data/local/idp/credentials
 
 gws_hosts="iam21 iam22 iam23 iam26"
 pds_hosts="seneca21 seneca22 seneca23"
+pds_hosts="seneca21 seneca22 seneca23 seneca31 seneca32 seneca33"
 pws_hosts="it-ws1 it-ws2 it-ws3 it-ws4"
 
 ## [[ "$1" == "" ]] || hosts="$1"
@@ -100,7 +101,7 @@ interactive=1
      (( st>0 )) && {
         txt="idled"
         (( st==2 )) && txt="dead"
-        (( interactive==1 )) && {
+        (( interactive==0 )) && {
            echo "$txt"
            continue
         }
@@ -125,7 +126,7 @@ interactive=1
      (( st>0 )) && {
         txt="idled"
         (( st==2 )) && txt="dead"
-        (( interactive==1 )) && {
+        (( interactive==0 )) && {
            echo "$txt"
            continue
         }

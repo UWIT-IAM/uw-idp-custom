@@ -11,39 +11,22 @@
                         urn:oasis:names:tc:SAML:2.0:metadata http://docs.oasis-open.org/security/saml/v2.0/saml-schema-metadata-2.0.xsd">
                         
 
-<!-- if full download of metadata.  See dynamic below 
-        <MetadataProvider id="ICMD" xsi:type="FileBackedHTTPMetadataProvider" 
-                          maxRefreshDelay="PT24H" minRefreshDelay="PT8H"
-                          metadataURL="http://md.incommon.org/InCommon/InCommon-metadata.xml"
-                          backingFile="%{idp.home}/metadata-cache/InCommon-metadata.xml">
-            <MetadataFilter xsi:type="SignatureValidation" requireSignedRoot="true"
-                            certificateFile="%{idp.home}/credentials/inc-md-cert.pem"/>
-            <MetadataFilter xsi:type="RequiredValidUntil" maxValidityInterval="P14D"/>
-            <MetadataFilter xsi:type="EntityRoleWhiteList" >
-                   <RetainedRole>md:SPSSODescriptor</RetainedRole>
-            </MetadataFilter>
-        </MetadataProvider>
--->
 
-
-<!-- if doing only filesystem metadata.  requires external metadata fetcher
-    <MetadataProvider id="InCommonMetadata"  xsi:type="FilesystemMetadataProvider"
-         xmlns="urn:mace:shibboleth:2.0:metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="urn:mace:shibboleth:2.0:metadata http://shibboleth.net/schema/idp/shibboleth-metadata.xsd"
-         maxRefreshDelay="PT2H" metadataFile="%{idp.home}/metadata-cache/InCommon-metadata.xml">
-            <MetadataFilter xsi:type="SignatureValidation" requireSignedRoot="true"
-                            certificateFile="%{idp.home}/credentials/inc-md-cert.pem"/>
-            <MetadataFilter xsi:type="RequiredValidUntil" maxValidityInterval="P14D"/>
-                <MetadataFilter xsi:type="EntityRoleWhiteList" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">
-                    <RetainedRole>md:SPSSODescriptor</RetainedRole>
-                </MetadataFilter>
-    </MetadataProvider>
--->
 
     <MetadataProvider id="UWBaseMetadata"  xsi:type="FilesystemMetadataProvider"
          maxRefreshDelay="PT4H" metadataFile="%{idp.home}/metadata/UW-base-metadata.xml"/>
+
+    <!--
     <MetadataProvider id="UWRpMetadata"  xsi:type="FilesystemMetadataProvider"
-         maxRefreshDelay="PT15M" metadataFile="%{idp.home}/metadata/UW-rp-metadata.xml"/>
+         failFastInitialization="false"
+         maxRefreshDelay="PT5M" metadataFile="%{idp.home}/metadata/UW-rp-metadata.xml"/>
+     -->
+
+    <!-- UW local Per-Entity Metadata -->
+    <MetadataProvider id="uwrp" xsi:type="LocalDynamicMetadataProvider"
+             sourceDirectory="%{idp.home}/rp-metadata"
+             maxCacheDuration="PT48H" minCacheDuration="PT10M" persistentCacheManagerDirectory="%{idp.home}/rp-metadata-cache">
+    </MetadataProvider>
 
     <!-- InCommon Per-Entity Metadata Distribution Service -->
     <MetadataProvider id="incommon" xsi:type="DynamicHTTPMetadataProvider"

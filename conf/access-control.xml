@@ -23,7 +23,7 @@
     <util:map id="shibboleth.AccessControlPolicies">
     
         <entry key="UWInternalPolicy">
-            <bean parent="shibboleth.IPRangeAccessControl" p:allowedRanges="#{ {'69.0.0.0/8', '127.0.0.1/32', '::1/128'} }" />
+            <bean parent="shibboleth.IPRangeAccessControl" p:allowedRanges="#{ {'10.0.0.0/8', '69.0.0.0/8', '127.0.0.1/32', '::1/128'} }" />
         </entry>
         <entry key="LocalhostPolicy">
             <bean parent="shibboleth.IPRangeAccessControl" p:allowedRanges="#{ {'127.0.0.1/32', '::1/128'} }" />

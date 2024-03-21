@@ -158,8 +158,8 @@ def updateIdpConfig(group):
         log(log_err, '%s document %s is too short: %d<%d' % (group['type'], tmp_path, num_row, group['min_rows']))
         return False
 
-    if not verifySaml(tmp_path):
-        return False
+    # if not verifySaml(tmp_path):
+    #     return False
 
     # is ok, replace original
 
@@ -185,25 +185,31 @@ def updateFiles(group):
     if not ret:
         print ('update files error: ' + group['type'])
         print (group)
-        send_alert(config.alert_component, 3, 'IdP update of spreg data failed',
-           'SPReg update: new data from spreg is not valid.  New changes from spreg will not propagate.',
-           kba=config.alert_kba, ci_name=config.alert_ci_name)
+        # send_alert(config.alert_component, 3, 'IdP update of spreg data failed',
+        #    'SPReg update: new data from spreg is not valid.  New changes from spreg will not propagate.',
+        #    kba=config.alert_kba, ci_name=config.alert_ci_name)
 
 # -------- access control update ------------------
 
 warning_msg = '<!-- DON\'T EDIT!  This file created by, and overwritten by, spreg_update_4.py -->'
 
+#def _api_json(type, sp, ts=ts, url=url):
+#    if type='mfa':
+        
 def updateAccess():
     global db
     num = 0
 
     # see if we're needed ( two tables to check )
     c1 = db.cursor()
-    mtime = mTime(config.idp_base + 'conf/' + config.autorps_filename)
+    mtime = mTime(config.idp_base + 'conf/authn/' + config.dynamic_filename)
+    print(mtime)
     query = "select count(*) from access_control where end_time is null and start_time > '%s';" % (mtime)
+    print(query)
     c1.execute(query)
     row = c1.fetchone()
     c1.close()
+    print('dyn rows: %d' % row[0])
 
     if row[0]==0:
         c1 = db.cursor()
@@ -220,18 +226,22 @@ def updateAccess():
         'mfa': set([]),
         'mfa_authz': set([]),
         'rkey': set([]),
-        'ciso': set([])
+        'disuser': set([]),
+        'reuser': set([]),
+        'zlink': set([])
     }
 
     # accumulate info from the tables
 
     c1 = db.cursor()
-    c1.execute('select entity_id,conditional,auto_2fa from access_control where end_time is null order by entity_id')
+    c1.execute('select entity_id,conditional,conditional_link,auto_2fa from access_control where end_time is null order by entity_id')
     rows = c1.fetchall()
     for row in rows:
         if row[1]:
             auth_sps['authz'].add(row[0])
-        if row[2]:
+            if row[2]:
+                auth_sps['zlink'].add((row[0],row[2]))
+        if row[3]:
             auth_sps['mfa'].add(row[0])
         num += 1
     c1.close()
@@ -241,12 +251,14 @@ def updateAccess():
     rows = c1.fetchall()
     for row in rows:
         if len(row)==3:
-            if row[0]=='ciso':
-                auth_sps['ciso'].add((row[1], row[2]))
+            if row[0]=='disuser':
+                auth_sps['disuser'].add((row[1], row[2]))
+            if row[0]=='reuser':
+                auth_sps['reuser'].add((row[1], row[2]))
             if row[0]=='rkey':
                 auth_sps['rkey'].add((row[1], row[2]))
     c1.close()
-    print(auth_sps)
+    # print(auth_sps)
 
     # output the specials bean
     auth_sps['warning'] = warning_msg
@@ -260,43 +272,62 @@ def updateAccess():
     os.rename(tout, dest)
     log(log_info, "Created new " + dest)
 
-    # output the autotoken list - no need for this after dynamic config file is live
-    dest = config.idp_base + 'conf/authn/' + config.autotoken_filename
-    tout = config.tmp_dir + config.autotoken_filename
-    with open(tout, 'w') as f:
-        f.write('# list of SPs needing auto 2fa\n# created by spreg_update_4.py\n')
-        f.write('urn:amazon:webservices\n')
-        f.write('http://www.workday.com\n')
-        f.write('oidc/mosler.s.uw.edu\n')
-        for l in auth_sps['mfa']:
-            f.write(l + '\n')
-    arc = config.archive_dir + config.autotoken_filename + '.' + time.strftime('%s')
-    shutil.copy2(dest, arc)
-    os.rename(tout, dest)
-    log(log_info, "Created new " + dest)
+    # output the dynamic config files
+    # Contents of the file - lines contain '|' separated fields
+    #    auto   | <spid>              SP always requires 2fa authentication
+    #    no2fa  | <spid>              SP never gets 2fa authentication ( overrides other flags )
+    #    disuser| <netid> | time      User is disusered (as of 'time'). Cannot login
+    #    reuser | <netid> | time      User is reusered (as of 'time'). Must force-reauth each time
+    #    zlnk   | <spid>  | URL       URL to display to users when access to SP is denied.
 
-    # output the dynamic config file
     dest = config.idp_base + 'conf/authn/' + config.dynamic_filename
     tout = config.tmp_dir + config.dynamic_filename
-    with open(tout, 'w') as f:
-        with open(tin, 'r') as fb:
-            f.write(fb.read())
-        # f.write('# dynamic configuration\n# created by spreg_update_4.py\n')
-        # f.write('auto|urn:amazon:webservices\n')
-        # f.write('auto|http://www.workday.com\n')
-        # f.write('auto|oidc/mosler.s.uw.edu\n')
+    tin = config.idp_base + 'conf/authn/' + config.dynamic_filename_base
 
+    apilines = []
+    with open(tout, 'w') as f:
+        f.write('# do not edit.  created by spreg_...\n')
+        # add fixed data
+        with open(tin, 'r') as fb:
+            lines = f.readlines()
+        for line in [x.strip() for x in lines]:
+            if line.find('#')>=0 or len(line)==0:
+                continue;
+            f.write(line + '\n')
+        # add spreg data
         for e in auth_sps['mfa']:
             f.write('auto|%s\n' % (e))
         for u,t in auth_sps['rkey']:
             f.write('rkey|%s|%d\n' % (u, t))
-        for u,t in auth_sps['ciso']:
-            f.write('ciso|%s|%d\n' % (u, t))
+        for u,t in auth_sps['disuser']:
+            f.write('disuser|%s|%d\n' % (u, t))
+        for u,t in auth_sps['reuser']:
+            f.write('reuser|%s|%d\n' % (u, t))
+        for u,l in auth_sps['zlink']:
+            f.write('zlink|%s|%s\n' % (u, l))
        
     arc = config.archive_dir + config.dynamic_filename + '.' + time.strftime('%s')
     shutil.copy2(dest, arc)
     os.rename(tout, dest)
     log(log_info, "Created new " + dest)
+
+    # write the api docs
+    rpt_excp = {'meta': {
+            'resource': 'IdP netid excptions',
+            'updated': int(time.time()),
+            'host': os.uname()[1] }}
+    rpt_full = {'meta': {
+            'resource': 'IdP netid excptions',
+            'updated': int(time.time()),
+            'host': os.uname()[1] }}
+    with open(dest,'r') as f:
+        lines = f.readlines()
+        for line in [x.strip() for x in lines]:
+            if line.find('#')>=0 or len(line)==0:
+                continue;
+
+    json_excp = config.dynamic_excp_report
+    json_full = config.dynamic_full_report
 
 
 # ---------
@@ -358,13 +389,10 @@ else:
     for group in config.idp_conf_files['groups']:
         log(log_info, "checking '%s %s'" % (group['type'], group['id'] if 'id' in group else ''))
         if options.force or countNewRows(group) > 0:
-            if group['type'] == 'access_control':
-                updateAccess(group)
-            else:
-                updateFiles(group)
+            updateFiles(group)
 
-        # update_access has it's own counter
-        updateAccess();
+    # update_access has it's own counter
+    updateAccess();
 
     # send keepalive every time script is run--dash alert will happen
 

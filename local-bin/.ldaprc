@@ -1,0 +1,5 @@
+TLS_CACERT /data/local/idp-3.4/credentials/uw-incommon-ca.crt
+TLS_RANDFILE /data/local/idp-3.4/local-bin/.rand
+TLS_CERT /data/local/idp-3.4/credentials/idp-uw.crt
+TLS_KEY /data/local/idp-3.4/credentials/idp-uw.key
+

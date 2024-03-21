@@ -15,9 +15,9 @@ use LWP::Simple;
 # ------------------- parameters ------------
 
 # filter and metadata files
-my $rp_filter_file = "/data/local/idp-3.4/conf/rp-filter.xml";
-my $uw_metadata_file = "/data/local/idp-3.4/metadata/UW-rp-metadata.xml";
-my $ic_metadata_file = "/data/local/idp-3.4/metadata/InCommon-metadata.xml";
+my $rp_filter_file = "/data/local/idp/conf/rp-filter.xml";
+my $uw_metadata_file = "/data/local/idp/metadata/UW-rp-metadata.xml";
+my $ic_metadata_file = "/data/local/idp/metadata/InCommon-metadata.xml";
 
 # get the dynamic files from idp eval
 # my $url = 'https://idp11.s.uw.edu/metadata/UW-rp-metadata.xml';
@@ -37,9 +37,9 @@ my $webpage_file = "";
 my $webpage_file_tmp = ".tmp";
 
 # authentication
-$ENV{HTTPS_CA_DIR} = "/data/local/idp-3.4/credentials/uwca.crt";
-$ENV{HTTPS_CERT_FILE} = "/data/local/idp-3.4/credentials/idp-uw.crt";
-$ENV{HTTPS_KEY_FILE}  = "/data/local/idp-3.4/credentials/idp-uw.key";
+$ENV{HTTPS_CA_DIR} = "/data/local/idp/credentials/uwca.crt";
+$ENV{HTTPS_CERT_FILE} = "/data/local/idp/credentials/idp-uw.crt";
+$ENV{HTTPS_KEY_FILE}  = "/data/local/idp/credentials/idp-uw.key";
 
 
 # -------------------------------------------

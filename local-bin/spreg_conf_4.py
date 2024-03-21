@@ -1,5 +1,5 @@
 
-idp_base = '/data/local/idp-3.4/'
+idp_base = '/data/local/idp/'
 
 tgtid_db = {
  "db_host": "localhost",
@@ -8,12 +8,15 @@ tgtid_db = {
  "db_pass": "spud123",
 }
 
-spreg_db_DEV = {
+# setting for iam-tools-test spreg
+spreg_db_TEST = {
  'db_host': 'iamdbdev01',
- 'db_name': 'spreghistory2018',
+ 'db_name': 'spregistry',
  'db_user': 'spreg1',
  'db_pass': 'ae500169-e8b9-4945-ba56-10d59d380067',
 }
+
+# setting for iam-tools spreg
 spreg_db = {
  'db_host': 'iamdb21',
  'db_name': 'spregistry',
@@ -22,7 +25,9 @@ spreg_db = {
 }
 
 conf_dir = idp_base + '/conf/'
-metadata_dir = idp_base + '/metadata/'
+filter_dir = idp_base + '/conf/'
+metadata_dir = idp_base + '/rp-metadata/'
+metadata_cache_dir = idp_base + '/rp-metadata-cache/'
 tmp_dir = idp_base + 'tmp/'
 archive_dir = idp_base + 'archive/'
 template_dir = conf_dir
@@ -36,6 +41,9 @@ idp_conf_files = {
 autorps_filename = 'uw-auto-rps.xml'
 autotoken_filename = 'autotoken.txt'
 dynamic_filename = 'dynamic-mfa.txt'
+dynamic_path = idp_base + 'conf/authn/' + dynamic_filename
+dynamic_filename_base = 'dynamic-mfa.base'
+dynamic_json = 'dynamic-mfa.json'
 
 # unedited files 
 #      {'type': 'filter', 'id':'uwcore', 'dir': 'conf', 'filename': 'core-filter.xml', 'min_rows': 2},

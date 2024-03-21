@@ -103,19 +103,4 @@
     </bean>
     -->
 
-<bean id="shibboleth.metrics.MetricStrategy" parent="shibboleth.ContextFunctions.Scripted"
-        factory-method="inlineScript">
-    <constructor-arg>
-        <value>
-        <![CDATA[
-            var dateTimeType = Java.type("org.joda.time.DateTime");
-            var auditCtx = input.getSubcontext("net.shibboleth.idp.profile.context.AuditContext", true);
-            auditCtx.getFieldValues("ST").add(new dateTimeType().toString("YYYY-MM-dd'T'HH:mm:ss.SSS"));
- 
-            true; // Signals success.
-        ]]>
-        </value>
-    </constructor-arg>
-</bean>
-    
 </beans>

@@ -1,9 +1,9 @@
 import os
 
-CERT_FILE = '/data/local/idp-3.4/credentials/idp-uw.crt'
-KEY_FILE = '/data/local/idp-3.4/credentials/idp-uw.key'
+CERT_FILE = '/data/local/idp/credentials/idp-uw.crt'
+KEY_FILE = '/data/local/idp/credentials/idp-uw.key'
 
-PROPS = '/data/local/idp-3.4/conf/idp.properties'
+PROPS = '/data/local/idp/conf/idp.properties'
 DNS_NAME = 's.uw.edu'
 
 URL = {

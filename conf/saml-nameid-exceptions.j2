@@ -50,6 +50,7 @@
     <bean id="uw.GetsTgtidNameId" parent="shibboleth.Conditions.RelyingPartyId">
      <constructor-arg name="candidates">
         <list>
+            <value>https://urizen.s.uw.edu/shibboleth</value>
             {% for rp in info.tgtid %}
             <value>{{ rp }}</value>
             {% endfor %}

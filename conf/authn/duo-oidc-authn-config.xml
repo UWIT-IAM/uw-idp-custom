@@ -1,0 +1,88 @@
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:util="http://www.springframework.org/schema/util" xmlns:p="http://www.springframework.org/schema/p" xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+
+    default-init-method="initialize" default-destroy-method="destroy">
+
+    <!--
+    By default, the DuoOIDC flow will use statically-defined integrations defined via
+    properties. If you need more flexibility, you can define a function bean
+    called "shibboleth.authn.DuoOIDC.DuoIntegrationStrategy" to return an instance of
+    net.shibboleth.idp.plugin.authn.duo.DefaultDuoOIDCIntegration based on the state
+    of the request.
+
+    The Duo flow is designed to operate in conjunction with some other login flow,
+    usually orchestrated by the MFA login flow. It obtains the username to send to
+    Duo based on the output of the other login flow or a previous session with the
+    user. You can override that approach using a function bean called
+    "shibboleth.authn.DuoOIDC.UsernameLookupStrategy" to supply the username from a
+    different source.
+    
+    Various other beans are supported, per the documentation.
+    -->
+
+    <!-- This bean configures DuoOIDC to use our custom duo_username field
+         for the Duo username, which can differ from the login id in crn cases. -->
+    <bean id="shibboleth.authn.DuoOIDC.UsernameLookupStrategy"
+        class="edu.washington.idp.authn.tools.CachedUsernameLookup" />
+
+
+    <!-- This is the default Duo Integration which supports a remember-me cookie. -->
+    <bean id="DefaultDuo" parent="shibboleth.authn.DuoOIDC.DuoIntegration" 
+        p:APIHost="%{idp.duo.oidc.apiHost:none}"
+        p:clientId="%{idp.duo.oidc.clientId:none}" 
+        p:secretKey="%{idp.duo.oidc.secretKey:none}" />
+
+    <!-- This is an alternate Duo Integration used for ForceAuthn cases.
+         Remember-me is not configured for this integration, so a new 2FA action will be required. -->
+    <bean id="ForceAuthnDuo" parent="shibboleth.authn.DuoOIDC.DuoIntegration" 
+        p:APIHost="%{idp.forceauthnduo.oidc.apiHost:none}"
+        p:clientId="%{idp.forceauthnduo.oidc.clientId:none}" 
+        p:secretKey="%{idp.forceauthnduoduo.oidc.secretKey:none}" />
+
+    <!-- This utility class is needed to support selecting a Duo integration based on a supplied parameter. -->
+    <util:map id="DuoIntegrationMap">
+        <entry key="default" value-ref="DefaultDuo" />
+        <entry key="forceAuthnDuo" value-ref="ForceAuthnDuo" />
+    </util:map>
+
+    <!-- This bean tells DuoOIDC how to choose which Duo integration to use.
+         Uses the default Duo integration unless the request configuration requests a different integration. -->
+    <bean id="shibboleth.authn.DuoOIDC.DuoIntegrationStrategy" parent="shibboleth.ContextFunctions.Scripted"
+        factory-method="inlineScript"
+        p:customObject-ref="DuoIntegrationMap">
+        <constructor-arg>
+        <value>
+        <![CDATA[
+            duoIntegration = null;
+
+            logger = Java.type("org.slf4j.LoggerFactory").getLogger("edu.washington.shibboleth");
+            springRequestContext = input.getSubcontext("net.shibboleth.idp.profile.context.SpringRequestContext");
+            if (springRequestContext) {
+                requestContext = springRequestContext.getRequestContext();
+                if (requestContext) {
+                    conversationScope = requestContext.getConversationScope();
+                    if (conversationScope) {
+                        requestedIntegration = conversationScope.get("duo_integration");
+                        if ("forceAuthnDuo" == requestedIntegration) {
+                            duoIntegration = custom.get("forceAuthnDuo");
+                            logger.info("Using ForceAuthnDuo integration.");
+                        }
+                    }
+                }
+            }
+
+            if (duoIntegration == null) {
+                duoIntegration = custom.get("default");
+                logger.info("Using DefaultDuo integration.");
+            }
+            duoIntegration;
+        ]]>
+        </value>
+        </constructor-arg>
+    </bean>
+
+</beans>

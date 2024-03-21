@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+                           
+       default-init-method="initialize"
+       default-destroy-method="destroy">
+
+    <!-- Use this file to define any custom beans needed globally. -->
+
+<bean id="uw.SessionReuse" class="edu.washington.idp.authn.SessionReuse"
+      p:userFile="/data/local/idp/conf/authn/dynamic-mfa.txt"
+      />
+
+<!-- http client for group attr resolver -->
+<bean id="uw.HttpClient"  parent="shibboleth.NonCachingHttpClient" lazy-init="true"
+        p:connectionDisregardTLSCertificate="%{idp.httpclient.connectionDisregardTLSCertificate:false}"
+        p:maxConnectionsPerRoute="5"
+        p:maxConnectionsTotal="10"
+        p:connectionTimeout="PT15S"
+        p:connectionRequestTimeout="PT15S"
+        p:socketTimeout="PT15S"
+        p:tLSSocketFactory-ref="shibboleth.SecurityEnhancedTLSSocketFactoryWithClientTLS" />
+
+<bean id="uw.GwsSecurity" class="org.opensaml.security.httpclient.HttpClientSecurityParameters" lazy-init="true">
+    <property name="tLSTrustEngine">
+        <bean parent="shibboleth.StaticPKIXTrustEngine"
+            p:checkNames="true"
+            p:verifyDepth="5"
+            p:certificates="%{idp.home}/credentials/uw-incommon-ca.crt" />
+    </property>
+    <property name="clientTLSCredential">
+        <bean class="net.shibboleth.idp.profile.spring.factory.BasicX509CredentialFactoryBean"
+            p:privateKeyResource="%{idp.home}/credentials/gws.cac-uw.key"
+            p:certificateResource="%{idp.home}/credentials/gws.cac-uw.crt" />
+    </property>
+</bean>
+<bean id="uw.PwsSecurity" class="org.opensaml.security.httpclient.HttpClientSecurityParameters" lazy-init="true">
+    <property name="tLSTrustEngine">
+        <bean parent="shibboleth.StaticPKIXTrustEngine"
+            p:checkNames="true"
+            p:verifyDepth="5"
+            p:certificates="%{idp.home}/credentials/uw-incommon-ca.crt" />
+    </property>
+    <property name="clientTLSCredential">
+        <bean class="net.shibboleth.idp.profile.spring.factory.BasicX509CredentialFactoryBean"
+            p:privateKeyResource="%{idp.home}/credentials/idp-uw.key"
+            p:certificateResource="%{idp.home}/credentials/idp-uw.crt" />
+    </property>
+</bean>
+
+
+<bean id="uw.UWHttpClient" class="edu.washington.shibboleth.tools.UWHttpClient" destroy-method="close"
+    p:certificateFile="%{idp.home}/credentials/idp-uw.crt"
+    p:keyFile="%{idp.home}/credentials/idp-uw.key"
+    p:caCertificateFile="%{idp.home}/credentials/uw-incommon-ca.crt"
+    p:acceptHeader="application/json"
+    p:optionsHeader="full"
+    p:connectTimeLimit="5"
+    p:responseTimeLimit="5"
+    p:maxConnections="5"
+    />
+
+<!-- configuration for the group membership attribute -->
+
+<!-- These predated shibboleth's own http data source
+<bean id="uw.GwsDataSource" class="edu.washington.shibboleth.attribute.resolver.dc.rws.HttpDataSource" destroy-method="close"
+    p:certificateFile="%{idp.home}/credentials/gws.cac-uw.crt"
+    p:keyFile="%{idp.home}/credentials/gws.cac-uw.key"
+    p:caCertificateFile="%{idp.home}/credentials/uw-incommon-ca.crt"
+    p:acceptHeader="text/xml" />
+
+<bean id="GwsDataSourceBasicTest" class="edu.washington.shibboleth.attribute.resolver.dc.rws.HttpDataSource" destroy-method="close"
+    p:username="spud"
+    p:password="1234"
+    p:caCertificateFile="%{idp.home}/credentials/uwca.crt"
+    p:acceptHeader="text/xml" />
+-->
+
+<!-- configuration for the targeted id database -->
+
+<bean id="EptidDataConnector" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"
+    p:driverClassName="org.postgresql.Driver"
+    p:url="jdbc:postgresql://localhost/idp" p:username="shib" p:password="spud123"
+    p:maxActive="10" p:maxIdle="5" p:maxWait="2000" p:testOnBorrow="true"
+    p:defaultReadOnly="false"
+    p:validationQuery="select 1" p:validationQueryTimeout="5" />
+
+<!-- configuration for consent storage -->
+
+<!--
+<bean id="shibboleth.JPAStorageService"
+        class="org.opensaml.storage.impl.JPAStorageService"
+        p:cleanupInterval="%{idp.storage.cleanupInterval:PT10M}"
+        c:factory-ref="shibboleth.JPAStorageService.EntityManagerFactory" />
+  
+<bean id="shibboleth.JPAStorageService.EntityManagerFactory"
+        class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceUnitName" value="storageservice" />
+        <property name="packagesToScan" value="org.opensaml.storage.impl" />
+        <property name="dataSource" ref="shibboleth.JPAStorageService.DataSource" />
+        <property name="jpaVendorAdapter" ref="shibboleth.JPAStorageService.JPAVendorAdapter" />
+        <property name="jpaDialect">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+        </property>
+</bean>
+
+<bean id="shibboleth.JPAStorageService.JPAVendorAdapter"
+    class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+    <property name="database" value="MYSQL" />
+</bean>
+
+<bean id="shibboleth.JPAStorageService.DataSource"
+    class="com.zaxxer.hikari.HikariDataSource" destroy-method="close" lazy-init="true"
+    p:driverClassName="com.mysql.jdbc.Driver"
+    p:jdbcUrl="jdbc:mysql://iamdbdev01.s.uw.edu:3306/idp"
+    p:username="shibidp"
+    p:password="Spud13579" />
+-->
+
+<!-- consent storage as external postgres DB 
+<bean id="shibboleth.JPAStorageService.DataSource"
+    class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"
+    p:driverClassName="org.postgresql.Driver"
+    p:url="jdbc:postgresql://localhost/idp" p:username="shib" p:password="spud123"
+    p:maxActive="10" p:maxIdle="5" p:maxWait="2000" p:testOnBorrow="true"
+    p:defaultReadOnly="false"
+    p:validationQuery="select 1" p:validationQueryTimeout="5" />
+-->
+
+    <!--
+    Algorithm whitelists and blacklists that override or merge with library defaults. Normally you can leave
+    these empty or commented and use the system defaults, but you can override those defaults using these lists.
+    Each <value> element is an algorithm URI, or you can use <util:constant> elements in place of literal values.
+    -->
+    
+    <!--
+    <util:list id="shibboleth.SignatureWhitelist">
+    </util:list>
+
+    <util:list id="shibboleth.SignatureBlacklist">
+    </util:list>
+
+    <util:list id="shibboleth.EncryptionWhitelist">
+    </util:list>
+
+    <util:list id="shibboleth.EncryptionBlacklist">
+    </util:list>
+    -->
+
+    <!--
+    If you need to define and inject custom Java object(s) into the various views used throughout the
+    system (errors, login, logout, etc.), you can uncomment and define the bean below to be of any
+    type required. It will appear in the view scope as a variable named "custom".
+    
+    The example below defines the bean as a map, which allows you to inject multiple objects under
+    named keys to expand the feature to support multiple injected objects.
+    -->
+    
+    <util:map id="shibboleth.CustomViewContext">
+        <entry key="foo" value="bar"/>
+    </util:map>
+    
+    <import resource="uw-auto-rps.xml" />
+
+    <util:map id="uw.ComboBean">
+        <entry key="webget" value-ref="uw.UWHttpClient"/>
+        <entry key="view" value-ref="shibboleth.CustomViewContext"/>
+        <entry key="request" value-ref="shibboleth.HttpServletRequest"/>
+        <entry key="response" value-ref="shibboleth.HttpServletResponse"/>
+        <entry key="sealer" value-ref="shibboleth.DataSealer"/>
+        <!-- <entry key="autotoken" value-ref="uw.AutoTokenRPIds"/> -->
+        <entry key="reuse" value-ref="uw.SessionReuse"/>
+    </util:map>
+
+    <util:list id="uw.SameSite.iframeSites">
+        <!-- This set is for the UW gifts site, -->
+        <value>https://ua-websrv.gifts.washington.edu/shibboleth</value>
+        <value>https://ua-eval-websrv.gifts.washington.edu/shibboleth</value>
+        <value>https://ua-dev-websrv.gifts.washington.edu/shibboleth</value>
+        <value>https://advweb1.s.uw.edu/shibboleth</value>
+        <!-- The next entry is used by the uwdawgdaze.com site within an iframe. -->
+        <value>https://uwmosaic.com/simplesaml/module.php/saml/sp/metadata.php/default-sp</value>
+        <!-- The following are the various electronic document service apps. -->
+        <value>https://apps.concert.uw.edu/shibboleth</value>
+        <value>https://apps.test.concert.uw.edu/shibboleth</value>     
+        <value>https://apps.dev.concert.uw.edu/shibboleth</value>
+        <value>https://webcenter.admin.uw.edu/shibboleth</value>
+        <value>https://webcenter-eval.admin.uw.edu/shibboleth</value>
+        <value>https://webcenter-dev.admin.uw.edu/shibboleth</value>
+    </util:list>
+
+    <bean id="uw.SameSiteControl" parent="shibboleth.Functions.Scripted" factory-method="inlineScript"
+        p:inputType="org.apache.catalina.connector.RequestFacade" p:outputType="java.lang.Boolean"
+        p:customObject-ref="uw.SameSite.iframeSites">
+        <constructor-arg>
+            <value>
+                <![CDATA[
+                    var logger = Java.type("org.slf4j.LoggerFactory").getLogger("edu.washington.shibboleth");
+                    var debug = false; // Set to true to enable enhanced logging.
+                    var returnValue = false; // true == enable SameSite, false == disable.
+                    
+                    try {
+                        // Look for a SAMLRequest parameter. If not found, exit with SameSite off.
+                        var samlParam = input.getParameter("SAMLRequest");
+                        if (samlParam == null || samlParam.length() == 0) {
+                            if (debug) {
+                                logger.info("Request has no SAMLRequest parameter. Disabling SameSite.");
+                            }
+                            returnValue = false;
+                        } else {
+                            if (debug) {
+                                logger.info("SAMLRequest parameter found. Parsing to extract entityId.");
+                            }
+                    
+                            // Parse the SAMLRequest to extract the entityId of the relying party.
+                            // This requires Base64 decoding the parameter, then unzipping it,
+                            // then parsing the XML content to get the field that holds the entityId.
+                            var encodedBytes = samlParam.getBytes("UTF-8");
+                            var deflatedBytes = Java.type("java.util.Base64").getMimeDecoder().decode(encodedBytes);
+                            
+                            var InflaterType = Java.type("java.util.zip.Inflater");
+                            var inflater = new InflaterType(true);
+                            inflater.setInput(deflatedBytes);
+                            var ByteArrayType = Java.type("byte[]");
+                            var xmlBytes = new ByteArrayType(10*deflatedBytes.length);
+                            var xmlLength = inflater.inflate(xmlBytes);
+                            inflater.end();
+                            
+                            var StringType = Java.type("java.lang.String");
+                            var xmlString = new StringType(xmlBytes, 0, xmlLength, "UTF-8");
+                            if (debug) {
+                                logger.info("xmlString = '" + xmlString + "'.");
+                            }
+                    
+                            // "Best" would be to parse the xml content as an XML document and extract the desired node.
+                            // Since that would require including XML libraries, here we use a regex pattern to find the element.
+                            // The desired data is text inside a "saml:Issuer" element.
+                            var pattern = Java.type("java.util.regex.Pattern").compile(".*<saml:Issuer[^>]*>([^<]+)</saml:Issuer>.*");
+                            var matcher = pattern.matcher(xmlString);
+                            if (matcher.matches()) {
+                                var entityId = matcher.group(1);
+                                if (debug) {
+                                    logger.info("Pattern matches. EntityId = '" + entityId + "'.");
+                                }
+                        
+                                returnValue = (custom.contains(entityId));
+                                // Always log the cases where SameSite is set. Otherwise only log if debugging enabled.
+                                if (returnValue || debug) {
+                                    logger.info("Setting SameSite activation to '" + returnValue + "' for entityId '" + entityId + "'.");
+                                }
+                            } else {
+                                if (debug) {
+                                    logger.info("Pattern did not match. EntityId not found. Disabling SameSite.");
+                                }
+                                returnValue = false;
+                            }
+                        }
+                    } catch (e) {
+                        logger.error("Exception while checking SameSiteControl: {}", e);
+                        logger.info("Disabling SameSite due to exception during processing.");
+                        returnValue = false;
+                    }
+                    returnValue; // This returns true or false to the caller.
+                ]]>
+            </value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="uw.SameSiteCondition" class="net.shibboleth.ext.spring.util.SpringExpressionPredicate"
+        c:expression="#custom.apply(#input)"
+        p:customObject-ref="uw.SameSiteControl" />
+</beans>

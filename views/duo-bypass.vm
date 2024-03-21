@@ -1,0 +1,108 @@
+##
+## Velocity Template for DisplayCrnSelectPage view-state
+##
+## Velocity context will contain the following properties
+## flowExecutionUrl - the form action location
+## flowRequestContext - the Spring Web Flow RequestContext
+## flowExecutionKey - the SWF execution key (this is built into the flowExecutionUrl)
+## encoder - HTMLEncoder class
+## request - HttpServletRequest
+## response - HttpServletResponse
+## environment - Spring Environment object for property resolution
+## custom - arbitrary object injected by deployer
+##
+##
+<!DOCTYPE html>
+<html>
+  	<head>
+    	<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="/fp/fp.css" />
+<title>UW NetID duo-bypass</title>
+
+<script>
+function _clear_screen() {
+   docdiv = document.getElementById('main');
+   docdiv.className='visuallyhidden';
+}
+
+</script>
+<script src="/fp/fingerprint2.js"></script>
+  	</head>
+
+
+  	<body>
+
+  <p>fingerprint: <var id="fp"></var></p>
+  <p>Time: <var id="time"></var> ms</p>
+
+  <script>
+    var hasConsole = typeof console !== "undefined"
+
+    var fingerprintReport = function () {
+      var d1 = new Date()
+      var options = {excludes: {fonts:true, webgl:true, audio:true, timezone:true, timezoneOffset:true}}
+      Fingerprint2.get(function(components) {
+        var murmur = Fingerprint2.x64hash128(components.map(function (pair) { return pair.value }).join(), 31)
+
+        document.getElementById("fp_id").value = murmur;
+
+        var d2 = new Date()
+        var time = d2 - d1
+        document.getElementById("fpt_id").value = time;
+        document.querySelector("#time").textContent = time
+        document.querySelector("#fp").textContent = murmur
+        console.log("bypass");
+        document.getElementById("submit_button").click()
+      })
+    }
+
+    var cancelId
+    var cancelFunction
+
+    if (window.requestIdleCallback) {
+      cancelId = requestIdleCallback(fingerprintReport)
+      cancelFunction = cancelIdleCallback
+    } else {
+      cancelId = setTimeout(fingerprintReport, 500)
+      cancelFunction = clearTimeout
+    }
+
+/**
+    document.querySelector("#btn").addEventListener("click", function () {
+      if (cancelId) {
+        cancelFunction(cancelId)
+        cancelId = undefined
+      }
+      fingerprintReport()
+    })
+**/
+  </script>
+
+  <div id="container">
+    <div id="main" role="main">
+
+        <div class="form">
+          <div><img src="/img/weblogin.png" height="57" width="198" alt="" aria-hidden="true"></div>
+
+
+          <div id="crnselect">Just hit continue.</div>
+
+          <!-- <form id="bypassform" name="bypass" method="POST" action="/env.cgi" autocomplete="off"> -->
+          <form name="bypass" method="POST" action="$flowExecutionUrl" autocomplete="off"> 
+            <input type="hidden" id="fp_id" name="fp_value" value=""/>
+            <input type="hidden" id="fpt_id" name="fpt_value" value=""/>
+
+            <ul class="submit">
+              <li><input type="submit" id="submit_button" name="_eventId_proceed" value="Continue"
+                    onClick="javascript:_clear_screen()"></li>
+            </ul>
+
+            </form>
+
+        </div>
+
+    </div> <!--end main -->
+  </div> <!-- end container -->
+
+ 	</body>
+</html>

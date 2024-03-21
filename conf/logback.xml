@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <!-- UW logging - PROD -->
-
     <!--
     Variables for simplifying logging configuration.
     http://logback.qos.ch/manual/configuration.html#variableSubstitution
@@ -42,9 +40,7 @@
     <!-- =========================================================== -->
 
     <!-- Logs our addons -->
-    <logger name="edu.washington" level="DEBUG"/>
-
-    <logger name="org.geant.idpextension.oidc.profile" level="INFO"/>
+    <logger name="edu.washington.shibboleth" level="INFO"/>
 
     <!-- Logs http client detail -->
     <logger name="org.apache.http.headers" level="WARN"/>
@@ -59,14 +55,14 @@
     <!-- Logs LDAP related messages -->
     <logger name="org.ldaptive" level="${idp.loglevel.ldap:-WARN}"/>
     
-    <!-- Logs inbound and outbound protocols messages at DEBUG level -->
+    <!-- Logs inbound and outbound protocols messages -->
     <logger name="PROTOCOL_MESSAGE" level="${idp.loglevel.messages:-INFO}" />
 
-    <!-- Logs unencrypted SAML at DEBUG level -->
+    <!-- Logs unencrypted SAML -->
     <logger name="org.opensaml.saml.saml2.encryption.Encrypter" level="${idp.loglevel.encryption:-INFO}" />
 
-    <!-- Logs system properties during startup at DEBUG level -->
-    <logger name="net.shibboleth.idp.log.LogbackLoggingService" level="${idp.loglevel.props:-DEBUG}" />
+    <!-- Logs system properties during startup -->
+    <logger name="net.shibboleth.idp.log.LogbackLoggingService" level="${idp.loglevel.props:-INFO}" />
 
     <!-- Especially chatty. -->
     <logger name="net.shibboleth.idp.saml.attribute.mapping" level="INFO" />
@@ -136,7 +132,7 @@
     
     <!-- Audit log to syslog. -->
     <appender name="IDP_AUDIT_2" class="ch.qos.logback.classic.net.SyslogAppender">
-        <syslogHost>logger3.s.uw.edu</syslogHost>
+        <syslogHost>logger4.s.uw.edu</syslogHost>
         <facility>LOCAL2</facility>
         <suffixPattern>idp-audit %msg</suffixPattern>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
@@ -160,23 +156,49 @@
     <appender name="IDP_PASSWORD" class="ch.qos.logback.classic.net.SyslogAppender">
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
           <evaluator>
-            <expression>return message.contains("Login by {} failed");</expression>
+            <expression>return message.contains("Login by '{}' failed");</expression>
           </evaluator>
           <OnMismatch>DENY</OnMismatch>
           <OnMatch>NEUTRAL</OnMatch>
         </filter>
-        <syslogHost>logger3.s.uw.edu</syslogHost>
+        <syslogHost>logger4.s.uw.edu</syslogHost>
         <facility>LOCAL2</facility>
         <throwableExcluded>true</throwableExcluded>
         <suffixPattern>idp-pass |%mdc{idp.remote_addr}|password failed</suffixPattern>
     </appender>
+
+    <!-- Local log of password failures for export to ciso tools. -->
+    <!-- The output has four fields: timestamp, client IP address, error message including the userid,
+         and the first line of the exception stack trace which indicates the failure mode (unknown user or bad password). -->
+    <appender name="IDP_PASSWORD_FAILURES" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${idp.logfiles}/loginFailures.log</File>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${idp.logfiles}/loginFailures-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>${idp.loghistory:-180}</maxHistory>
+        </rollingPolicy>
+
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+          <evaluator>
+            <expression>return message.contains("Login by '{}' failed");</expression>
+          </evaluator>
+          <OnMismatch>DENY</OnMismatch>
+          <OnMatch>NEUTRAL</OnMatch>
+        </filter>
+
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <Pattern>%date{ISO8601}|%mdc{idp.remote_addr}|%msg |%replace(%ex){'([^\n]*)\n.*','$1'}%n</Pattern>
+        </encoder>
+    </appender>
+
 
     <!-- Warn log to syslog. -->
     <appender name="IDP_WARN_2" class="ch.qos.logback.classic.net.SyslogAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>WARN</level>
         </filter>
-        <syslogHost>logger3.s.uw.edu</syslogHost>
+        <syslogHost>logger4.s.uw.edu</syslogHost>
         <facility>LOCAL2</facility>
         <throwableExcluded>true</throwableExcluded>
         <suffixPattern>idp-warn %msg</suffixPattern>
@@ -215,6 +237,9 @@
 
     <logger name="Shibboleth-Audit-2" level="ALL">
         <appender-ref ref="IDP_AUDIT_2"/>
+    </logger>
+
+    <logger name="Shibboleth-Audit-3" level="ALL">
         <appender-ref ref="IDP_AUDIT_3"/>
     </logger>
 
@@ -230,6 +255,7 @@
         <appender-ref ref="${idp.process.appender:-IDP_PROCESS}"/>
         <appender-ref ref="${idp.warn.appender:-IDP_WARN}" />
         <appender-ref ref="IDP_PASSWORD" />
+        <appender-ref ref="IDP_PASSWORD_FAILURES" />
     </root>
 
 </configuration>

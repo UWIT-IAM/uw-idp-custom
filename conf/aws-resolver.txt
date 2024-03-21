@@ -1,0 +1,17 @@
+ <!-- aws roles -->
+
+    <resolver:AttributeDefinition id="awsrole" xsi:type="Simple" xmlns="urn:mace:shibboleth:2.0:resolver:ad"
+        sourceAttributeID="awsfoxadmin">
+        <resolver:Dependency ref="staticAttributes" />
+        <resolver:AttributeEncoder xsi:type="SAML2String" xmlns="urn:mace:shibboleth:2.0:attribute:encoder"
+            name="https://aws.amazon.com/SAML/Attributes/Role" friendlyName="RoleEntitlement" />
+    </resolver:AttributeDefinition>
+
+    <resolver:AttributeDefinition id="awsname" xsi:type="Scoped" xmlns="urn:mace:shibboleth:2.0:resolver:ad"
+        scope="washington.edu" sourceAttributeID="uwNetID">
+        <resolver:Dependency ref="personreg" />
+        <resolver:AttributeEncoder xsi:type="SAML2ScopedString" xmlns="urn:mace:shibboleth:2.0:attribute:encoder"
+            name="https://aws.amazon.com/SAML/Attributes/RoleSessionName" friendlyName="RoleSessionName" scopeType="inline" />
+    </resolver:AttributeDefinition>
+
+

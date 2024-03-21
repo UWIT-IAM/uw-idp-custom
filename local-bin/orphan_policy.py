@@ -108,12 +108,12 @@ def sendNotice(sub):
 # ----------
 
 
-parseMetadata('/data/local/idp-3.4/metadata/InCommon-metadata.xml')
-parseMetadata('/data/local/idp-3.4/metadata/UW-rp-metadata.xml')
+parseMetadata('/data/local/idp/metadata/InCommon-metadata.xml')
+parseMetadata('/data/local/idp/metadata/UW-rp-metadata.xml')
 
 print '{} metadata rps'.format(len(known_rps))
 
-parseFilter('/data/local/idp-3.4/conf/rp-filter.xml')
+parseFilter('/data/local/idp/conf/rp-filter.xml')
 
 print '{} filter rps'.format(len(policy_rps))
 

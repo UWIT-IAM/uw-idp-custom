@@ -1,0 +1,15 @@
+<flow xmlns="http://www.springframework.org/schema/webflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd"
+    parent="authn.abstract">
+    
+    <!-- This flow displays the "you need Duo soon" message and that's it. -->
+
+    <view-state id="DisplayDuoSoonFlow" view="duo-soon">
+
+        <transition on="proceed" to="proceed" />
+        <transition on="cancel" to="ReselectFlow" />
+    </view-state>
+
+
+</flow>
+

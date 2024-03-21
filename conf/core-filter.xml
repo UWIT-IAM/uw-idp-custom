@@ -1,13 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?> <AttributeFilterPolicyGroup id="CoreFilterPolicy" 
   xmlns="urn:mace:shibboleth:2.0:afp"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:oidcext="org.geant.idpextension.oidc.attribute.filter"
-  xsi:schemaLocation="urn:mace:shibboleth:2.0:afp classpath:/schema/shibboleth-2.0-afp.xsd
-                      org.geant.idpextension.oidc.attribute.filter classpath:/schema/idp-oidc-extension-afp.xsd">
+  xsi:schemaLocation="urn:mace:shibboleth:2.0:afp classpath:/schema/shibboleth-2.0-afp.xsd">
 
+<AttributeFilterPolicy id="releaseStuffToUW">
+<PolicyRequirementRule xsi:type="RequesterRegex" regex="^https?://[^/]*\.(uw|washington)\.edu(/.*)?$" />
+<AttributeRule attributeID="uwNetID">
+<PermitValueRule xsi:type="ANY" />
+</AttributeRule>
+<AttributeRule attributeID="ePPN">
+<PermitValueRule xsi:type="ANY" />
+</AttributeRule>
+<AttributeRule attributeID="affiliation">
+<PermitValueRule xsi:type="ANY"/>
+</AttributeRule>
+<AttributeRule attributeID="scopedAffiliation">
+<PermitValueRule xsi:type="ANY"/>
+</AttributeRule>
+</AttributeFilterPolicy>
 
-<AttributeFilterPolicy id="releaseStuffToUW"> <PolicyRequirementRule xsi:type="RequesterRegex" regex="^https?://[^/]*\.(uw|washington)\.edu(/.*)?$" /> <AttributeRule attributeID="uwNetID"> <PermitValueRule xsi:type="ANY" /> </AttributeRule> <AttributeRule attributeID="ePPN"> <PermitValueRule xsi:type="ANY" /> </AttributeRule> <AttributeRule attributeID="affiliation"> <PermitValueRule xsi:type="ANY"/> </AttributeRule> <AttributeRule attributeID="scopedAffiliation"> <PermitValueRule xsi:type="ANY"/> </AttributeRule> </AttributeFilterPolicy>
-<AttributeFilterPolicy id="releaseStuffToUWalt"> <PolicyRequirementRule xsi:type="RequesterRegex" regex="^https?://.*.washington.edu:[0-9]*/.*" /> <AttributeRule attributeID="ePPN"> <PermitValueRule xsi:type="ANY" /> </AttributeRule> <AttributeRule attributeID="affiliation"> <PermitValueRule xsi:type="ANY"/> </AttributeRule> <AttributeRule attributeID="scopedAffiliation"> <PermitValueRule xsi:type="ANY"/> </AttributeRule> </AttributeFilterPolicy>
+<AttributeFilterPolicy id="releaseStuffToUWalt">
+<PolicyRequirementRule xsi:type="RequesterRegex" regex="^https?://.*.(uw|washington)\.edu:[0-9](/.*)?$" />
+<AttributeRule attributeID="uwNetID">
+<PermitValueRule xsi:type="ANY" />
+</AttributeRule>
+<AttributeRule attributeID="ePPN">
+<PermitValueRule xsi:type="ANY" />
+</AttributeRule>
+<AttributeRule attributeID="affiliation">
+<PermitValueRule xsi:type="ANY"/>
+</AttributeRule>
+<AttributeRule attributeID="scopedAffiliation">
+<PermitValueRule xsi:type="ANY"/>
+</AttributeRule>
+</AttributeFilterPolicy>
 
 
 </AttributeFilterPolicyGroup>

@@ -1,0 +1,34 @@
+ <flow xmlns="http://www.springframework.org/schema/webflow"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd"
+       parent="intercept.abstract">
+
+    <!-- Rudimentary impediment to direct execution of subflow. -->
+    <input name="calledAsSubflow" type="boolean" required="true" />
+    
+    <on-start>
+       <evaluate expression="'uwSlack=done'" result="flowScope.didit" /> 
+    </on-start>
+
+
+    <decision-state id="DoesUserGetSlack">
+       <if test="SlackIntercept.testSlack(opensamlProfileRequestContext)" then="proceed" else="SendToNoSlack" />
+    </decision-state>
+
+    <view-state id="SendToNoSlack" view="no-slack">
+        <on-render>
+           <evaluate expression="environment" result="viewScope.environment" />
+           <evaluate expression="%{uw.slack-gws-urlbase}" result="viewScope.slackgws" />
+           <evaluate expression="%{uw.slack-extras}" result="viewScope.slackextras" />
+            <evaluate expression="T(net.shibboleth.utilities.java.support.codec.HTMLEncoder)" result="viewScope.encoder" />
+            <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" result="viewScope.request" />
+            <evaluate expression="flowRequestContext.getExternalContext().getNativeResponse()" result="viewScope.response" />
+            <evaluate expression="opensamlProfileRequestContext" result="viewScope.profileRequestContext" />
+        </on-render>
+        <transition to="proceed" />
+    </view-state>
+
+    <bean-import resource="../../../flows/intercept/slack-check/slack-check-beans.xml" />
+
+</flow>
+    
