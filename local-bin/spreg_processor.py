@@ -67,9 +67,12 @@ def mTime(filename):
 def openDb():
     global db
     db = dbapi2.connect(host=config.spreg_db['db_host'],
-                        database=config.spreg_db['db_name'],
+                        dbname=config.spreg_db['db_name'],
                         user=config.spreg_db['db_user'],
-                        password=config.spreg_db['db_pass'])
+                        password=config.spreg_db['db_pass'],
+                        sslrootcert=config.spreg_db['db_sslrootcert'],
+                        sslcert=config.spreg_db['db_sslcert'],
+                        sslkey=config.spreg_db['db_sslkey'])
     log(log_info, 'db is %s %s' % (config.spreg_db['db_host'], config.spreg_db['db_name']))
     
 
@@ -122,9 +125,9 @@ def updateMetadata():
             if os.path.exists(config.metadata_dir + sha + '.xml'):
                 print('.. removing ' + config.metadata_dir + sha + '.xml')
                 os.remove(config.metadata_dir + sha + '.xml')
-            if os.path.exists(config.metadata_cache_dir + sha + '.xml'):
-                print('.. removing ' + config.metadata_cache_dir + sha + '.xml')
-                os.remove(config.metadata_cache_dir + sha + '.xml')
+            if os.path.exists(config.metadata_cache_dir + sha):
+                print('.. removing ' + config.metadata_cache_dir + sha)
+                os.remove(config.metadata_cache_dir + sha)
         else:
             log(log_debug, 'db has update for %s: %s' % (row[0], sha))
             print('db has update for %s: %s' % (row[0], sha))
@@ -133,9 +136,9 @@ def updateMetadata():
             with open(config.metadata_dir + sha + '.tmp', 'w') as dest:
                 dest.write(row[1].replace('<EntityDescriptor','<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata"'))
             os.rename(config.metadata_dir + sha + '.tmp', config.metadata_dir + sha + '.xml')
-            if os.path.exists(config.metadata_cache_dir + sha + '.xml'):
-                print('.. removing ' + config.metadata_cache_dir + sha + '.xml')
-                os.remove(config.metadata_cache_dir + sha + '.xml')
+            if os.path.exists(config.metadata_cache_dir + sha):
+                print('.. removing ' + config.metadata_cache_dir + sha)
+                os.remove(config.metadata_cache_dir + sha)
     
 
 # see if any new filter entries 
