@@ -12,9 +12,35 @@
     as long as the resolver and/or registry rules match.
     -->
 
+    <!--
+    This demonstrates how subject is set when 'openid' -scope is involved. That scope is required in
+    OIDC sequences.
+    -->
     <AttributeFilterPolicy id="OPENID_SCOPE">
         <PolicyRequirementRule xsi:type="oidc:OIDCScope" value="openid" />
         <!-- May adjust to taste depending on strategy used to produce sub claim. -->
+        <AttributeRule attributeID="subject">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+        <AttributeRule attributeID="subject-public">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+        <AttributeRule attributeID="subject-pairwise">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+    </AttributeFilterPolicy>
+
+    <!--
+    This demonstrates how subject is set with "plain" OAuth authorization sequences, i.e. when 'openid'
+    scope is not involved.
+    -->
+    <AttributeFilterPolicy id="OAUTH_SUBJECT">
+        <PolicyRequirementRule xsi:type="AND">
+            <Rule xsi:type="NOT">
+                <Rule xsi:type="oidc:OIDCScope" value="openid" />
+            </Rule>
+            <Rule xsi:type="Profile" value="http://shibboleth.net/ns/profiles/oidc/sso/browser" />
+        </PolicyRequirementRule>
         <AttributeRule attributeID="subject">
             <PermitValueRule xsi:type="ANY" />
         </AttributeRule>
