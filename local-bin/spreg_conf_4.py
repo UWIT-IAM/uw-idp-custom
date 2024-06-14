@@ -1,3 +1,7 @@
+"""Contains config values used by the scripts in this folder.
+
+TODO: De-duplicate this file with the other conf.py file."""
+
 import yaml
 
 idp_base = '/data/local/idp/'
