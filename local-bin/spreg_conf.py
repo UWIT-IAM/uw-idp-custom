@@ -19,7 +19,9 @@ metadata_id = 'uwrp'
 metadata_min_rows = 500
 
 # Prefer this config object for creds
-spreg_creds = yaml.safe_load(creds_dir + "db.yaml")
+spreg_creds = None
+with open(creds_dir + "db.yaml", "r", encoding="utf-8") as creds_file:
+  spreg_creds = yaml.safe_load(creds_file)
 
 # Shortcuts for backward compatibility, deprecated
 tgtid_db = spreg_creds["tgtid_db"]
