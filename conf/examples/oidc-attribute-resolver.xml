@@ -93,17 +93,11 @@
     This demonstrates a complex claim constructed by forming a JSON structure.
     The default transcoding rule for the address claim expects such a structure.
     -->
-    <AttributeDefinition id="address" xsi:type="ScriptedAttribute">
+    <AttributeDefinition id="address" xsi:type="Template">
         <InputDataConnector ref="staticAttributes" attributeNames="street_address locality region postal_code country"/>
-        <Script>
-        <![CDATA[
-        address.addValue("{\"street_address\":\""+street_address.getValues().get(0) + "\","
-            +"\"locality\":\""+locality.getValues().get(0) + "\","
-            +"\"region\":\""+region.getValues().get(0) + "\","
-            +"\"postal_code\":\""+postal_code.getValues().get(0) + "\","
-            +"\"country\":\""+country.getValues().get(0) + "\"}");
-        ]]>
-        </Script>
+        <Template><![CDATA[
+            {"street_address":"${street_address}", "locality":"${locality}","region":"${region}","postal_code":"${postal_code}","country":"${country}" }
+        ]]></Template>
     </AttributeDefinition>
 
     <!--

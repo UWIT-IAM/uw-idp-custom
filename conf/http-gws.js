@@ -25,4 +25,5 @@
   }
   attr.setValues(values);
   connectorResults.add(attr);
+  // logger.info("in http-gws.js; connectorResults: " + connectorResults);
   // logger.info("=== gws out");

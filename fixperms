@@ -1,7 +1,7 @@
 # fix permissions for idpdev.
 # they get messed up by shib install.sh
 
-cd /data/local/idp-3.4
+cd /data/local/idp
 
 chmod -R +r conf
 chmod -R +r credentials
