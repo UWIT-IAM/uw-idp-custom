@@ -6,12 +6,20 @@
                       urn:mace:shibboleth:2.0:afp:oidc http://shibboleth.net/schema/oidc/shibboleth-afp-oidc.xsd">
 
 
-<AttributeFilterPolicy id="OPENID_SCOPE">
-    <PolicyRequirementRule xsi:type="oidc:OIDCScope" value="openid" />
-    <AttributeRule attributeID="subject">
-        <PermitValueRule xsi:type="ANY" />
-    </AttributeRule>
-</AttributeFilterPolicy> 
+    <AttributeFilterPolicy id="OPENID_SCOPE">
+	<PolicyRequirementRule xsi:type="oidc:OIDCScope" value="openid" />
+	<!--
+	<AttributeRule attributeID="subject">
+	    <PermitValueRule xsi:type="ANY" />
+	</AttributeRule>
+	-->
+        <AttributeRule attributeID="subject-public">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+        <AttributeRule attributeID="subject-pairwise">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+    </AttributeFilterPolicy> 
 
     <AttributeFilterPolicy id="OPENID_urizen">
         <PolicyRequirementRule xsi:type="Requester" value="oidc/urizen.s.uw.edu"/>
@@ -124,7 +132,7 @@
             <Rule xsi:type="Value" value="urn:mace:washington.edu:groups:uw_employee"/>
             <Rule xsi:type="Value" value="urn:mace:washington.edu:groups:uw_member"/>
             <Rule xsi:type="Value" value="urn:mace:washington.edu:groups:uw_staff"/>
-            <Rule xsi:type="ValueRegex" regex="urn:mace:washington.edu:groups:u_fox_brow.*"/>
+            <Rule xsi:type="ValueRegex" regex="urn:mace:washington.edu:groups:uw_iam_.*"/>
            </PermitValueRule>
         </AttributeRule>
     </AttributeFilterPolicy>
@@ -144,6 +152,7 @@
            </PermitValueRule>
         </AttributeRule>
     </AttributeFilterPolicy>
+
     <AttributeFilterPolicy id="OPENID_MEMBER_OF_MOSLER">
         <PolicyRequirementRule xsi:type="AND">
            <Rule xsi:type="Requester" value="oidc/mosler.s.uw.edu" />
@@ -158,12 +167,36 @@
 
     <AttributeFilterPolicy id="OPENID_MEMBER_OF_DOCFINITY">
         <PolicyRequirementRule xsi:type="AND">
-           <Rule xsi:type="Requester" value="oidc/sandbox-edu.cloudtest.docfinity.com" />
+           <Rule xsi:type="Requester" value="oidc/uw.cloud.docfinity.com" />
            <Rule xsi:type="oidc:OIDCScope" value="edumember_is_member_of" />
         </PolicyRequirementRule>
         <AttributeRule attributeID="gws_groups">
            <PermitValueRule xsi:type="OR">
-            <Rule xsi:type="ValueRegex" regex="urn:mace:washington.edu:groups:u_edms_dev_.*"/>
+            <Rule xsi:type="ValueRegex" regex="urn:mace:washington.edu:groups:u_edms_prod_.*"/>
+           </PermitValueRule>
+        </AttributeRule>
+    </AttributeFilterPolicy>
+
+    <AttributeFilterPolicy id="OPENID_MEMBER_OF_DOCFINITY_TEST">
+        <PolicyRequirementRule xsi:type="AND">
+           <Rule xsi:type="Requester" value="oidc/uw.cloudtest.docfinity.com" />
+           <Rule xsi:type="oidc:OIDCScope" value="edumember_is_member_of" />
+        </PolicyRequirementRule>
+        <AttributeRule attributeID="gws_groups">
+           <PermitValueRule xsi:type="OR">
+            <Rule xsi:type="ValueRegex" regex="urn:mace:washington.edu:groups:u_edms_test_.*"/>
+           </PermitValueRule>
+        </AttributeRule>
+    </AttributeFilterPolicy>
+
+    <AttributeFilterPolicy id="OPENID_MEMBER_OF_DOCFINITY_BETA">
+        <PolicyRequirementRule xsi:type="AND">
+           <Rule xsi:type="Requester" value="oidc/uw-beta.cloudtest.docfinity.com" />
+           <Rule xsi:type="oidc:OIDCScope" value="edumember_is_member_of" />
+        </PolicyRequirementRule>
+        <AttributeRule attributeID="gws_groups">
+           <PermitValueRule xsi:type="OR">
+            <Rule xsi:type="ValueRegex" regex="urn:mace:washington.edu:groups:u_edms_test_.*"/>
            </PermitValueRule>
         </AttributeRule>
     </AttributeFilterPolicy>
