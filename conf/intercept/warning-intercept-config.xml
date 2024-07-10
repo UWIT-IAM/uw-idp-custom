@@ -19,6 +19,8 @@
     the warning is displayed, and the duration is the interval between warnings.
     -->
     <util:map id="shibboleth.warning.ConditionMap">
+        <!-- This is an example that uses our standard groups-based template to implement
+             a warning message shown to subjects in a specific group.
         <entry key="google-storage-warning">
             <bean parent="shibboleth.Pair">
                 <constructor-arg index="0">
@@ -35,7 +37,8 @@
                 </constructor-arg>
             </bean>
         </entry>
- 
+        -->
+
         <!--
         <entry key="warn-one">
             <bean parent="shibboleth.Pair">

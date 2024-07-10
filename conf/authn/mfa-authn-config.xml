@@ -59,7 +59,7 @@
                var Cookie = Java.type("javax.servlet.http.Cookie");
                logger = Java.type("org.slf4j.LoggerFactory").getLogger("edu.washington.shibboleth");
 
-               request = custom.get("request");
+               request = custom.get("requestSupplier").get();
                webget = custom.get("webget");
                dynamic_info = custom.get("reuse");
 
@@ -408,7 +408,7 @@
                            cookie.setSecure(true);
                            cookie.setHttpOnly(true);
                            cookie.setMaxAge(0);  // delete
-                           response = custom.get("response");
+                           response = custom.get("responseSupplier").get();
                            response.addCookie(cookie);
                         }
                      }
@@ -483,7 +483,7 @@
                        cookie.setSecure(true);
                        cookie.setHttpOnly(true);
                        cookie.setMaxAge(%{idp.uw.mfa-soon-seconds});
-                       response = custom.get("response");
+                       response = custom.get("responseSupplier").get();
                        response.addCookie(cookie);
                    } else if (clearMfaSoonCookie) {
                        var Cookie = Java.type("javax.servlet.http.Cookie");
@@ -492,7 +492,7 @@
                        cookie.setSecure(true);
                        cookie.setHttpOnly(true);
                        cookie.setMaxAge(0);  // delete
-                       response = custom.get("response");
+                       response = custom.get("responseSupplier").get();
                        response.addCookie(cookie);
                    }
                }

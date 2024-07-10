@@ -19,7 +19,7 @@
       />
 
 <!-- http client for group attr resolver -->
-<bean id="uw.HttpClient"  parent="shibboleth.NonCachingHttpClient" lazy-init="true"
+<bean id="uw.HttpClient"  parent="shibboleth.HttpClientFactory" lazy-init="true"
         p:connectionDisregardTLSCertificate="%{idp.httpclient.connectionDisregardTLSCertificate:false}"
         p:maxConnectionsPerRoute="5"
         p:maxConnectionsTotal="10"
@@ -172,8 +172,8 @@
     <util:map id="uw.ComboBean">
         <entry key="webget" value-ref="uw.UWHttpClient"/>
         <entry key="view" value-ref="shibboleth.CustomViewContext"/>
-        <entry key="request" value-ref="shibboleth.HttpServletRequest"/>
-        <entry key="response" value-ref="shibboleth.HttpServletResponse"/>
+        <entry key="requestSupplier" value-ref="shibboleth.HttpServletRequestSupplier"/>
+        <entry key="responseSupplier" value-ref="shibboleth.HttpServletResponseSupplier"/>
         <entry key="sealer" value-ref="shibboleth.DataSealer"/>
         <!-- <entry key="autotoken" value-ref="uw.AutoTokenRPIds"/> -->
         <entry key="reuse" value-ref="uw.SessionReuse"/>
