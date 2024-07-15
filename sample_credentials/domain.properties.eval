@@ -1,0 +1,31 @@
+# This is the eval version of the domain.properties file.
+# This file contains properties that are not true secrets, but values that depend on the domain.
+# Each domain (dev/eval/prod) will have a different version of this file.
+
+# Set the entityID of the IdP and the AWS ident, formerly in conf/idp.properties
+idp.entityID= urn:mace:incommon:washington.edu:eval
+idp.uw.awsEntityId = UWeval
+# Set the oidc issuer, formerly in conf/oidc.properties
+idp.oidc.issuer = https://idp-eval.u.washington.edu
+
+
+# Settings for our Duo integrations, formerly in conf/duo-oidc.properties.
+# Duo clientIds are suppressed - these can be obtained from the Duo admin console.
+
+# This is the main Duo auth integration used for most relying parties.
+idp.duo.oidc.apiHost = api-57f2a007.duosecurity.com
+idp.duo.oidc.clientId = see Duo admin console
+# idp.duo.oidc.secretKey = defined in secrets.properties
+
+# This is the alternate integration that does not support remember-me.
+idp.forceauthnduo.oidc.apiHost = api-57f2a007.duosecurity.com
+idp.forceauthnduo.oidc.clientId = see Duo admin console
+# idp.forceauthnduo.oidc.secretKey = defined in secrets.properties
+
+# Configuration for the API client
+uw.idp.duo.api.apiHost = api-57f2a007.duosecurity.com
+uw.idp.duo.api.integrationKey = see Duo admin console
+# uw.idp.duo.api.secretKey = defined in secrets.properties
+
+# Static redirect_uri. See conf/duo-oidc.properties for other options.
+idp.duo.oidc.redirectURL = https://idp-eval.u.washington.edu/idp/profile/Authn/Duo/2FA/duo-callback

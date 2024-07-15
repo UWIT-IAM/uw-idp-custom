@@ -1,29 +1,10 @@
+"""Contains config values used by the scripts in this folder."""
+
+import yaml
 
 idp_base = '/data/local/idp/'
 
-tgtid_db = {
- "db_host": "localhost",
- "db_name": "idp",
- "db_user": "shib",
- "db_pass": "spud123",
-}
-
-# setting for iam-tools-test spreg
-spreg_db_TEST = {
- 'db_host': 'iamdbdev20',
- 'db_name': 'spregistry',
- 'db_user': 'spreg1',
- 'db_pass': 'ae500169-e8b9-4945-ba56-10d59d380067',
-}
-
-# setting for iam-tools spreg
-spreg_db = {
- 'db_host': 'iamdb21',
- 'db_name': 'spregistry',
- 'db_user': 'spreg1',
- 'db_pass': '47dafbe2-2c28-4a16-a549-591285c62e5a',
-}
-
+creds_dir = idp_base + "credentials/"
 conf_dir = idp_base + 'conf/'
 metadata_dir = idp_base + 'rp-metadata/'
 metadata_cache_dir = idp_base + '/rp-metadata-cache/'
@@ -38,6 +19,16 @@ filter_min_rows = 300
 
 metadata_id = 'uwrp'
 metadata_min_rows = 500
+
+# Prefer this config object for creds
+spreg_creds = None
+with open(creds_dir + "db.yaml", "r", encoding="utf-8") as creds_file:
+  spreg_creds = yaml.safe_load(creds_file)
+
+# Shortcuts for backward compatibility, deprecated
+tgtid_db = spreg_creds["tgtid_db"]
+spreg_db_TEST = spreg_creds["spreg_db_TEST"]
+spreg_db = spreg_creds["spreg_db"]
 
 # old config 
 idp_conf_files = {
@@ -95,5 +86,3 @@ filter_header_xml = '<?xml version="1.0" encoding="UTF-8"?>' \
      'xsi:schemaLocation="urn:mace:shibboleth:2.0:afp classpath:/schema/shibboleth-2.0-afp.xsd ' \
          'org.geant.idpextension.oidc.attribute.filter classpath:/schema/idp-oidc-extension-afp.xsd" >'
 filter_footer_xml = '</AttributeFilterPolicyGroup>'
-
-
