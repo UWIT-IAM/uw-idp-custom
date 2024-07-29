@@ -830,12 +830,12 @@
         <Script><![CDATA[
            IdPAttribute = Java.type("net.shibboleth.idp.attribute.IdPAttribute");
            StringAttributeValue = Java.type("net.shibboleth.idp.attribute.StringAttributeValue");
-           HashSet = Java.type("java.util.HashSet");
+           ArrayList = Java.type("java.util.ArrayList");
 
            attr = new IdPAttribute("uwNetID");
-           set = new HashSet(1);
-           set.add(new StringAttributeValue(resolutionContext.getPrincipal()));
-           attr.setValues(set);
+           list = new ArrayList(1);
+           list.add(new StringAttributeValue(resolutionContext.getPrincipal()));
+           attr.setValues(list);
            connectorResults.add(attr);
         ]]></Script>
     </DataConnector>
