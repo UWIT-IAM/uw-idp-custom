@@ -6,7 +6,7 @@
   // logger.info("=== gws in");
   //  new Excp().printStackTrace();
 
-  var HashSet = Java.type("java.util.HashSet");
+  var ArrayList = Java.type("java.util.ArrayList");
   var HttpClientSupport = Java.type("net.shibboleth.utilities.java.support.httpclient.HttpClientSupport");
   var IdPAttribute = Java.type("net.shibboleth.idp.attribute.IdPAttribute");
   var StringAttributeValue = Java.type("net.shibboleth.idp.attribute.StringAttributeValue");
@@ -15,7 +15,7 @@
   var result = JSON.parse(body);
 
   var attr = new IdPAttribute("memberOf");
-  var values = new HashSet();
+  var values = new ArrayList();
   if (result.data != null) {
       logger.info("GWS: " + result.data.length + " groups");
       for (var i=0; i<result.data.length; i++) {
