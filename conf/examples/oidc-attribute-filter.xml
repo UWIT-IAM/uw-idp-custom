@@ -22,10 +22,10 @@
         <AttributeRule attributeID="subject">
             <PermitValueRule xsi:type="ANY" />
         </AttributeRule>
-        <AttributeRule attributeID="subject-public">
+        <AttributeRule attributeID="subjectPublic">
             <PermitValueRule xsi:type="ANY" />
         </AttributeRule>
-        <AttributeRule attributeID="subject-pairwise">
+        <AttributeRule attributeID="subjectPairwise">
             <PermitValueRule xsi:type="ANY" />
         </AttributeRule>
     </AttributeFilterPolicy>
@@ -44,10 +44,10 @@
         <AttributeRule attributeID="subject">
             <PermitValueRule xsi:type="ANY" />
         </AttributeRule>
-        <AttributeRule attributeID="subject-public">
+        <AttributeRule attributeID="subjectPublic">
             <PermitValueRule xsi:type="ANY" />
         </AttributeRule>
-        <AttributeRule attributeID="subject-pairwise">
+        <AttributeRule attributeID="subjectPairwise">
             <PermitValueRule xsi:type="ANY" />
         </AttributeRule>
     </AttributeFilterPolicy>
