@@ -15,7 +15,8 @@ tmp/
 downloads/
 eggs/
 .eggs/
-lib/
+# Allowing lib which is a subdirectory of edit-webapp.
+# lib/
 lib64/
 parts/
 sdist/
