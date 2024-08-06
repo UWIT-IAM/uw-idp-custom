@@ -1,6 +1,7 @@
 #!/bin/bash
 echo "[[ $1 ]]"
-export JAVA_HOME=/usr/local/java
+SCRIPT_DIR=$(dirname $0)
+. $SCRIPT_DIR/setJavaHome.sh
 /data/local/idp/local-bin/xmlsectool-3.0.0/xmlsectool.sh \
    --inFile $1 \
      --validateSchema \

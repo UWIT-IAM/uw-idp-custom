@@ -26,13 +26,13 @@
     this is simply to provide a "working" out of the box example. Using something
     more stable, managed by IDM infrastructure, is the advisable approach.
     -->
-    <AttributeDefinition id="subject-public" xsi:type="Scoped" scope="%{idp.scope}"
+    <AttributeDefinition id="subjectPublic" xsi:type="Scoped" scope="%{idp.scope}"
             activationConditionRef="shibboleth.oidc.Conditions.PublicRequired">
         <InputAttributeDefinition ref="uid" />
         <AttributeEncoder xsi:type="oidc:OIDCScopedString" name="sub" />
     </AttributeDefinition>
 
-    <AttributeDefinition id="subject-pairwise" xsi:type="Scoped" scope="%{idp.scope}"
+    <AttributeDefinition id="subjectPairwise" xsi:type="Scoped" scope="%{idp.scope}"
             activationConditionRef="shibboleth.oidc.Conditions.PairwiseRequired">
         <InputDataConnector ref="computedSubjectId" attributeNames="subjectId"/>
         <AttributeEncoder xsi:type="oidc:OIDCScopedString" name="sub" />

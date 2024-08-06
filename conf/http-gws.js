@@ -7,7 +7,7 @@
   //  new Excp().printStackTrace();
 
   var ArrayList = Java.type("java.util.ArrayList");
-  var HttpClientSupport = Java.type("net.shibboleth.utilities.java.support.httpclient.HttpClientSupport");
+  var HttpClientSupport = Java.type("net.shibboleth.shared.httpclient.HttpClientSupport");
   var IdPAttribute = Java.type("net.shibboleth.idp.attribute.IdPAttribute");
   var StringAttributeValue = Java.type("net.shibboleth.idp.attribute.StringAttributeValue");
    

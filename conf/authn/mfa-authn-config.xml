@@ -56,7 +56,7 @@
            <value>
            <![CDATA[
                var AuthnContextClassRefPrincipal = Java.type("net.shibboleth.idp.saml.authn.principal.AuthnContextClassRefPrincipal");
-               var Cookie = Java.type("javax.servlet.http.Cookie");
+               var Cookie = Java.type("jakarta.servlet.http.Cookie");
                logger = Java.type("org.slf4j.LoggerFactory").getLogger("edu.washington.shibboleth");
 
                request = custom.get("requestSupplier").get();
@@ -86,7 +86,7 @@
                conversationScope.put("needsOptinCookie", null);
 
                /* Get relying party id */ 
-               var rpCtx = input.getSubcontext("net.shibboleth.idp.profile.context.RelyingPartyContext");
+               var rpCtx = input.getSubcontext("net.shibboleth.profile.context.RelyingPartyContext");
                var rpCtxId = rpCtx.getConfiguration().getId();
                rpid = rpCtx.relyingPartyId;
                logger.info("rpid = " + rpid);
@@ -192,7 +192,7 @@
                           rsp = webget.getResource(url)
                           // logger.debug("rsp = " + rsp);
                           if (rsp != null) {
-                              var Json = Java.type("javax.json.Json");
+                              var Json = Java.type("jakarta.json.Json");
                               var SR = Java.type("java.io.StringReader");
                               var reader = Json.createReader(new SR(rsp));
                               var jresp = reader.readObject();
@@ -222,7 +222,7 @@
                       logger.debug(".. looking for " + url);
                       rsp = webget.getResource(url)
                       if (rsp != null) {
-                         var Json = Java.type("javax.json.Json");
+                         var Json = Java.type("jakarta.json.Json");
                          var SR = Java.type("java.io.StringReader");
                          var reader = Json.createReader(new SR(rsp));
                          var jresp = reader.readObject();
@@ -272,7 +272,7 @@
                // If this is a return from crn selector duo_crn_username will be set
 
                if (need2f == 't') {
-                  var Json = Java.type("javax.json.Json");
+                  var Json = Java.type("jakarta.json.Json");
                   var SR = Java.type("java.io.StringReader");
                   var Http = Java.type("com.duosecurity.client.Http");
 
@@ -473,7 +473,7 @@
                    // set or clear cookie as needed to control future notfications
                    if (needMfaSoonCookie) {
                        var Random = Java.type("java.util.Random");
-                       var Cookie = Java.type("javax.servlet.http.Cookie");
+                       var Cookie = Java.type("jakarta.servlet.http.Cookie");
                        var uNow = Instant.now().getEpochSecond();
                        tdata = new Random().nextInt(1000000) + "|" + username + "|" + uNow;
                        logger.debug("scookie=" + tdata);
@@ -486,7 +486,7 @@
                        response = custom.get("responseSupplier").get();
                        response.addCookie(cookie);
                    } else if (clearMfaSoonCookie) {
-                       var Cookie = Java.type("javax.servlet.http.Cookie");
+                       var Cookie = Java.type("jakarta.servlet.http.Cookie");
                        cookie = new Cookie("%{idp.uw.mfa-soon-cookie}" + username, "xxx");
                        cookie.setPath("/");
                        cookie.setSecure(true);
