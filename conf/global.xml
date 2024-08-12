@@ -36,7 +36,7 @@
             p:certificates="%{idp.home}/credentials/uw-incommon-ca.crt" />
     </property>
     <property name="clientTLSCredential">
-        <bean class="net.shibboleth.idp.profile.spring.factory.BasicX509CredentialFactoryBean"
+        <bean parent="shibboleth.BasicX509CredentialFactoryBean"
             p:privateKeyResource="%{idp.home}/credentials/gws.cac-uw.key"
             p:certificateResource="%{idp.home}/credentials/gws.cac-uw.crt" />
     </property>
@@ -49,7 +49,7 @@
             p:certificates="%{idp.home}/credentials/uw-incommon-ca.crt" />
     </property>
     <property name="clientTLSCredential">
-        <bean class="net.shibboleth.idp.profile.spring.factory.BasicX509CredentialFactoryBean"
+        <bean parent="shibboleth.BasicX509CredentialFactoryBean"
             p:privateKeyResource="%{idp.home}/credentials/idp-uw.key"
             p:certificateResource="%{idp.home}/credentials/idp-uw.crt" />
     </property>

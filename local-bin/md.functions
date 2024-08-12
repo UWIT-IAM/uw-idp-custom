@@ -3,7 +3,8 @@
 #
 
 root=/data/local/idp
-export JAVA_HOME=/usr/local/java
+SCRIPT_DIR=$(dirname $0)
+. $SCRIPT_DIR/setJavaHome.sh
 
 #
 # simple cycle of archive files

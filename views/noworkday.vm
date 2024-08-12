@@ -1,6 +1,6 @@
 ##
 ##
-#set ($rpContext = $profileRequestContext.getSubcontext('net.shibboleth.idp.profile.context.RelyingPartyContext'))
+#set ($rpContext = $profileRequestContext.getSubcontext('net.shibboleth.profile.context.RelyingPartyContext'))
 #set ($username = $authenticationContext.getSubcontext('net.shibboleth.idp.authn.context.UsernamePasswordContext', true).getUsername())
 #set ($username2 = $authenticationContext.getSubcontext('net.shibboleth.idp.authn.context.MultiFactorAuthenticationContext', true).getUsername())
 #set ($principalName = $authenticationContext.getSubcontext('net.shibboleth.idp.authn.context.ExternalAuthenticationContext', true).getPrincipalName())
