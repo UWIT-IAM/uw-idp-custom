@@ -6,13 +6,20 @@
                       urn:mace:shibboleth:2.0:afp:oidc http://shibboleth.net/schema/oidc/shibboleth-afp-oidc.xsd">
 
 
+    <!-- This file controls the data attributes released to OIDC clients.
+         Currently this is manually edited until we can build an SPRegistry-controlled
+         process to generate this file.
+         
+         There are two sections of this file. The top section controls the attributes released
+         based on OIDC scopes. The bottom section contains rules for specifc relying parties.
+    -->
+
+    <!-- This section contains one attribute rule for each supported OIDC scope,
+         as specified by the value of the PolicyRequirementRule at the beginning of each policy.
+    -->
+
     <AttributeFilterPolicy id="OPENID_SCOPE">
 	<PolicyRequirementRule xsi:type="oidc:OIDCScope" value="openid" />
-	<!--
-	<AttributeRule attributeID="subject">
-	    <PermitValueRule xsi:type="ANY" />
-	</AttributeRule>
-	-->
         <AttributeRule attributeID="subject-public">
             <PermitValueRule xsi:type="ANY" />
         </AttributeRule>
@@ -20,13 +27,6 @@
             <PermitValueRule xsi:type="ANY" />
         </AttributeRule>
     </AttributeFilterPolicy> 
-
-    <AttributeFilterPolicy id="OPENID_urizen">
-        <PolicyRequirementRule xsi:type="Requester" value="oidc/urizen.s.uw.edu"/>
-        <AttributeRule attributeID="preferredFirst">
-            <PermitValueRule xsi:type="ANY" />
-        </AttributeRule>
-    </AttributeFilterPolicy>
 
     <AttributeFilterPolicy id="OPENID_SCOPE_EMAIL">
         <PolicyRequirementRule xsi:type="oidc:OIDCScope" value="email" />
@@ -105,6 +105,20 @@
     </AttributeFilterPolicy>
 
 
+    <!-- All policies below here apply to specific relying parties (RPs),
+         as defined by the value, or value set, of the PolicyRequirementRule.
+
+         Most of these policies define the subset of UW Groups released to each RP.
+         The naming convention for such policies is "OPENID_MEMBER_OF_" plus an indicator for the RP.
+    -->
+
+    <AttributeFilterPolicy id="OPENID_urizen">
+        <PolicyRequirementRule xsi:type="Requester" value="oidc/urizen.s.uw.edu"/>
+        <AttributeRule attributeID="preferredFirst">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+    </AttributeFilterPolicy>
+
     <AttributeFilterPolicy id="OPENID_MEMBER_OF_SAND">
         <PolicyRequirementRule xsi:type="AND">
            <Rule xsi:type="Requester" value="oidc/gws.sandbox.iam.s.uw.edu" />
@@ -145,10 +159,13 @@
            <Rule xsi:type="Requester" value="oidc/research-eval.ui.oris.washington.edu" />
            <Rule xsi:type="Requester" value="oidc/research-int.ui.oris.washington.edu" />
            <Rule xsi:type="Requester" value="oidc/research-dev.ui.oris.washington.edu" />
+           <Rule xsi:type="Requester" value="oidc/research.washington.edu" />
+           <Rule xsi:type="Requester" value="oidc/eval.research.washington.edu" />
+           <Rule xsi:type="Requester" value="oidc/int.research.washington.edu" />
         </PolicyRequirementRule>
         <AttributeRule attributeID="gws_groups">
            <PermitValueRule xsi:type="OR">
-            <Rule xsi:type="ValueRegex" regex="urn:mace:washington.edu:groups:u_oris_provs_.*"/>
+            <Rule xsi:type="ValueRegex" regex="urn:mace:washington.edu:groups:u_oris_privs_.*"/>
            </PermitValueRule>
         </AttributeRule>
     </AttributeFilterPolicy>
