@@ -81,7 +81,7 @@ def openDb():
 # refid = attribute ref triggering activation
 # attrids = list of triggering attributes
 resolverEntities = [
-    {'type': 'gws', 'values': set([]), 'beanid': 'uw.GetsGwsMemberships', 'refid': 'gws_groups', 'attrids': ['gws_groups']},
+    {'type': 'gws', 'values': set([]), 'beanid': 'uw.GetsGwsMemberships', 'refid': 'gws_groups', 'attrids': ['gws_groups','gws_groups_unscoped']},
     {'type': 'courses', 'values': set([]), 'beanid': 'uw.GetsCourseMemberships', 'refid': 'sln_courses', 'attrids': ['sln_courses']},
 ]
 resolverNeedsUpdate = False
