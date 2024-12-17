@@ -753,6 +753,14 @@
 
     </AttributeDefinition>
 
+    <AttributeDefinition id="gws_groups_unscoped" xsi:type="Simple" >
+        <InputDataConnector ref="gws" attributeNames="memberOf"/>
+
+        <AttributeEncoder xsi:type="SAML1String" name="urn:mace:dir:attribute-def:isMemberOf_unscoped" />
+        <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.2.840.113994.200.110" friendlyName="isMemberOf_unscoped" />
+        <AttributeEncoder xsi:type="oidc:OIDCString" name="edumember_is_member_of_unscoped" asArray="true" />
+    </AttributeDefinition>
+
  <!-- Course memberships by SLN - this is just for other attributes, not delivered directly -->
 
     <AttributeDefinition id="sln_courses" xsi:type="Simple" >
