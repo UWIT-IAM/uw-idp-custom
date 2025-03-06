@@ -717,6 +717,11 @@
         <AttributeEncoder xsi:type="SAML2String" name="EmailAddress" />
     </AttributeDefinition>
 
+    <AttributeDefinition id="alt2_email" xsi:type="Simple" >
+        <InputAttributeDefinition ref="email" />
+        <AttributeEncoder xsi:type="SAML2String" name="Email" />
+    </AttributeDefinition>
+
   <!-- uw.edu email -->
 
     <AttributeDefinition id="uwEduEmail" xsi:type="Template" >
