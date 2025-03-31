@@ -6,8 +6,12 @@
                         urn:mace:shibboleth:2.0:resolver:oidc http://shibboleth.net/schema/oidc/shibboleth-attribute-encoder-oidc.xsd">
 
     <!--
-    Some of the examples assume conf/attributes/oidc-claim-rules.xml is loaded
-    into the registry service.
+    Some of the examples assume conf/attributes/oidc-claim-rules.xml is
+    loaded into the registry service.
+    
+    Additionally, the "sub" claim examples below all assume that the file
+    including them is also loaded into that service to process the
+    AttributeEncoder elements shown in these examples.
     -->
 
     <!--
@@ -29,12 +33,14 @@
     <AttributeDefinition id="subjectPublic" xsi:type="Scoped" scope="%{idp.scope}"
             activationConditionRef="shibboleth.oidc.Conditions.PublicRequired">
         <InputAttributeDefinition ref="uid" />
+        <!-- Only works if you load the containing file into the registry service. -->
         <AttributeEncoder xsi:type="oidc:OIDCScopedString" name="sub" />
     </AttributeDefinition>
 
     <AttributeDefinition id="subjectPairwise" xsi:type="Scoped" scope="%{idp.scope}"
             activationConditionRef="shibboleth.oidc.Conditions.PairwiseRequired">
         <InputDataConnector ref="computedSubjectId" attributeNames="subjectId"/>
+        <!-- Only works if you load the containing file into the registry service. -->
         <AttributeEncoder xsi:type="oidc:OIDCScopedString" name="sub" />
     </AttributeDefinition>
 
