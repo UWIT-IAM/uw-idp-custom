@@ -18,6 +18,12 @@
       p:userFile="/data/local/idp/conf/authn/dynamic-mfa.txt"
       />
 
+<!-- resolver for OIDC client secrets -->
+<util:list id="shibboleth.oidc.ClientSecretValueResolvers">
+	<bean parent="shibboleth.oidc.PropertiesClientSecretValueResolver"
+		p:resource="%{idp.home}/credentials/client-secrets.properties" />
+</util:list>
+
 <!-- http client for group attr resolver -->
 <bean id="uw.HttpClient"  parent="shibboleth.HttpClientFactory" lazy-init="true"
         p:connectionDisregardTLSCertificate="%{idp.httpclient.connectionDisregardTLSCertificate:false}"
