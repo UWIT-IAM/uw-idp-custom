@@ -12,7 +12,8 @@
   var StringAttributeValue = Java.type("net.shibboleth.idp.attribute.StringAttributeValue");
    
   var body = HttpClientSupport.toString(response.getEntity(), "UTF-8", 1000000);
-  var result = JSON.parse(body);
+  var cleanBody = body.replaceAll("[\b\f\n\r\t]", " ");
+  var result = JSON.parse(cleanBody);
 
   var attr = new IdPAttribute("memberOf");
   var values = new ArrayList();
