@@ -159,6 +159,7 @@
            <Rule xsi:type="Requester" value="oidc/research-eval.ui.oris.washington.edu" />
            <Rule xsi:type="Requester" value="oidc/research-int.ui.oris.washington.edu" />
            <Rule xsi:type="Requester" value="oidc/research-dev.ui.oris.washington.edu" />
+           <Rule xsi:type="Requester" value="oidc/research-poc.ui.oris.washington.edu" />
            <Rule xsi:type="Requester" value="oidc/research.washington.edu" />
            <Rule xsi:type="Requester" value="oidc/eval.research.washington.edu" />
            <Rule xsi:type="Requester" value="oidc/int.research.washington.edu" />
