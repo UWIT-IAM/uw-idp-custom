@@ -97,7 +97,7 @@
         </bean>
 
         <!-- needing signed assertions -->
-        <bean parent="RelyingPartyByName" c:relyingPartyIds="#{ {'https://az1.qualtrics.com','https://saml.enplug.com','https://uweducation.communityforce.com','https://uweducationstaging.communityforce.com','https://login.apogeenet.net/sp','https://pvs.education.uw.edu','https://app.yodeck.com/api/v1/account/metadata/','https://sso.pitchbook.com/sso/saml/sp/metadata','https://uw.creatcom.washington.edu/DSF/','https://uwm.creatcom.washington.edu/DSF/','https://auth.factset.com','http://app.pantrysoft.com/saml/id','https://wikibeta.s.uw.edu','https://jira.cac.washington.edu','https://jiratest.cac.washington.edu','https://wikitest.cac.washington.edu','https://admin.formstack.com/orgIdp/a56108fe-2a8f-11f0-8420-0e5cfb997abb/samlEntityID'} }">
+        <bean parent="RelyingPartyByName" c:relyingPartyIds="#{ {'https://az1.qualtrics.com','https://saml.enplug.com','https://uweducation.communityforce.com','https://uweducationstaging.communityforce.com','https://login.apogeenet.net/sp','https://pvs.education.uw.edu','https://app.yodeck.com/api/v1/account/metadata/','https://sso.pitchbook.com/sso/saml/sp/metadata','https://uw.creatcom.washington.edu/DSF/','https://uwm.creatcom.washington.edu/DSF/','https://auth.factset.com','http://app.pantrysoft.com/saml/id','https://wikibeta.s.uw.edu','https://jira.cac.washington.edu','https://jiratest.cac.washington.edu','https://wikitest.cac.washington.edu','https://admin.formstack.com/orgIdp/a56108fe-2a8f-11f0-8420-0e5cfb997abb/samlEntityID','urn:auth0:shopsafegraph:washington'} }">
             <property name="profileConfigurations">
                 <list>
                     <bean parent="SAML2.SSO"
