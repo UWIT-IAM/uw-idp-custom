@@ -1,0 +1,18 @@
+# This file supports the intercept that blocks access for separated employees.
+# This file defines the list of sites that users are still allowed to access
+# after they have departed; this is a short list and access to all other sites
+# is blocked.
+# The actual content of this file is a set of entityIds; access will be allowed
+# if the entityId being accessed is on this list.
+#
+# This file is referenced by conf/intercept/warning-intercept-config.xml
+# and is read by the class edu.washington.idp.intercept.impl.BlockAccessIntercept
+# in the uw-slack-intercept plugin. That class checks the timestamp on this file
+# and will reload it on the next access attempt if this file is updated.
+#
+
+http://www.workday.com/uw
+https://identity.uw.edu/shibboleth
+https://myuw.washington.edu/shibboleth
+oidc/myuw
+https://uwnetid.washington.edu/
