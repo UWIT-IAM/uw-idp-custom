@@ -1,0 +1,26 @@
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:p="http://www.springframework.org/schema/p" xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+
+    default-init-method="initialize" default-destroy-method="destroy">
+
+    <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer"
+        p:placeholderPrefix="%{" p:placeholderSuffix="}" />
+
+    <bean class="net.shibboleth.shared.spring.config.IdentifiableBeanPostProcessor" />
+    <bean class="net.shibboleth.idp.profile.impl.ProfileActionBeanPostProcessor" />
+
+    <import resource="../../../conf/intercept/separated-user-intercept-config.xml" />
+
+    <bean id="uw.BlockSeparatedUserIntercept"
+        class="edu.washington.idp.intercept.impl.BlockSeparatedUserIntercept"
+        p:webClient-ref="uw.UWHttpClient"
+        p:gwsUrlbase = "%{idp.uw.slack-gws-urlbase}"
+        p:groupId = "block-separated-users"
+        p:allowFilename = "%{idp.home}/conf/sitesForSeparatedStaff.txt"
+        />
+    <alias name="uw.BlockSeparatedUserIntercept" alias="BlockSeparatedUserIntercept" />
+</beans>
