@@ -13,6 +13,7 @@
 
 http://www.workday.com/uw
 https://identity.uw.edu/shibboleth
+https://my.uw.edu/shibboleth
 https://myuw.washington.edu/shibboleth
 oidc/myuw
 https://uwnetid.washington.edu/
