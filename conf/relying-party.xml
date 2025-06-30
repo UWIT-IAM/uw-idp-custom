@@ -31,6 +31,7 @@
                 <bean parent="Shibboleth.SSO" p:includeAttributeStatement="true" />
                 <bean parent="SAML2.SSO" 
                      p:authenticationFlows="#{{'MFA'}}"
+                     p:postAuthenticationFlows="#{{'separated-user'}}"
                      p:signResponses="true"
                      p:signAssertions="false" p:encryptAssertions="false" p:includeAttributeStatement="true"
                      p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent','urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified','urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress','urn:oasis:names:tc:SAML:2.0:nameid-format:transient'}}" />
