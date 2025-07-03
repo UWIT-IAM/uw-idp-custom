@@ -17,3 +17,4 @@ https://my.uw.edu/shibboleth
 https://myuw.washington.edu/shibboleth
 oidc/myuw
 https://uwnetid.washington.edu/
+https://uwhires.admin.washington.edu/shibboleth
