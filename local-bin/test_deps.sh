@@ -18,9 +18,8 @@ cd $wd
 ## . /data/local/gws-provisioning/bin/gws_lib.sh
 certdir=/data/local/idp/credentials
 
-gws_hosts="iam21 iam22 iam23 iam26"
-pds_hosts="seneca21 seneca22 seneca23"
-pds_hosts="seneca21 seneca22 seneca23 seneca31 seneca32 seneca33"
+gws_hosts=`dig groups.uw.edu +short A | tail -n +2 | sed 's/\n/ /g'
+pds_hosts=`dig eds.u.washington.edu +short A | tail -n +2 | sed 's/\n/ /g'`
 pws_hosts="it-ws1 it-ws2 it-ws3 it-ws4"
 
 ## [[ "$1" == "" ]] || hosts="$1"
