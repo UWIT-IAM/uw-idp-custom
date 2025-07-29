@@ -19,6 +19,112 @@
     the warning is displayed, and the duration is the interval between warnings.
     -->
     <util:map id="shibboleth.warning.ConditionMap">
+        <entry key="password-recovery-warning">
+            <bean parent="shibboleth.Pair">
+                <constructor-arg index="0">
+                    <bean id="uw.PasswordRecoveryWarning"
+                        class="edu.washington.idp.intercept.impl.PasswordRecoveryIntercept"
+                        p:webClient-ref="uw.UWHttpClient"
+                        p:gwsUrlbase = "%{idp.uw.slack-gws-urlbase}"
+                        p:passwordEntityId = "https://identity.uw.edu/shibboleth"
+                        p:warningGroupId = "warning_recovery-warning"
+                        p:blockGroupId = "warning_recovery-block"
+                        p:staffGroupId = "warning_recovery-staff"
+                        p:facultyGroupId = "warning_recovery-faculty"
+                        p:studentsGroupId = "warning_recovery-students"
+                        p:groupToCheck = "warning_recovery-warning"
+                    />
+                </constructor-arg>
+                <constructor-arg index="1">
+                    <bean class="java.time.Duration" factory-method="parse" c:_0="PT20H" />
+                </constructor-arg>
+            </bean>
+        </entry>
+        <entry key="password-recovery-block">
+            <bean parent="shibboleth.Pair">
+                <constructor-arg index="0">
+                    <bean id="uw.PasswordRecoveryBlock"
+                        class="edu.washington.idp.intercept.impl.PasswordRecoveryIntercept"
+                        p:webClient-ref="uw.UWHttpClient"
+                        p:gwsUrlbase = "%{idp.uw.slack-gws-urlbase}"
+                        p:passwordEntityId = "https://identity.uw.edu/shibboleth"
+                        p:warningGroupId = "warning_recovery-warning"
+                        p:blockGroupId = "warning_recovery-block"
+                        p:staffGroupId = "warning_recovery-staff"
+                        p:facultyGroupId = "warning_recovery-faculty"
+                        p:studentsGroupId = "warning_recovery-students"
+                        p:groupToCheck = "warning_recovery-block"
+                    />
+                </constructor-arg>
+                <constructor-arg index="1">
+                    <bean class="java.time.Duration" factory-method="parse" c:_0="PT0S" />
+                </constructor-arg>
+            </bean>
+        </entry>
+        <entry key="password-recovery-staff">
+            <bean parent="shibboleth.Pair">
+                <constructor-arg index="0">
+                    <bean id="uw.PasswordRecoveryStaff"
+                        class="edu.washington.idp.intercept.impl.PasswordRecoveryIntercept"
+                        p:webClient-ref="uw.UWHttpClient"
+                        p:gwsUrlbase = "%{idp.uw.slack-gws-urlbase}"
+                        p:passwordEntityId = "https://identity.uw.edu/shibboleth"
+                        p:warningGroupId = "warning_recovery-warning"
+                        p:blockGroupId = "warning_recovery-block"
+                        p:staffGroupId = "warning_recovery-staff"
+                        p:facultyGroupId = "warning_recovery-faculty"
+                        p:studentsGroupId = "warning_recovery-students"
+                        p:groupToCheck = "warning_recovery-staff"
+                    />
+                </constructor-arg>
+                <constructor-arg index="1">
+                    <bean class="java.time.Duration" factory-method="parse" c:_0="PT0S" />
+                </constructor-arg>
+            </bean>
+        </entry>
+        <entry key="password-recovery-faculty">
+            <bean parent="shibboleth.Pair">
+                <constructor-arg index="0">
+                    <bean id="uw.PasswordRecoveryFaculty"
+                        class="edu.washington.idp.intercept.impl.PasswordRecoveryIntercept"
+                        p:webClient-ref="uw.UWHttpClient"
+                        p:gwsUrlbase = "%{idp.uw.slack-gws-urlbase}"
+                        p:passwordEntityId = "https://identity.uw.edu/shibboleth"
+                        p:warningGroupId = "warning_recovery-warning"
+                        p:blockGroupId = "warning_recovery-block"
+                        p:staffGroupId = "warning_recovery-staff"
+                        p:facultyGroupId = "warning_recovery-faculty"
+                        p:studentsGroupId = "warning_recovery-students"
+                        p:groupToCheck = "warning_recovery-faculty"
+                    />
+                </constructor-arg>
+                <constructor-arg index="1">
+                    <bean class="java.time.Duration" factory-method="parse" c:_0="PT0S" />
+                </constructor-arg>
+            </bean>
+        </entry>
+        <entry key="password-recovery-students">
+            <bean parent="shibboleth.Pair">
+                <constructor-arg index="0">
+                    <bean id="uw.PasswordRecoveryStudents"
+                        class="edu.washington.idp.intercept.impl.PasswordRecoveryIntercept"
+                        p:webClient-ref="uw.UWHttpClient"
+                        p:gwsUrlbase = "%{idp.uw.slack-gws-urlbase}"
+                        p:passwordEntityId = "https://identity.uw.edu/shibboleth"
+                        p:warningGroupId = "warning_recovery-warning"
+                        p:blockGroupId = "warning_recovery-block"
+                        p:staffGroupId = "warning_recovery-staff"
+                        p:facultyGroupId = "warning_recovery-faculty"
+                        p:studentsGroupId = "warning_recovery-students"
+                        p:groupToCheck = "warning_recovery-students"
+                    />
+                </constructor-arg>
+                <constructor-arg index="1">
+                    <bean class="java.time.Duration" factory-method="parse" c:_0="PT0S" />
+                </constructor-arg>
+            </bean>
+        </entry>
+
         <!-- This is an example that uses our standard groups-based template to implement
              a warning message shown to subjects in a specific group.
         <entry key="google-storage-warning">
