@@ -31,13 +31,13 @@
                 <bean parent="Shibboleth.SSO" p:includeAttributeStatement="true" />
                 <bean parent="SAML2.SSO" 
                      p:authenticationFlows="#{{'MFA'}}"
-                     p:postAuthenticationFlows="#{{'separated-user'}}"
+                     p:postAuthenticationFlows="#{{'separated-user','warning'}}"
                      p:signResponses="true"
                      p:signAssertions="false" p:encryptAssertions="false" p:includeAttributeStatement="true"
                      p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent','urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified','urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress','urn:oasis:names:tc:SAML:2.0:nameid-format:transient'}}" />
                 <ref bean="SAML2.ECP" />
                 <ref bean="SAML2.Logout" />
-            <bean parent="OIDC.SSO" p:postAuthenticationFlows="#{{'separated-user'}}" />
+            <bean parent="OIDC.SSO" p:postAuthenticationFlows="#{{'separated-user','warning'}}" />
             <bean parent="OIDC.UserInfo"/>
             <bean parent="OAUTH2.Revocation"/>
             </list>
@@ -89,7 +89,7 @@
                 <list>
                     <bean parent="SAML2.SSO"
                      p:authenticationFlows="#{{'MFA'}}"
-                     p:postAuthenticationFlows="#{{'separated-user'}}"
+                     p:postAuthenticationFlows="#{{'separated-user','warning'}}"
                      p:signResponses="false"
                      p:signAssertions="true" p:encryptAssertions="false" p:includeAttributeStatement="true"
                      p:securityConfiguration-ref="SHA1SecurityConfig"
@@ -104,7 +104,7 @@
                 <list>
                     <bean parent="SAML2.SSO"
                      p:authenticationFlows="#{{'MFA'}}"
-                     p:postAuthenticationFlows="#{{'separated-user'}}"
+                     p:postAuthenticationFlows="#{{'separated-user','warning'}}"
                      p:signResponses="false"
                      p:signAssertions="true" p:encryptAssertions="false" p:includeAttributeStatement="true"
                  p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent','urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified','urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress','urn:oasis:names:tc:SAML:2.0:nameid-format:transient'}}"
@@ -119,7 +119,7 @@
                 <list>
                     <bean parent="SAML2.SSO"
                      p:authenticationFlows="#{{'MFA'}}"
-                     p:postAuthenticationFlows="#{{'separated-user'}}"
+                     p:postAuthenticationFlows="#{{'separated-user','warning'}}"
                      p:signResponses="false"
                      p:signAssertions="true" p:encryptAssertions="true" p:includeAttributeStatement="true"
                  p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent','urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified','urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress','urn:oasis:names:tc:SAML:2.0:nameid-format:transient'}}"
@@ -134,7 +134,7 @@
                 <list>
                     <bean parent="SAML2.SSO"
                      p:authenticationFlows="#{{'MFA'}}"
-                     p:postAuthenticationFlows="#{{'separated-user'}}"
+                     p:postAuthenticationFlows="#{{'separated-user','warning'}}"
                      p:signResponses="true"
                      p:signAssertions="true" p:encryptAssertions="false" p:includeAttributeStatement="true"
                  p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent','urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified','urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress','urn:oasis:names:tc:SAML:2.0:nameid-format:transient'}}"
@@ -149,7 +149,7 @@
                 <list>
                     <bean parent="SAML2.SSO"
                      p:authenticationFlows="#{{'MFA'}}"
-                     p:postAuthenticationFlows="#{{'separated-user'}}"
+                     p:postAuthenticationFlows="#{{'separated-user','warning'}}"
                      p:signResponses="false"
                      p:signAssertions="true" p:encryptAssertions="false" p:includeAttributeStatement="true"
                      p:securityConfiguration-ref="SHA1SecurityConfig"
@@ -164,7 +164,7 @@
                 <list>
                     <bean parent="SAML2.SSO"
                      p:authenticationFlows="#{{'MFA'}}"
-                     p:postAuthenticationFlows="#{{'separated-user'}}"
+                     p:postAuthenticationFlows="#{{'separated-user','warning'}}"
                      p:signResponses="false"
                      p:signAssertions="true" p:encryptAssertions="false" p:includeAttributeStatement="true"
                      p:securityConfiguration-ref="SHA1SecurityConfig"
@@ -179,7 +179,7 @@
                 <list>
                     <bean parent="SAML2.SSO"
                      p:authenticationFlows="#{{'MFA'}}"
-                     p:postAuthenticationFlows="#{{'separated-user'}}"
+                     p:postAuthenticationFlows="#{{'separated-user','warning'}}"
                      p:signResponses="false"
                      p:signAssertions="true" p:encryptAssertions="false" p:includeAttributeStatement="true"
                      p:securityConfiguration-ref="SHA1SecurityConfig"
@@ -197,7 +197,7 @@
                      p:encryptAssertions="false"
                      p:securityConfiguration-ref="LegacySecurityConfig" 
                      p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'}}"
-                     p:postAuthenticationFlows="#{{'google-check', 'warning'}}"
+                     p:postAuthenticationFlows="#{{'separated-user','warning','google-check'}}"
                      />
                 </list>
             </property>
@@ -209,7 +209,7 @@
                 <list>
                 <bean parent="SAML2.SSO"
                      p:authenticationFlows="#{{'MFA'}}"
-                     p:postAuthenticationFlows="#{{'separated-user'}}"
+                     p:postAuthenticationFlows="#{{'separated-user','warning'}}"
                      p:signResponses="true"
                      p:signAssertions="false"
                      p:encryptAssertions="true"
@@ -225,7 +225,7 @@
                 <list>
                 <bean parent="SAML2.SSO"
                      p:authenticationFlows="#{{'MFA'}}"
-                     p:postAuthenticationFlows="#{{'separated-user'}}"
+                     p:postAuthenticationFlows="#{{'separated-user','warning'}}"
                      p:signResponses="true"
                      p:signAssertions="false"
                      p:encryptAssertions="false"
@@ -245,7 +245,7 @@
                 <list>
                     <bean parent="SAML2.SSO"
                      p:authenticationFlows="#{{'MFA'}}"
-                     p:postAuthenticationFlows="#{{'separated-user'}}"
+                     p:postAuthenticationFlows="#{{'separated-user','warning'}}"
                      p:encryptAssertions="false"
                      p:signResponses="false"
                      p:signAssertions="true"
@@ -279,7 +279,7 @@
                     p:accessTokenLifetime="PT1H"
                     p:refreshTokenTimeout="PT168H"
                     p:refreshTokenChainLifetime="PT168H"
-                    p:postAuthenticationFlows="#{{'separated-user'}}"
+                    p:postAuthenticationFlows="#{{'separated-user','warning'}}"
                 />
                 <bean parent="OAUTH2.Token"
                     p:accessTokenLifetime="PT1H"
@@ -303,9 +303,9 @@
                      p:signResponses="true"
                      p:signAssertions="true" p:encryptAssertions="false" p:includeAttributeStatement="true"
                      p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent','urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified','urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress','urn:oasis:names:tc:SAML:2.0:nameid-format:transient'}}" 
-                   p:postAuthenticationFlows="#{{'separated-user','slack-check'}}"
+                   p:postAuthenticationFlows="#{{'separated-user','warning','slack-check'}}"
                  />
-                <bean parent="OIDC.SSO" p:postAuthenticationFlows="#{{'separated-user','slack-check'}}" />
+                <bean parent="OIDC.SSO" p:postAuthenticationFlows="#{{'separated-user','warning','slack-check'}}" />
                 <bean parent="OIDC.UserInfo"/>
                 <bean parent="OAUTH2.Revocation"/>
                </list>
