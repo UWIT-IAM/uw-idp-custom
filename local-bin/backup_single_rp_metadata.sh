@@ -25,7 +25,7 @@ BACKUP_FILE=${METADATA_FILE}.$DATE_STRING
 
 if [ ! -f $SRC_DIR/$METADATA_FILE ]
 then
-  echo "${METADATA_FILE} doesn't exist, or is not a file!"
+  echo "${SRC_DIR}/${METADATA_FILE} doesn't exist, or is not a file!"
   exit 1
 fi
 
