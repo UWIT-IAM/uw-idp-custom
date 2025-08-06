@@ -63,6 +63,7 @@
         <InputDataConnector ref="personreg" attributeNames="uwRegID" />
         <AttributeEncoder xsi:type="SAML1String" name="urn:mace:washington.edu:dir:attribute-def:uwRegID" />
         <AttributeEncoder xsi:type="SAML2String" name="urn:oid:1.2.840.113994.200.24" friendlyName="uwRegID" />
+	<AttributeEncoder xsi:type="oidc:OIDCString" name="uwRegID" />
     </AttributeDefinition>
 
 
