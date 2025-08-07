@@ -159,7 +159,6 @@
 
     <AttributeFilterPolicy id="OPENID_MEMBER_OF_ORIS">
         <PolicyRequirementRule xsi:type="OR">
-           <Rule xsi:type="Requester" value="oidc/myresearch-dev.ui.oris.washington.edu" />
            <Rule xsi:type="Requester" value="oidc/myresearch-int.ui.oris.washington.edu" />
            <Rule xsi:type="Requester" value="oidc/myresearch.washington.edu" />
            <Rule xsi:type="Requester" value="oidc/research-eval.ui.oris.washington.edu" />
