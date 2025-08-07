@@ -104,6 +104,12 @@
         </AttributeRule>
     </AttributeFilterPolicy>
 
+    <AttributeFilterPolicy id="OPENID_SCOPED_UWREGID">
+        <PolicyRequirementRule xsi:type="oidc:OIDCScope" value="uwRegID" />
+        <AttributeRule attributeID="uwRegID">
+            <PermitValueRule xsi:type="ANY" />
+        </AttributeRule>
+    </AttributeFilterPolicy>
 
     <!-- All policies below here apply to specific relying parties (RPs),
          as defined by the value, or value set, of the PolicyRequirementRule.
