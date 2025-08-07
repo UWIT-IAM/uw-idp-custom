@@ -97,14 +97,14 @@
         </AttributeRule>
     </AttributeFilterPolicy>
 
-    <AttributeFilterPolicy id="OPENID_SCOPED_AFFILIATION">
+    <AttributeFilterPolicy id="OPENID_SCOPE_AFFILIATION">
         <PolicyRequirementRule xsi:type="oidc:OIDCScope" value="eduperson_scoped_affiliation" />
         <AttributeRule attributeID="scopedAffiliation">
             <PermitValueRule xsi:type="ANY" />
         </AttributeRule>
     </AttributeFilterPolicy>
 
-    <AttributeFilterPolicy id="OPENID_SCOPED_UWREGID">
+    <AttributeFilterPolicy id="OPENID_SCOPE_UWREGID">
         <PolicyRequirementRule xsi:type="oidc:OIDCScope" value="uwRegID" />
         <AttributeRule attributeID="uwRegID">
             <PermitValueRule xsi:type="ANY" />
