@@ -15,7 +15,7 @@
 #set ($titleSuffix = $springMacroRequestContext.getMessage("idp.client-storage-write.suffix", "Saving Session Information..."))
 ##
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
     <head>
         <meta charset="utf-8" />
         <title>$title - $titleSuffix</title>

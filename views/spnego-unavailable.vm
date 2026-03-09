@@ -13,7 +13,7 @@
 ##
 #set ($eventKey = $springMacroRequestContext.getMessage("SPNEGOUnavailable", "spnego-unavailable"))
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <title>#springMessageText("idp.title", "Web Login Sevice") - #springMessageText("${eventKey}.title", "Error")</title>
