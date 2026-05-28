@@ -235,5 +235,17 @@
            </PermitValueRule>
         </AttributeRule>
     </AttributeFilterPolicy>
+
+    <AttributeFilterPolicy id="OPENID_MEMBER_OF_SEMAPHORE">
+        <PolicyRequirementRule xsi:type="AND">
+           <Rule xsi:type="Requester" value="oidc/semaphore.s.uw.edu" />
+           <Rule xsi:type="oidc:OIDCScope" value="edumember_is_member_of" />
+        </PolicyRequirementRule>
+        <AttributeRule attributeID="gws_groups">
+           <PermitValueRule xsi:type="OR">
+            <Rule xsi:type="Value" value="urn:mace:washington.edu:groups:u_webacl_.*"/>
+           </PermitValueRule>
+        </AttributeRule>
+    </AttributeFilterPolicy>
 </AttributeFilterPolicyGroup>
 
