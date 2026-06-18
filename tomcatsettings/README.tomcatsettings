@@ -1,0 +1,32 @@
+We use a Tomcat web server to run our Shibboleth Identity Provider.
+This directory contains custom configuration files for Tomcat.
+
+When we moved to Tomcat 11, IAM took over control of the Tomcat/Catalina installation.
+This is managed by having the systemctl override file at /etc/systemd/system/tomcat.service.d/override.conf
+reference a working directory of /data/local/packages/tomcat/bin.
+/data/local/packages/tomcat is a symbolic link that we control and point to the active Tomcat/Catalina installation.
+
+There are three custom files here that we deploy to override the Tomcat defaults. These files are deployed
+to /data/tomcatsettings on the server. The Tomcat/Catalina installation is modified with symbolic links
+to these custom files.
+
+
+logging.properties:
+Linked from ${CATALINA_HOME}/conf/logging.properties
+These modifications send the log files to /data/logs/tomcat, and limit the content of the console logging in catalina.out.
+
+server.xml
+Linked from ${CATALINA_HOME}/conf/server.xml
+Defines the specific configuration of our Tomcat service.
+Essential elements:
+1. Sets /data/webapps as the base for our web applications.
+2. Defines a Valve for the Tomcat access log.
+3. Defines a Valve that rewrites the source IP address for requests coming through our HAProxy load balancers.
+  For such requests the source IP is rewritten to the value of the "x-forwarded-for" header.
+  This is critical to support accurate logging of the IP address of the end user.
+
+setenv.sh
+Linked from ${CATALINA_HOME}/bin/setenv.sh
+Defines our custom environment variables.
+The most important is the idp.home, set to /data/local/idp to override the Shibboleth default of /opt/shibboleth-idp.
+The web application would not work without this override.
