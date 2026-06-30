@@ -9,6 +9,7 @@
    lockfile -r 0 -l 600 /www/refresh_uw/lock || exit 1
 }
 
+echo "--------------------"
 date
 rm -f /www/refresh_uw/data/refresh
 
@@ -16,7 +17,6 @@ root=/data/local/idp
 cd ${root}/local-bin
 
 . py-env/bin/activate
-. setJavaHome.sh
 export LD_LIBRARY_PATH=/usr/local/pgsql-12.2/lib
 
 {
