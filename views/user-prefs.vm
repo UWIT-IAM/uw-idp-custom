@@ -8,7 +8,7 @@
 ## custom - arbitrary object injected by deployer
 ##
 <!DOCTYPE html>
-<html>
+<html lang="en">
   	<head>
     	<meta charset="utf-8">
     	<title>#springMessageText("idp.userprefs.title", "Web Login Service") - #springMessageText("idp.userprefs.title.suffix", "Login Preferences")</title>
