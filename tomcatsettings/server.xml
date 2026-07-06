@@ -63,7 +63,7 @@
 
                 <Valve
                    className="org.apache.catalina.valves.RemoteIpValve"
-                   internalProxies="140\.142\.11\.\d{1,3}|34\.83\.0\.192|35\.203\.139\.245|128\.208\.61\.115|35\.247\.54\.56"
+                   internalProxies="140\.142\.11\.\d{1,3}|34\.83\.0\.192|35\.203\.139\.245|128\.208\.61\.115|35\.247\.54\.56|10\.40\.8\.52|10\.40\.8\.54"
                    remoteIpHeader="x-forwarded-for" />
 
           </Host>
