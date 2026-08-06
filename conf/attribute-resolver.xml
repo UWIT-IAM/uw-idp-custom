@@ -891,7 +891,7 @@
            useStartTLS="true"
            connectTimeout="PT3S"
            responseTimeout="PT5S"
-           trustFile="%{idp.home}/credentials/uw-incommon-ca.crt"
+           trustFile="/usr/local/ssl/certs/ca-bundle.crt"
            authCert="%{idp.home}/credentials/idp-uw.crt"
            authKey="%{idp.home}/credentials/idp-uw.key"
            propagateResolutionExceptions="false"
