@@ -143,6 +143,21 @@
             </property>
         </bean>
 
+        <!-- needing signed and encrypted assertions, and signed responses -->
+        <bean parent="RelyingPartyByName" c:relyingPartyIds="#{ {'https://certinext.io/sp'} }">
+            <property name="profileConfigurations">
+                <list>
+                    <bean parent="SAML2.SSO"
+                     p:authenticationFlows="#{{'MFA'}}"
+                     p:postAuthenticationFlows="#{{'separated-user','warning'}}"
+                     p:signResponses="true"
+                     p:signAssertions="true" p:encryptAssertions="true" p:includeAttributeStatement="true"
+                     p:nameIDFormatPrecedence="#{{'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent','urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified','urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress','urn:oasis:names:tc:SAML:2.0:nameid-format:transient'}}"
+                    />
+                </list>
+            </property>
+        </bean>
+
         <!-- pinnacle -->
         <bean parent="RelyingPartyByName" c:relyingPartyIds="#{ {'https://www.mypinnaclelogin.com/'} }">
             <property name="profileConfigurations">
