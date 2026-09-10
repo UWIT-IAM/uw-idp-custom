@@ -68,7 +68,7 @@ attrs_post="`date +%s -r ${root}/conf/attribute-resolver-activators.xml`"
 
 (( auto_post > auto_pre + 60 )) && {
    echo "notify idp of auto rps change"
-   ${root}/bin/reload_relyingparty
+   ${root}/local-bin/reload_relyingparty
 }
 
 rm -f /www/refresh_uw/lock
