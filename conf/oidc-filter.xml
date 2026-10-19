@@ -168,6 +168,9 @@
            <Rule xsi:type="Requester" value="oidc/int.research.washington.edu" />
            <Rule xsi:type="Requester" value="oidc/int.research.washington.edu/research" />
            <Rule xsi:type="Requester" value="oidc/research.washington.edu/research" />
+           <Rule xsi:type="Requester" value="oidc/int.researchadmin.washington.edu/" />
+           <Rule xsi:type="Requester" value="oidc/eval.researchadmin.washington.edu/" />
+           <Rule xsi:type="Requester" value="oidc/researchadmin.washington.edu/" />
         </PolicyRequirementRule>
         <AttributeRule attributeID="gws_groups">
            <PermitValueRule xsi:type="OR">
