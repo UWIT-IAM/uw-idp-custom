@@ -61,9 +61,19 @@
                        prefix="tomcat_access_log" fileDateFormat=".yyyyMMdd"
                        resolveHosts="false"/>
 
+                <!-- This valve manages connections from the upstream proxy servers.
+                     For those servers we use the specified http header to extract and log the real client IP address.
+                     These are the private and public IP addresses of the proxy servers:
+                     iamproxy01     10.40.8.250 20.114.14.156
+                     iamproxy02     10.40.8.251 20.57.157.239
+                     iamproxydev01  10.40.8.52  20.83.248.137
+                     iamproxyeval01 10.40.8.54  40.125.83.97
+                     iamproxy01     128.208.61.115 (local, to be removed after move to Azure)
+                     iamproxy02     35.247.54.56 (Google, to be removed after move to Azure)
+                -->
                 <Valve
                    className="org.apache.catalina.valves.RemoteIpValve"
-                   internalProxies="140\.142\.11\.\d{1,3}|34\.83\.0\.192|35\.203\.139\.245|128\.208\.61\.115|35\.247\.54\.56|10\.40\.8\.52|10\.40\.8\.54"
+                   internalProxies="10\.40\.8\.250|20\.114\.14\.156|10\.40\.8\.251|20\.57\.157\.239|128\.208\.61\.115|35\.247\.54\.56|10\.40\.8\.52|20\.114\.14\.156|10\.40\.8\.54|40\.125\.83\.97"
                    remoteIpHeader="x-forwarded-for" />
 
           </Host>
